@@ -1,0 +1,4 @@
+digital-panda
+=============
+
+Openstack client
