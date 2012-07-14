@@ -2,18 +2,22 @@ import urlparse
 import json
 import urllib
 import logging
+import httplib
 
-class Swift(Object):
+class SwiftAPI(object):
     """ class that wraps OpenStack Swift REST API 
     as specfied @ http://docs.openstack.org/api/openstack-object-storage/1.0/content/
 
     """
     def __init__(self, auth_url, username, password):
-        """ we need to remember authentication details,
+        """ 
+        auth_url: string representing authentication url
+
+        we need to remember authentication details,
         so that if we ever get a 401, we can retry
 
         """
-        self._auth_url = auth_url
+        self._auth_url = urlparse.urlparse(auth_url)
         self._username = username
         self._password = password
 
@@ -22,7 +26,10 @@ class Swift(Object):
         on protocol specified in authentication url
 
         """
-        host = "%s:%d" % (url.hostname, url.port)
+        if url.port:
+            host = "%s:%d" % (url.hostname, url.port)
+        else:
+            host = url.hostname
         if (url.scheme=='https'):
             return httplib.HTTPSConnection(host)
         else:
@@ -33,8 +40,8 @@ class Swift(Object):
         """ authenticate against swift
 
         """
-        headers = {'X-Storage-User': user, 
-                   'X-Storage-Pass': password}
+        headers = {'X-Storage-User': self._username, 
+                   'X-Storage-Pass': self._password}
 
         connection = self._open_connection(self._auth_url)
         connection.request('GET', self._auth_url.path, None, headers)
@@ -43,7 +50,7 @@ class Swift(Object):
         if result.status==200:
             self._auth_token = result.getheader('X-Auth-Token')
             self._storage_url = urlparse.urlparse(result.getheader('X-Storage-Url'))
-        else
+        else:
             raise Exception('login failed')
 
     def get_auth_token(self):
@@ -83,7 +90,7 @@ class Swift(Object):
             containers = json.loads(result.read())
         elif result.status == 401 and retry_on_unauthorized:
             return self.get_containers(False)
-        else
+        else:
             raise Exception('failed get catalogue; status = - %r' % (result.status))
 
     def get_container_meta_data(self, container, retry_on_unauthorized):
@@ -100,7 +107,7 @@ class Swift(Object):
             response = result.getheaders()
         elif result.status == 401 and retry_on_unauthorized:
             return self.get_container_meta_data(container, False)
-        else
+        else:
             raise Exception('failed to get container meta data; status = %r' % (result.status))
 
     def get_object_meta_data(self, container, name, retry_on_unauthorized = True):
