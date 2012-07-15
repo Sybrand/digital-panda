@@ -1,3 +1,12 @@
+"""
+F.Y.I - it's VERY early days for this module - there's still a lot that needs
+to be done
+
+TODO: currently busy with: skeleton
+TODO: next: implement action panel
+TODO: hookup events, re-factor, style, etc. etc.
+"""
+
 import wx
 from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin
 from ..bucket.local import LocalBucket
@@ -6,10 +15,51 @@ from ..digitalpanda import Config
 import sys
 import logging
 
+ID_SPLITTER = 300
+
 class AutoWidthListCtrl(wx.ListCtrl, ListCtrlAutoWidthMixin):
     def __init__(self, parent):
         wx.ListCtrl.__init__(self, parent, -1, style=wx.LC_REPORT)
         ListCtrlAutoWidthMixin.__init__(self)
+
+class ActionPanel(wx.Panel):
+    """
+    The action panel relates to the currently selected bucket pane,
+    and allows one to perfrom actions in that context.
+    e.g: copy file from selected pane, to other pane
+    e.g: create directory in selected pane
+    """
+    def __init__(self, *args, **kwargs):
+        super(ActionPanel, self).__init__(*args, **kwargs)
+
+        self._InitUI()
+
+    def _InitUI(self):
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        gbs = wx.GridBagSizer(2, 2)
+        gbs.AddGrowableCol(0)
+        gbs.Add(wx.Button(self, label = 'Copy'), pos = (0,0), 
+            span = (1, 1), flag= wx.EXPAND)
+        gbs.AddGrowableCol(1)
+        gbs.Add(wx.Button(self, label = 'Move'), pos = (0,1), 
+            span = (1, 1), flag= wx.EXPAND)
+        gbs.AddGrowableCol(2)
+        gbs.Add(wx.Button(self, label = 'Mkdir'), pos = (0,2), 
+            span = (1, 1), flag= wx.EXPAND)
+        gbs.AddGrowableCol(3)
+        gbs.Add(wx.Button(self, label = 'Delete'), pos = (0,3), 
+            span = (1, 1), flag= wx.EXPAND)
+        gbs.AddGrowableCol(4)
+        gbs.Add(wx.Button(self, label = 'Search'), pos = (0,4), 
+            span = (1, 1), flag= wx.EXPAND)
+
+        sizer.Add(wx.StaticText(self, label='TODO: show current directory here'), flag = wx.EXPAND)
+        sizer.Add(gbs, flag = wx.EXPAND)
+        self.SetSizer(sizer)        
+
+
 
 class BucketPanel(wx.Panel):
     """
@@ -60,17 +110,23 @@ class Gui(wx.Frame):
         self._InitUi()
         self.Show()
 
-    def _InitUi(self):
+    def _InitUi(self):        
         self._InitMenuItems()
 
-        local_panel = BucketPanel(self, LocalBucket()) 
-        # TODO: allow for runtime decision on loading openstack swift or amazon s3
-        remote_panel = BucketPanel(self, SwiftBucket()) 
+        splitter = wx.SplitterWindow(self, ID_SPLITTER, style = wx.SP_BORDER)
+        splitter.SetMinimumPaneSize(50)
 
-        frame_gs = wx.GridSizer(rows = 1, cols = 2)
-        frame_gs.Add(local_panel, flag = wx.EXPAND)
-        frame_gs.Add(remote_panel, flag = wx.EXPAND)
-        self.SetSizer(frame_gs)
+        # TODO: allow for runtime decision on loading openstack swift, local files system, or amazon s3
+        local_panel = BucketPanel(splitter, LocalBucket())         
+        remote_panel = BucketPanel(splitter, SwiftBucket())
+        action_panel = ActionPanel(self)
+
+        splitter.SplitVertically(local_panel, remote_panel)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(splitter,1,wx.EXPAND)
+        sizer.Add(action_panel,0,wx.EXPAND)
+        self.SetSizer(sizer)
         
 
     def _InitMenuItems(self):
