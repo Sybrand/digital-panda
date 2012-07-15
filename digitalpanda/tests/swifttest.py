@@ -4,6 +4,10 @@ import ConfigParser
 import logging
 
 class SwiftApi(unittest.TestCase):
+	"""
+	TODO: write many more tests
+	
+	"""
 
 	def test_authenticate(self):
 		"""

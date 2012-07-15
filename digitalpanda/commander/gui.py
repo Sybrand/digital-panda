@@ -2,6 +2,10 @@
 F.Y.I - it's VERY early days for this module - there's still a lot that needs
 to be done
 
+This module deviates from PEP 8 - seems like the wx-python guys didn't use
+PEP 8 - and it just looks messy mixing PEP 8 with wx-python - so try to emulate
+wx-python code in this module
+
 TODO: currently busy with: skeleton
 TODO: next: implement action panel
 TODO: hookup events, re-factor, style, etc. etc.
@@ -141,7 +145,7 @@ class Gui(wx.Frame):
         self.Close()
 
 
-if __name__ == '__main__':
+def run_gui():
     config = Config().config;
     log_level = getattr(logging, config.get('Logging', 'log_level').upper())
 
@@ -152,3 +156,7 @@ if __name__ == '__main__':
     g = Gui(None, -1, 'Digital Panda Commander', size=(800,300))
 
     app.MainLoop()
+
+if __name__ == '__main__':
+    run_gui()
+    

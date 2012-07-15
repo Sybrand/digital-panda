@@ -2,11 +2,17 @@
 
 Cloud storage client - the endgoal is to have a tray application that syncs your local files into the cloud.
 
-Currently runs on Ubuntu 12.04 - but should work on any OS with the correct dependancies installed
+Target cloud solutions to begin with are: Swift (Openstack) and Amazon S3
 
 ## License
 
 This Software is licensed under the MIT License (MIT), please refer to LICENSE for details
+
+## How to run
+
+Currently runs on Ubuntu 12.04 - but should work on any OS with the correct dependancies installed.
+
+There's not much to see right now...
 
 ## Milestones
 
