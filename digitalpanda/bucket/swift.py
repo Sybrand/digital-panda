@@ -3,6 +3,43 @@ import json
 import urllib
 import logging
 import httplib
+from ..digitalpanda import Config
+from abstract import AbstractBucket
+
+
+class SwiftBucket(AbstractBucket):
+    def __init__(self):
+        """ this class pulls swift into a common interface - as defined in AbstractBucket
+
+        """
+        config = Config().config;
+        self._swift = SwiftAPI(auth_url = config.get('Swift', 'swift_auth_url'),
+            username = config.get('Swift', 'swift_username'),
+            password = config.get('Swift', 'swift_password'))
+        self._swift.authenticate()
+        # use / convention to indicate root
+        # in swift context - we will take this to mean that 
+        # no container has yet been selected
+        self._current_path = '/';
+
+    def delete_object(self, path):
+        raise NotImplemented
+
+    def list_current_dir(self):
+        # default to empty array
+        files = []
+        if self._current_path == '/':
+            # at our "root" - we list containers
+            containers = self._swift.get_containers()
+            if containers:
+                for container in containers:
+                    files.append(container, container)
+        else:
+            # if not at "root" - we list everything in the current "directory"
+            raise NotImplemented
+
+        return files
+
 
 class SwiftAPI(object):
     """ class that wraps OpenStack Swift REST API 
@@ -41,7 +78,8 @@ class SwiftAPI(object):
 
 
     def authenticate(self):
-        """ authenticate against swift
+        """ authenticate against swift, store X-Auth-Token and
+        X-Storage-Url
 
         """
         headers = {'X-Storage-User': self._username, 
@@ -88,9 +126,10 @@ class SwiftAPI(object):
         connection = self._open_connection(self._storage_url)
         connection.request('GET', path, None, self._create_headers())
         result = connection.getresponse()
+        logging.debug('get containers returned %r' % result.status)
 
         containers = None
-        if result.status == 200:
+        if result.status == 200:            
             containers = json.loads(result.read())
         elif result.status == 401 and retry_on_unauthorized:
             return self.get_containers(False)
