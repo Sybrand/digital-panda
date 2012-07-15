@@ -12,7 +12,7 @@ This Software is licensed under the MIT License (MIT), please refer to LICENSE f
 
 Currently runs on Ubuntu 12.04 - but should work on any OS with the correct dependancies installed.
 
-There's not much to see right now...
+There's not much to see right now... especially if you don't have a swift server to connect to!
 
 ## Milestones
 

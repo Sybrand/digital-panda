@@ -98,10 +98,14 @@ class BucketPanel(wx.Panel):
 
     def _PopulateCurrentDirectory(self):
         # get entries
-        entries = self._bucket.list_current_dir()
-        for entry in entries:
-            index = self._listbox.InsertStringItem(sys.maxint, '')
-            self._listbox.SetStringItem(index, 1, entry.name)
+        try:
+            entries = self._bucket.list_current_dir()
+            for entry in entries:
+                index = self._listbox.InsertStringItem(sys.maxint, '')
+                self._listbox.SetStringItem(index, 1, entry.name)
+        except:
+            # TODO: feed exception details to user
+            logging.error('failed to get directory listing!')        
 
 class Gui(wx.Frame):
     def __init__(self, *args, **kwargs):

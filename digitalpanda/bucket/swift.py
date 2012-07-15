@@ -16,7 +16,11 @@ class SwiftBucket(AbstractBucket):
         self._swift = SwiftAPI(auth_url = config.get('Swift', 'swift_auth_url'),
             username = config.get('Swift', 'swift_username'),
             password = config.get('Swift', 'swift_password'))
-        self._swift.authenticate()
+        try:
+            self._swift.authenticate()
+        except:
+            # TODO: feed this error to the user - nicely
+            logging.error('could not authenticate!')
         # use / convention to indicate root
         # in swift context - we will take this to mean that 
         # no container has yet been selected
