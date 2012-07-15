@@ -1,4 +1,4 @@
-import urlparse
+from urlparse import urlparse
 import json
 import urllib
 import logging
@@ -17,7 +17,10 @@ class SwiftAPI(object):
         so that if we ever get a 401, we can retry
 
         """
-        self._auth_url = urlparse.urlparse(auth_url)
+        logging.debug('auth_url: %s ; username = %s' 
+            % (auth_url, username))
+        self._auth_url = urlparse(auth_url)
+        logging.debug('self._auth_url = %s' % (self._auth_url.scheme))
         self._username = username
         self._password = password
 
@@ -30,6 +33,7 @@ class SwiftAPI(object):
             host = "%s:%d" % (url.hostname, url.port)
         else:
             host = url.hostname
+        logging.debug('host = %r' % host)
         if (url.scheme=='https'):
             return httplib.HTTPSConnection(host)
         else:
@@ -49,9 +53,9 @@ class SwiftAPI(object):
 
         if result.status==200:
             self._auth_token = result.getheader('X-Auth-Token')
-            self._storage_url = urlparse.urlparse(result.getheader('X-Storage-Url'))
+            self._storage_url = urlparse(result.getheader('X-Storage-Url'))
         else:
-            raise Exception('login failed')
+            raise Exception('login failed ; status = %r' % result.status)
 
     def get_auth_token(self):
         return self._auth_token
