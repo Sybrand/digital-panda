@@ -44,6 +44,10 @@ class SwiftBucket(AbstractBucket):
 
         return files
 
+    def get_current_dir(self):
+        storageUrl = self._swift.get_storage_url()
+        return '%s://%s%s%s' % (storageUrl.scheme, storageUrl.netloc, storageUrl.path, self._current_path)
+
 
 class SwiftAPI(object):
     """ class that wraps OpenStack Swift REST API 
@@ -101,6 +105,9 @@ class SwiftAPI(object):
 
     def get_auth_token(self):
         return self._auth_token
+
+    def get_storage_url(self):
+        return self._storage_url
 
     def put_container(self, container, retry_on_unauthorized = True):
         """ create a swift container

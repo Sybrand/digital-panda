@@ -27,3 +27,6 @@ class LocalBucket(AbstractBucket):
         
         return files
 
+    def get_current_dir(self):
+        return os.getcwd()
+

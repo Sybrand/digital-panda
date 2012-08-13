@@ -33,3 +33,7 @@ class AbstractBucket:
     @abstractmethod
     def list_current_dir(self):
         return NotImplemented
+
+    @abstractmethod
+    def get_current_dir(self):
+        return NotImplemented

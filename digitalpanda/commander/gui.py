@@ -59,7 +59,7 @@ class ActionPanel(wx.Panel):
         gbs.Add(wx.Button(self, label = 'Search'), pos = (0,4), 
             span = (1, 1), flag= wx.EXPAND)
 
-        sizer.Add(wx.StaticText(self, label='TODO: show current directory here'), flag = wx.EXPAND)
+        sizer.Add(wx.StaticText(self, label='some static text?'), flag = wx.EXPAND)
         sizer.Add(gbs, flag = wx.EXPAND)
         self.SetSizer(sizer)        
 
@@ -90,15 +90,21 @@ class BucketPanel(wx.Panel):
         self._listbox.InsertColumn(3, 'size')
         self._listbox.InsertColumn(4, 'date')
 
-        gs = wx.GridSizer(rows = 1, cols = 1)
-        gs.Add(self._listbox, flag = wx.EXPAND)
-        self.SetSizer(gs)
+        self._currentDirectory = wx.StaticText(self, label='TODO: show current directory here')
+
+        #sizer = wx.GridSizer(rows = 2, cols = 1)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self._currentDirectory, 0, flag = wx.EXPAND)
+        sizer.Add(self._listbox, 1, flag = wx.EXPAND)
+        self.SetSizer(sizer)
 
         self._PopulateCurrentDirectory()
 
     def _PopulateCurrentDirectory(self):
         # get entries
         try:
+            self._currentDirectory.SetLabel(self._bucket.get_current_dir())
+
             entries = self._bucket.list_current_dir()
             for entry in entries:
                 index = self._listbox.InsertStringItem(sys.maxint, '')
