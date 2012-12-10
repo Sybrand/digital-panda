@@ -25,4 +25,4 @@ There's not much to see right now... especially if you don't have a swift server
 
 ## Dependancies
 
-python-wx (for ubunut: apt-get install python-wxgtk2.8)
+python-wx (for ubuntu: apt-get install python-wxgtk2.8)
