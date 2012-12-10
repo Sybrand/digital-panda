@@ -10,10 +10,14 @@
 
 </head>
 
-
-
 <body>
-	Digital Panda! How cool is that!
+<h1>Digital Panda</h1>
+<p>
+<a href="http://docs.openstack.org/api/openstack-object-storage/1.0/content/">OpenStack Object Storage Developer Guide</a>
+</p>
+<p>
+<a href="https://github.com/Sybrand/digital-panda">Digital Panda on GitHub</a>
+</p>
 </body>
 
 </html>
