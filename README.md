@@ -16,6 +16,10 @@ There's not much to see right now... especially if you don't have a swift server
 
 ## Milestones
 
+* TODO: refactor panda-commander into own project
+* TODO: refactor panda-daemon into own project
+* TODO: port panda-daemon to Python 3
+* (busy implementing tray client)
 * (busy implementing) Classic commander style interface (left pane local file structure, right page remote file structure)
 * (busy implementing) Rackspace - OpenStack Swift integration
 * (next step) Amazon - S3 integration 
