@@ -11,13 +11,19 @@ import settings
 class TaskBar(wx.TaskBarIcon):
     def __init__(self):
         super(TaskBar, self).__init__()
-        icon = wx.IconFromBitmap(wx.Bitmap("panda3232.png"))
+        #icon = wx.IconFromBitmap(wx.Bitmap("panda3232.png"))
+        icon = wx.Icon('digital-panda.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon(icon, "Digital Panda - Cloud Storage Sync Client" +
                      " - Online")
         self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
+        self.Bind(wx.EVT_TASKBAR_RIGHT_DOWN, self.on_right_down)
 
     def on_left_down(self, event):
         # we give left click the same functionality as right click
+        self.PopupMenu(self.create_popup_menu())
+
+    def on_right_down(self, event):
+        # we give right click the same functionality as left
         self.PopupMenu(self.create_popup_menu())
 
     def create_popup_menu(self):
