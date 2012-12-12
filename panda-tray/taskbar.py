@@ -13,10 +13,12 @@ class TaskBar(wx.TaskBarIcon):
         super(TaskBar, self).__init__()
         #icon = wx.IconFromBitmap(wx.Bitmap("panda3232.png"))
         icon = wx.Icon('digital-panda.ico', wx.BITMAP_TYPE_ICO)
-        self.SetIcon(icon, "Digital Panda - Cloud Storage Sync Client" +
-                     " - Online")
+        self.SetIcon(icon, "Digital Panda\r\nCloud Storage Sync Client\r\n" +
+                     "Online")
         self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
         self.Bind(wx.EVT_TASKBAR_RIGHT_DOWN, self.on_right_down)
+
+        self.dialog = None
 
     def on_left_down(self, event):
         # we give left click the same functionality as right click
@@ -46,6 +48,10 @@ class TaskBar(wx.TaskBarIcon):
 
     def on_exit(self, event):
         wx.CallAfter(self.Destroy)
+        if self.dialog:
+            self.dialog.Destroy()
 
     def show_settings(self, event):
-        settings.Settings()
+        self.dialog = settings.Settings(None, -1, 'Settings')
+        self.dialog.Center()
+        self.dialog.Show()
