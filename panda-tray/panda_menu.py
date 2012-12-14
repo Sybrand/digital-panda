@@ -14,7 +14,7 @@ SettingsEvent, EVT_SETTINGS = wx.lib.newevent.NewEvent()
 class CustomButton(wx.PyControl):
     def __init__(self, parent, id=wx.ID_ANY, bitmap=None,
                  label="", pos=wx.DefaultPosition,
-                 size=(10, 10), style=wx.NO_BORDER,
+                 size=(130, 10), style=wx.NO_BORDER,
                  validator=wx.DefaultValidator,
                  name="CustomButton"):
         wx.PyControl.__init__(self, parent, id,
@@ -30,6 +30,11 @@ class CustomButton(wx.PyControl):
         self.Bind(wx.EVT_ENTER_WINDOW, self.OnEnter)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
+        self.SetTransparent(50)
+        self.active = True
+
+    def SetInactive(self):
+        self.active = False
 
     def OnLeftDown(self, event):
         self.leftDown = True
@@ -71,7 +76,10 @@ class CustomButton(wx.PyControl):
         wx.PyControl.SetInitialSize(self, size)
 
     def OnPaint(self, event):
-        dc = wx.BufferedPaintDC(self)
+        # http://wxpython.org/docs/api/wx.BufferedPaintDC-class.html
+        bpdc = wx.BufferedPaintDC(self)
+        #pdc = wx.PaintDC(self)
+        dc = wx.GCDC(bpdc)
         self.Draw(dc)
 
     def Draw(self, dc):
@@ -80,31 +88,50 @@ class CustomButton(wx.PyControl):
             return
 
         textWidth, textHeight = dc.GetTextExtent(self.label)
-        if self.mouseOver:
-            backColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
-        else:
-            menuColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
-            backColour = menuColour
 
+        # http://docs.wxwidgets.org/2.8/wx_wxsystemsettings.html
+        backColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
         backBrush = wx.Brush(backColour, wx.SOLID)
         dc.SetBackground(backBrush)
         dc.Clear()
 
-        if self.mouseOver:
+        if self.mouseOver and self.active:
             penWidth = 1
             borderColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT)
-            pen = wx.Pen(colour=borderColour, width=penWidth, style=wx.SOLID)
+            borderColour = wx.Colour(borderColour.Red(),
+                                     borderColour.Green(),
+                                     borderColour.Blue(),
+                                     80)
+            # http://wxpython.org/docs/api/wx.Pen-class.html
+            # http://docs.wxwidgets.org/trunk/classwx_pen.html
+            pen = wx.Pen(colour=borderColour, width=penWidth,
+                         style=wx.SOLID)
             dc.SetPen(pen)
-            right = width - penWidth
-            bottom = height - 1
-            dc.DrawLine(0, 0, right, 0)
-            dc.DrawLine(right, 0, right, bottom)
-            dc.DrawLine(right, bottom, 0, bottom)
-            dc.DrawLine(0, bottom, 0, 0)
-        #dc.Clear()
+            rectColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+            rectColour = wx.Colour(rectColour.Red(),
+                                   rectColour.Green(),
+                                   rectColour.Blue(),
+                                   5)
+            dc.SetBrush(wx.Brush(rectColour))
 
-        dc.SetTextForeground(self.GetForegroundColour())
-        dc.SetFont(self.GetFont())
+            rect = wx.Rect(0, 0, width, height)
+            rect.SetPosition((0, 0))
+            dc.DrawRoundedRectangleRect(rect, 3)
+
+        textColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENUTEXT)
+        textColour = wx.Colour(textColour.Red(), textColour.Green(),
+                               textColour.Blue(), wx.ALPHA_OPAQUE)
+        dc.SetTextForeground(textColour)
+        font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
+        font.SetPointSize(9)
+        font.SetFaceName('Segoe UI')
+
+        #font = wx.Font(9, wx.FONTFAMILY_DEFAULT,
+        #               wx.NORMAL, wx.NORMAL, False, 'MS Shell Dlg 2')
+        #font = wx.Font(9, wx.SWISS, wx.NORMAL,
+        #               wx.NORMAL, False, u'Segoe UI')
+
+        dc.SetFont(font)
 
         textXpos = self.GetSpacing()
         textYpos = (height - textHeight) / 2
@@ -122,7 +149,8 @@ class LogoPanel(wx.Panel):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.BORDER_NONE)
 
-        self.SetBackgroundColour((0, 255, 0))
+        backColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
+        self.SetBackgroundColour(backColour)
 
         vbox = wx.BoxSizer(wx.VERTICAL)
 
@@ -154,9 +182,9 @@ class ActionPanel(wx.Panel):
         vbox.Add(item=settingsButton, proportion=1,
                  flag=wx.ALL | wx.EXPAND, border=1)
 
-        lineA = wx.StaticLine(self, wx.ID_ANY)
-        vbox.Add(item=lineA, proportion=0, flag=wx.ALL | wx.EXPAND,
-                 border=2)
+        #lineA = wx.StaticLine(self, wx.ID_ANY)
+        #vbox.Add(item=lineA, proportion=0, flag=wx.ALL | wx.EXPAND,
+        #         border=2)
 
         #quitButton = platebtn.PlateButton(self, wx.ID_ANY, 'Quit',
         #                                  style=platebtn.PB_STYLE_SQUARE)
@@ -165,20 +193,26 @@ class ActionPanel(wx.Panel):
         vbox.Add(item=quitButton, proportion=1,
                  flag=wx.ALL | wx.EXPAND, border=1)
 
-        lineB = wx.StaticLine(self, wx.ID_ANY)
-        vbox.Add(item=lineB, proportion=0, flag=wx.ALL | wx.EXPAND,
-                 border=2)
+        #lineB = wx.StaticLine(self, wx.ID_ANY)
+        #vbox.Add(item=lineB, proportion=0, flag=wx.ALL | wx.EXPAND,
+        #         border=2)
 
         # we plomp in a spacer to make everything fit nicely
-        panelSpacer = wx.Panel(self, wx.ID_ANY, wx.DefaultPosition,
+        """panelSpacer = wx.Panel(self, wx.ID_ANY, wx.DefaultPosition,
                                size=(1, 1))
         vbox.Add(item=panelSpacer, proportion=0,
-                 flag=wx.RIGHT | wx.EXPAND, border=150)
+                 flag=wx.RIGHT | wx.EXPAND, border=150)"""
 
+        """
         labelStatus = wx.StaticText(self, wx.ID_ANY,
                                     'Status: Online')
         vbox.Add(item=labelStatus, proportion=1,
-                 flag=wx.ALL | wx.EXPAND, border=10)
+                 flag=wx.ALL | wx.EXPAND, border=10)"""
+
+        statusButton = CustomButton(self, wx.ID_ANY, label='Status: Online')
+        statusButton.SetInactive()
+        vbox.Add(item=statusButton, proportion=1,
+                 flag=wx.ALL | wx.EXPAND, border=1)
 
         self.SetSizer(vbox)
 
@@ -194,22 +228,28 @@ class ActionPanel(wx.Panel):
 class PandaMenu(wx.Frame):
     def __init__(self, parent, id, title, pos=wx.DefaultPosition):
         wx.Frame.__init__(self, parent=parent, id=id, title=title,
-                          pos=pos, style=wx.FRAME_NO_TASKBAR | wx.STAY_ON_TOP,
+                          pos=pos, style=wx.FRAME_NO_TASKBAR | wx.STAY_ON_TOP
+                          | wx.NO_BORDER,
                           size=(500, 200))
 
         logoPanel = LogoPanel(self, wx.ID_ANY)
         actionPanel = ActionPanel(self, wx.ID_ANY)
 
+        backColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
+        self.SetBackgroundColour(backColour)
+        #self.SetBackgroundColour((255, 0, 0))
         hbox = wx.BoxSizer(wx.HORIZONTAL)
 
         hbox.Add(item=logoPanel, proportion=0,
                  flag=wx.ALL | wx.EXPAND, border=0)
+
         hbox.Add(item=actionPanel, proportion=1,
                  flag=wx.EXPAND | wx.ALL,
                  border=0)
 
         self.SetSizer(hbox)
         hbox.Fit(self)
+        #"""
 
         self.Bind(wx.EVT_ACTIVATE, self.on_activate)
 
