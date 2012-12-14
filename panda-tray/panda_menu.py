@@ -228,7 +228,8 @@ class ActionPanel(wx.Panel):
 class PandaMenu(wx.Frame):
     def __init__(self, parent, id, title, pos=wx.DefaultPosition):
         wx.Frame.__init__(self, parent=parent, id=id, title=title,
-                          pos=pos, style=wx.FRAME_NO_TASKBAR | wx.STAY_ON_TOP,
+                          pos=pos, style=wx.FRAME_NO_TASKBAR | wx.STAY_ON_TOP |
+                          wx.SIMPLE_BORDER,
                           size=(500, 200))
 
         logoPanel = LogoPanel(self, wx.ID_ANY)

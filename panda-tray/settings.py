@@ -15,17 +15,21 @@ class StatusPanel(wx.Panel):
         labelStatus = wx.StaticText(self, wx.ID_ANY,
                                     'Status: Online', style=wx.ALIGN_RIGHT)
 
+        """
         image = wx.Image('digital-panda-online-1616.png', wx.BITMAP_TYPE_ANY)
         bitmap = image.ConvertToBitmap()
         position = (0, 0)
         size = (bitmap.GetWidth(), bitmap.GetHeight())
         staticBitmap = wx.StaticBitmap(self, -1, bitmap, position, size)
+        """
 
         panelSizer = wx.BoxSizer(wx.HORIZONTAL)
         panelSizer.Add(item=labelStatus, proportion=1,
                        flag=wx.ALL | wx.EXPAND, border=5)
+        """
         panelSizer.Add(item=staticBitmap, proportion=0,
                        flag=wx.ALL, border=5)
+        """
         self.SetSizer(panelSizer)
 
 
@@ -43,18 +47,20 @@ class LogoPanel(wx.Panel):
                                        bitmap, position, size)
         #self.SetSize(size)
 
+        """
         logoLabel = wx.StaticText(self, wx.ID_ANY,
                                   'Digital Panda')
         font = wx.Font(pointSize=20, family=wx.FONTFAMILY_DEFAULT,
                        style=wx.FONTSTYLE_NORMAL,
                        weight=wx.FONTWEIGHT_BOLD)
         logoLabel.SetFont(font)
+        """
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         hbox.Add(item=staticBitmap, proportion=0,
                  flag=wx.LEFT, border=0)
-        hbox.Add(item=logoLabel, proportion=0,
-                 flag=wx.ALL, border=5)
+        """hbox.Add(item=logoLabel, proportion=0,
+                 flag=wx.ALL, border=5)"""
         self.SetSizer(hbox)
 
 
@@ -80,18 +86,53 @@ class TestConnectionPanel(wx.Panel):
         self.SetSizer(panelSizer)
 
 
-class SettingsPanel(wx.Panel):
+class SettingsPanel2(wx.Panel):
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
-                          style=wx.SIMPLE_BORDER)
+                          style=wx.NO_BORDER)
+
+        #sizer = wx.FlexGridSizer(1, 2)
+        sizer = wx.GridBagSizer(vgap=5, hgap=5)
+
         # auth url
         labelAuthUrl = wx.StaticText(self, wx.ID_ANY,
-                                     'Authentication Url')
+                                     'Auth Url')
         inputAuthUrl = wx.TextCtrl(self, wx.ID_ANY,
                                    'https://store-it.mweb.co.za/v1/auth')
 
-        labelCredentials = wx.StaticText(self, wx.ID_ANY,
-                                         'Credentials:')
+        # username
+        labelUsername = wx.StaticText(self, wx.ID_ANY,
+                                      'Username')
+        inputUsername = wx.TextCtrl(self, wx.ID_ANY, '')
+
+        # password
+        labelPassword = wx.StaticText(self, wx.ID_ANY,
+                                      'Password')
+        inputPassword = wx.TextCtrl(self, wx.ID_ANY, '',
+                                    style=wx.TE_PASSWORD)
+
+        sizer.AddGrowableCol(1)
+        sizer.Add(item=labelAuthUrl, flag=wx.EXPAND | wx.TOP, pos=(0, 0), border=5)
+        sizer.Add(item=inputAuthUrl, flag=wx.EXPAND, pos=(0, 1))
+        sizer.Add(item=labelUsername, flag=wx.EXPAND | wx.TOP, pos=(1, 0), border=5)
+        sizer.Add(item=inputUsername, flag=wx.EXPAND, pos=(1, 1))
+        sizer.Add(item=labelPassword, flag=wx.EXPAND | wx.TOP, pos=(2, 0), border=5)
+        sizer.Add(item=inputPassword, flag=wx.EXPAND, pos=(2, 1))
+        self.SetSizer(sizer)
+
+
+class SettingsPanel(wx.Panel):
+    def __init__(self, parent, id):
+        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
+                          style=wx.NO_BORDER)
+        # auth url
+        labelAuthUrl = wx.StaticText(self, wx.ID_ANY,
+                                     'Auth Url')
+        inputAuthUrl = wx.TextCtrl(self, wx.ID_ANY,
+                                   'https://store-it.mweb.co.za/v1/auth')
+
+        #labelCredentials = wx.StaticText(self, wx.ID_ANY,
+        #                                 'Credentials:')
 
         # username
         labelUsername = wx.StaticText(self, wx.ID_ANY,
@@ -119,8 +160,8 @@ class SettingsPanel(wx.Panel):
         authSizer.Add(item=inputAuthUrl, proportion=1,
                       flag=wx.ALL, border=5)
 
-        credentialsSizer.Add(item=labelCredentials, proportion=0,
-                             flag=wx.ALL, border=5)
+        #credentialsSizer.Add(item=labelCredentials, proportion=0,
+        #                     flag=wx.ALL, border=5)
 
         usernameSizer.Add(item=labelUsername, proportion=0,
                           flag=wx.ALL, border=5)
@@ -168,16 +209,17 @@ class Settings(wx.Frame):
 
         midPanel = wx.Panel(framePanel)
         midPanelSizer = wx.BoxSizer(wx.VERTICAL)
-        labelEditYourSettings = wx.StaticText(midPanel, wx.ID_ANY,
-                                              'Edit your settings')
-        midPanelSizer.Add(item=labelEditYourSettings, border=5,
-                          proportion=0,
-                          flag=wx.ALL | wx.EXPAND)
+        #labelEditYourSettings = wx.StaticText(midPanel, wx.ID_ANY,
+        #                                      'Edit your settings')
+        #midPanelSizer.Add(item=labelEditYourSettings, border=5,
+        #                  proportion=0,
+        #                  flag=wx.ALL | wx.EXPAND)
         midPanel.SetSizer(midPanelSizer)
 
         #line = wx.StaticLine(framePanel, wx.ID_ANY)
 
-        settingsPanel = SettingsPanel(framePanel, wx.ID_ANY)
+        #settingsPanel = SettingsPanel(framePanel, wx.ID_ANY)
+        settingsPanel = SettingsPanel2(framePanel, wx.ID_ANY)
 
         statusPanel = StatusPanel(framePanel, wx.ID_ANY)
 

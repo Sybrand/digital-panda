@@ -82,7 +82,7 @@ class TaskBar(wx.TaskBarIcon):
             self.dialog.Show(True)
             # simply calling .Raise() doesn't work in windows
             # so we change the style to on top, and back again
-            style = self.dialog.GetWindowStyle()            
+            style = self.dialog.GetWindowStyle()
             self.dialog.SetWindowStyle(style | wx.STAY_ON_TOP)
             self.dialog.SetWindowStyle(style)
 
