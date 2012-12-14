@@ -11,7 +11,6 @@ class StatusPanel(wx.Panel):
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
-        #self.SetBackgroundColour((255, 0, 0))
 
         labelStatus = wx.StaticText(self, wx.ID_ANY,
                                     'Status: Online', style=wx.ALIGN_RIGHT)
@@ -33,7 +32,7 @@ class StatusPanel(wx.Panel):
 class LogoPanel(wx.Panel):
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
-                          style=wx.SIMPLE_BORDER)
+                          style=wx.NO_BORDER)
         self.SetBackgroundColour((0, 255, 0))
 
         image = wx.Image('digital-panda-header.png', wx.BITMAP_TYPE_ANY)
@@ -150,7 +149,12 @@ class SettingsPanel(wx.Panel):
 
 class Settings(wx.Frame):
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition)
+        # we don't want the user to be able to resize - since it's a very
+        # basic menu - so we build up the style ourselves
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
+                          style=wx.MINIMIZE_BOX | wx.MAXIMIZE_BOX |
+                          wx.CLOSE_BOX | wx.SYSTEM_MENU |
+                          wx.CAPTION)
 
         self.icon = wx.Icon('digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon(self.icon)
@@ -171,6 +175,8 @@ class Settings(wx.Frame):
                           flag=wx.ALL | wx.EXPAND)
         midPanel.SetSizer(midPanelSizer)
 
+        #line = wx.StaticLine(framePanel, wx.ID_ANY)
+
         settingsPanel = SettingsPanel(framePanel, wx.ID_ANY)
 
         statusPanel = StatusPanel(framePanel, wx.ID_ANY)
@@ -179,6 +185,8 @@ class Settings(wx.Frame):
                  flag=wx.EXPAND | wx.ALL)
         vbox.Add(midPanel, border=5, proportion=0,
                  flag=wx.EXPAND | wx.ALL)
+        #vbox.Add(line, border=10, proportion=0,
+        #         flag=wx.EXPAND | wx.ALL)
         vbox.Add(settingsPanel, proportion=1, flag=wx.EXPAND | wx.ALL,
                  border=10)
         vbox.Add(statusPanel, border=5, proportion=0,

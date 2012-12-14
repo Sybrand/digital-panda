@@ -26,6 +26,9 @@
 		<p>
 			<a href="http://wxpython.org/docs/api/wx-module.html">wxpython package wx</a>
 		</p>
+		<p>
+			<a href="http://wxpython.org/docs/api/">http://wxpython.org/docs/api/</a>
+		</p>
 	</body>
 
 </html>

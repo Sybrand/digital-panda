@@ -33,6 +33,7 @@ class TaskBar(wx.TaskBarIcon):
 
     def on_left_down(self, event):
         # we give left click the same functionality as right click
+        #x, y = event.GetPosition()
         self.show_advanced_menu()
 
     def on_right_down(self, event):
@@ -57,6 +58,14 @@ class TaskBar(wx.TaskBarIcon):
         menu.AppendItem(item)
         return menu
 
+    def create_advanced_menu(self):
+        advancedMenu = panda_menu.PandaMenu(None, -1, 'Advanced Menu')
+
+        advancedMenu.Bind(panda_menu.EVT_EXIT, self.on_exit)
+        advancedMenu.Bind(panda_menu.EVT_SETTINGS, self.show_settings)
+
+        return advancedMenu
+
     def on_exit(self, event):
         wx.CallAfter(self.Destroy)
         if self.dialog:
@@ -65,13 +74,27 @@ class TaskBar(wx.TaskBarIcon):
             self.advancedMenu.Destroy()
 
     def show_settings(self, event):
-        self.dialog = settings.Settings(None, -1, 'Settings')
-        self.dialog.Center()
-        self.dialog.Show()
+        if not self.dialog:
+            self.dialog = settings.Settings(None, -1, 'Digital Panda Settings')
+            self.dialog.Center()
+            self.dialog.Show(True)
+        else:
+            self.dialog.Show(True)
+            # simply calling .Raise() doesn't work in windows
+            # so we change the style to on top, and back again
+            style = self.dialog.GetWindowStyle()            
+            self.dialog.SetWindowStyle(style | wx.STAY_ON_TOP)
+            self.dialog.SetWindowStyle(style)
 
     def show_advanced_menu(self):
         if not self.advancedMenu:
-            self.advancedMenu = panda_menu.PandaMenu(None, -1, 'Advanced Menu')
-        self.advancedMenu.Center()
+            self.advancedMenu = self.create_advanced_menu()
+
+        menuSize = self.advancedMenu.GetSize()
+        mousePosition = wx.GetMousePosition()
+        pos = (mousePosition[0] - menuSize.width,
+               mousePosition[1] - menuSize.height)
+        self.advancedMenu.Move(pos)
+
         self.advancedMenu.Show()
         self.advancedMenu.Raise()
