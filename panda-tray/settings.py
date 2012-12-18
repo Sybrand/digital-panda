@@ -5,6 +5,11 @@ Created on December 11, 2012
 @author: Sybrand Strauss
 '''
 import wx
+import wx.lib.newevent
+
+ApplyEvent, EVT_APPLY = wx.lib.newevent.NewEvent()
+OkEvent, EVT_OK = wx.lib.newevent.NewEvent()
+CancelEvent, EVT_CANCEL = wx.lib.newevent.NewEvent()
 
 
 class StatusPanel(wx.Panel):
@@ -86,7 +91,102 @@ class TestConnectionPanel(wx.Panel):
         self.SetSizer(panelSizer)
 
 
-class SettingsPanel2(wx.Panel):
+class HelpPanel(wx.Panel):
+    def __init__(self, parent, id):
+        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
+                          style=wx.NO_BORDER)
+
+        #text = wx.StaticText(self, wx.ID_ANY, 'Help')
+        url = 'http://www.digitalpanda.co.za/help.php'
+        text = wx.HyperlinkCtrl(self, wx.ID_ANY, 'Help', url)
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(item=text, proportion=0,
+                  flag=wx.ALL, border=5)
+        self.SetSizer(sizer)
+
+
+class OkCancelApply(wx.Panel):
+    def __init__(self, parent, id):
+        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
+                          style=wx.NO_BORDER)
+        self.parent = parent
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        btnOk = wx.Button(self, -1, 'Ok')
+        btnOk.Bind(wx.EVT_BUTTON, self.OnOk)
+        sizer.Add(item=btnOk, proportion=0,
+                  flag=wx.ALL, border=2)
+
+        btnCancel = wx.Button(self, -1, 'Cancel')
+        btnCancel.Bind(wx.EVT_BUTTON, self.OnCancel)
+        sizer.Add(item=btnCancel, proportion=0,
+                  flag=wx.ALL, border=2)
+
+        self.btnApply = wx.Button(self, -1, 'Apply')
+        self.btnApply.Disable()
+        self.btnApply.Bind(wx.EVT_BUTTON, self.OnApply)
+        sizer.Add(item=self.btnApply, proportion=0,
+                  flag=wx.ALL, border=2)
+
+        self.SetSizer(sizer)
+
+    def OnCancel(self, event):
+        event = CancelEvent()
+        wx.PostEvent(self.parent, event)
+
+    def OnOk(self, event):
+        event = OkEvent()
+        wx.PostEvent(self.parent, event)
+
+    def OnApply(self, event):
+        event = ApplyEvent()
+        wx.PostEvent(self.parent, event)
+
+    def EnableApply(self):
+        self.btnApply.Enable()
+
+    def DisableApply(self):
+        self.btnApply.Disable()
+
+
+class BottomPanel(wx.Panel):
+    def __init__(self, parent, id):
+        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
+                          style=wx.NO_BORDER)
+        self.parent = parent
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        help = HelpPanel(self, wx.ID_ANY)
+        sizer.Add(item=help, proportion=0,
+                  flag=wx.ALL, border=5)
+
+        spacer = wx.Panel(self, wx.ID_ANY)
+        sizer.Add(item=spacer, proportion=1,
+                  flag=wx.ALL, border=0)
+
+        okCancelApply = OkCancelApply(self, wx.RIGHT)
+        sizer.Add(item=okCancelApply, proportion=0,
+                  flag=wx.ALL, border=5)
+        self.Bind(EVT_OK, self.HandleEvent)
+        self.Bind(EVT_CANCEL, self.HandleEvent)
+        self.Bind(EVT_APPLY, self.HandleEvent)
+
+        """
+        status = StatusPanel(self, wx.ID_ANY)
+        sizer.Add(item=status, proportion=1,
+                  flag=wx.ALL, border=5)"""
+
+        self.SetSizer(sizer)
+
+    def HandleEvent(self, event):
+        print "handle event"
+        wx.PostEvent(self.parent, event)
+
+
+class SettingsPanel(wx.Panel):
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
@@ -138,76 +238,8 @@ class SettingsPanel2(wx.Panel):
         sizer.Add(item=labelPassword, flag=wx.EXPAND | wx.TOP,
                   pos=(2, 0), border=5)
         sizer.Add(item=inputPassword, flag=wx.EXPAND, pos=(2, 1))
+
         self.SetSizer(sizer)
-
-"""
-class SettingsPanel(wx.Panel):
-    def __init__(self, parent, id):
-        wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
-                          style=wx.NO_BORDER)
-        # auth url
-        # using "Auth Url - is waaaay too technical - so instead
-        # - using server"
-        labelAuthUrl = wx.StaticText(self, wx.ID_ANY,
-                                     'Server')
-        inputAuthUrl = wx.TextCtrl(self, wx.ID_ANY,
-                                   'https://store-it.mweb.co.za/v1/auth')
-
-        #labelCredentials = wx.StaticText(self, wx.ID_ANY,
-        #                                 'Credentials:')
-
-        # username
-        labelUsername = wx.StaticText(self, wx.ID_ANY,
-                                      'Username')
-        inputUsername = wx.TextCtrl(self, wx.ID_ANY, '')
-
-        # password
-        labelPassword = wx.StaticText(self, wx.ID_ANY,
-                                      'Password')
-        inputPassword = wx.TextCtrl(self, wx.ID_ANY, '',
-                                    style=wx.TE_PASSWORD)
-
-        # test
-        testConnectionPanel = TestConnectionPanel(self, -1)
-
-        # sizers
-        panelSizer = wx.BoxSizer(wx.VERTICAL)
-        authSizer = wx.BoxSizer(wx.HORIZONTAL)
-        credentialsSizer = wx.BoxSizer(wx.HORIZONTAL)
-        usernameSizer = wx.BoxSizer(wx.HORIZONTAL)
-        passwordSizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        authSizer.Add(item=labelAuthUrl, proportion=0,
-                      flag=wx.ALL, border=5)
-        authSizer.Add(item=inputAuthUrl, proportion=1,
-                      flag=wx.ALL, border=5)
-
-        #credentialsSizer.Add(item=labelCredentials, proportion=0,
-        #                     flag=wx.ALL, border=5)
-
-        usernameSizer.Add(item=labelUsername, proportion=0,
-                          flag=wx.ALL, border=5)
-        usernameSizer.Add(item=inputUsername, proportion=1,
-                          flag=wx.ALL, border=5)
-
-        passwordSizer.Add(item=labelPassword, proportion=0,
-                          flag=wx.ALL, border=5)
-        passwordSizer.Add(item=inputPassword, proportion=1,
-                          flag=wx.ALL, border=5)
-
-        panelSizer.Add(item=authSizer, border=0, proportion=0,
-                       flag=wx.ALL | wx.EXPAND)
-        panelSizer.Add(item=credentialsSizer, border=0, proportion=0,
-                       flag=wx.ALL | wx.EXPAND)
-        panelSizer.Add(item=usernameSizer, border=0, proportion=0,
-                       flag=wx.ALL | wx.EXPAND)
-        panelSizer.Add(item=passwordSizer, border=0, proportion=0,
-                       flag=wx.ALL | wx.EXPAND)
-        panelSizer.Add(item=testConnectionPanel, border=0, proportion=0,
-                       flag=wx.ALL | wx.EXPAND)
-
-        self.SetSizer(panelSizer)
-        #panelSizer.Fit(parent)"""
 
 
 class Settings(wx.Frame):
@@ -231,19 +263,11 @@ class Settings(wx.Frame):
 
         midPanel = wx.Panel(framePanel)
         midPanelSizer = wx.BoxSizer(wx.VERTICAL)
-        #labelEditYourSettings = wx.StaticText(midPanel, wx.ID_ANY,
-        #                                      'Edit your settings')
-        #midPanelSizer.Add(item=labelEditYourSettings, border=5,
-        #                  proportion=0,
-        #                  flag=wx.ALL | wx.EXPAND)
         midPanel.SetSizer(midPanelSizer)
 
-        #line = wx.StaticLine(framePanel, wx.ID_ANY)
+        settingsPanel = SettingsPanel(framePanel, wx.ID_ANY)
 
-        #settingsPanel = SettingsPanel(framePanel, wx.ID_ANY)
-        settingsPanel = SettingsPanel2(framePanel, wx.ID_ANY)
-
-        statusPanel = StatusPanel(framePanel, wx.ID_ANY)
+        #statusPanel = StatusPanel(framePanel, wx.ID_ANY)
 
         vbox.Add(logoPanel, border=0, proportion=0,
                  flag=wx.EXPAND | wx.ALL)
@@ -254,11 +278,33 @@ class Settings(wx.Frame):
         vbox.Add(settingsPanel, proportion=1, flag=wx.EXPAND | wx.ALL,
                  border=10)
 
+        statusPanel = StatusPanel(framePanel, wx.ID_ANY)
+        vbox.Add(statusPanel, proportion=0, flag=wx.EXPAND | wx.RIGHT,
+                 border=5)
+
+        """
         testConnectionPanel = TestConnectionPanel(framePanel, wx.ID_ANY)
         vbox.Add(testConnectionPanel, border=5, proportion=0,
+                 flag=wx.EXPAND | wx.ALL)"""
+
+        #bottomPanel = StatusPanel(framePanel, wx.ID_ANY)
+        bottomPanel = BottomPanel(framePanel, wx.ID_ANY)
+        bottomPanel.Bind(EVT_APPLY, self.HandleApply)
+        bottomPanel.Bind(EVT_OK, self.HandleOk)
+        bottomPanel.Bind(EVT_CANCEL, self.HandleCancel)
+        #bottomPanel = OkCancelApply(framePanel, wx.ID_ANY)
+        #bottomPanel = HelpPanel(framePanel, wx.ID_ANY)
+        vbox.Add(bottomPanel, border=0, proportion=0,
                  flag=wx.EXPAND | wx.ALL)
 
-        vbox.Add(statusPanel, border=5, proportion=0,
-                 flag=wx.EXPAND | wx.ALL)
         framePanel.SetSizer(vbox)
         vbox.Fit(self)
+
+    def HandleOk(self, event):
+        self.Show(False)
+
+    def HandleCancel(self, event):
+        self.Show(False)
+
+    def HandleApply(self, event):
+        pass
