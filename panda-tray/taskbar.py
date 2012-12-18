@@ -12,6 +12,7 @@ import os
 import os.path
 import subprocess
 
+
 if sys.platform == 'win32':
     def open_folder(path):
         if not os.path.exists(path):
@@ -30,6 +31,16 @@ class PandaMenu(wx.Menu):
 
 
 class TaskBar(wx.TaskBarIcon):
+    """ Icon that appears on TaskBar
+
+    - Windows <= 8 have taskbar icons - this class will run fine in
+     those environments.
+    - Ubuntu with Unity >= 11.04 needs to use an Application
+     Indicator - see http://unity.ubuntu.com/projects/appindicators/
+    - No idea what would have to be done for mac at this point in time.
+
+    """
+
     def __init__(self):
         super(TaskBar, self).__init__()
         icon = wx.IconFromBitmap(wx.Bitmap("gfx/icon1616.png"))
@@ -43,15 +54,17 @@ class TaskBar(wx.TaskBarIcon):
         self.advancedMenu = None
 
     def on_left_down(self, event):
-        # we give left click the same functionality as right click
-        #x, y = event.GetPosition()
         self.show_advanced_menu()
 
     def on_right_down(self, event):
-        # we give right click the same functionality as left
+        # showing system default popup menu - will probably switch
+        # over to using ONLY the advanced menu
         self.PopupMenu(self.create_popup_menu())
 
     def create_popup_menu(self):
+        """ Returns a popup menu.
+
+        """
         menu = wx.Menu()
 
         # open folder
@@ -75,6 +88,10 @@ class TaskBar(wx.TaskBarIcon):
         return menu
 
     def create_advanced_menu(self):
+        """ Returns an "advanced menu" - this is just a popup
+        menu with nice graphics on it.
+
+        """
         advancedMenu = panda_menu.PandaMenu(None, -1, 'Advanced Menu')
 
         advancedMenu.Bind(panda_menu.EVT_EXIT, self.on_exit)
@@ -104,6 +121,8 @@ class TaskBar(wx.TaskBarIcon):
             self.dialog.SetWindowStyle(style)
 
     def open_folder(self, event):
+        """ Open the sync folder (and creates it if it doesn't exist)
+        """
         if self.advancedMenu:
             self.advancedMenu.Show(False)
         home = os.path.expanduser('~')

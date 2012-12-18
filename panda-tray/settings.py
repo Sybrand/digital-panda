@@ -13,6 +13,10 @@ CancelEvent, EVT_CANCEL = wx.lib.newevent.NewEvent()
 
 
 class StatusPanel(wx.Panel):
+    """ Panel that shows the current status of the sync app
+
+    """
+
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
@@ -28,6 +32,9 @@ class StatusPanel(wx.Panel):
 
 
 class LogoPanel(wx.Panel):
+    """ Panel that shows the logo of the sync app
+
+    """
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
@@ -48,6 +55,9 @@ class LogoPanel(wx.Panel):
 
 
 class TestConnectionPanel(wx.Panel):
+    """ Panel that can be used to test a connection
+
+    """
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
@@ -70,6 +80,9 @@ class TestConnectionPanel(wx.Panel):
 
 
 class HelpPanel(wx.Panel):
+    """ Panel that contains help link
+
+    """
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
@@ -85,6 +98,10 @@ class HelpPanel(wx.Panel):
 
 
 class OkCancelApply(wx.Panel):
+    """ Panel that contains the Ok, Cancel and Apply buttons
+
+    """
+
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
@@ -130,6 +147,10 @@ class OkCancelApply(wx.Panel):
 
 
 class BottomPanel(wx.Panel):
+    """ Unimagintively named panel that sits at the bottom of the dialog
+    It houses the help panel, apply, ok and cancel
+
+    """
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
@@ -152,11 +173,6 @@ class BottomPanel(wx.Panel):
         self.Bind(EVT_CANCEL, self.HandleEvent)
         self.Bind(EVT_APPLY, self.HandleEvent)
 
-        """
-        status = StatusPanel(self, wx.ID_ANY)
-        sizer.Add(item=status, proportion=1,
-                  flag=wx.ALL, border=5)"""
-
         self.SetSizer(sizer)
 
     def HandleEvent(self, event):
@@ -165,6 +181,10 @@ class BottomPanel(wx.Panel):
 
 
 class SettingsPanel(wx.Panel):
+    """ Panel that houses all the widgets for changing settings
+    Username, password, auth url
+
+    """
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
@@ -221,6 +241,9 @@ class SettingsPanel(wx.Panel):
 
 
 class Settings(wx.Frame):
+    """ The frame that pops up when you click settings
+    """
+
     def __init__(self, parent, id, title):
         # we don't want the user to be able to resize - since it's a very
         # basic menu - so we build up the style ourselves
