@@ -4,6 +4,9 @@ import taskbar
 
 
 def main():
+    provider = wx.SimpleHelpProvider()
+    wx.HelpProvider_Set(provider)
+
     app = wx.PySimpleApp()
     taskbar.TaskBar()
     app.MainLoop()

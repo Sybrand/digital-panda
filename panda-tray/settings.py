@@ -91,43 +91,65 @@ class SettingsPanel2(wx.Panel):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
 
+        self.SetHelpText('This is a panel')
+
         #sizer = wx.FlexGridSizer(1, 2)
         sizer = wx.GridBagSizer(vgap=5, hgap=5)
 
         # auth url
+        # using "Auth Url - is waaaay too technical - so instead
+        # - using server"
+        tipText = 'Authentication URL for your cloud ' \
+                  'storage provider'
         labelAuthUrl = wx.StaticText(self, wx.ID_ANY,
-                                     'Auth Url')
+                                     'Server')
         inputAuthUrl = wx.TextCtrl(self, wx.ID_ANY,
                                    'https://store-it.mweb.co.za/v1/auth')
+        inputAuthUrl.SetHelpText(tipText)
+        inputAuthUrl.SetToolTip(wx.ToolTip(tipText))
+        labelAuthUrl.SetToolTip(wx.ToolTip(tipText))
 
         # username
+        tipText = 'Cloud storage account user'
         labelUsername = wx.StaticText(self, wx.ID_ANY,
                                       'Username')
         inputUsername = wx.TextCtrl(self, wx.ID_ANY, '')
+        inputUsername.SetHelpText(tipText)
+        inputUsername.SetToolTip(wx.ToolTip(tipText))
+        labelUsername.SetToolTip(wx.ToolTip(tipText))
 
         # password
+        tipText = 'Cloud storage account password'
         labelPassword = wx.StaticText(self, wx.ID_ANY,
                                       'Password')
+        inputAuthUrl.SetHelpText('''Password''')
         inputPassword = wx.TextCtrl(self, wx.ID_ANY, '',
                                     style=wx.TE_PASSWORD)
+        labelPassword.SetToolTip(wx.ToolTip(tipText))
+        inputPassword.SetToolTip(wx.ToolTip(tipText))
 
         sizer.AddGrowableCol(1)
-        sizer.Add(item=labelAuthUrl, flag=wx.EXPAND | wx.TOP, pos=(0, 0), border=5)
+        sizer.Add(item=labelAuthUrl, flag=wx.EXPAND | wx.TOP,
+                  pos=(0, 0), border=5)
         sizer.Add(item=inputAuthUrl, flag=wx.EXPAND, pos=(0, 1))
-        sizer.Add(item=labelUsername, flag=wx.EXPAND | wx.TOP, pos=(1, 0), border=5)
+        sizer.Add(item=labelUsername, flag=wx.EXPAND | wx.TOP,
+                  pos=(1, 0), border=5)
         sizer.Add(item=inputUsername, flag=wx.EXPAND, pos=(1, 1))
-        sizer.Add(item=labelPassword, flag=wx.EXPAND | wx.TOP, pos=(2, 0), border=5)
+        sizer.Add(item=labelPassword, flag=wx.EXPAND | wx.TOP,
+                  pos=(2, 0), border=5)
         sizer.Add(item=inputPassword, flag=wx.EXPAND, pos=(2, 1))
         self.SetSizer(sizer)
 
-
+"""
 class SettingsPanel(wx.Panel):
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
         # auth url
+        # using "Auth Url - is waaaay too technical - so instead
+        # - using server"
         labelAuthUrl = wx.StaticText(self, wx.ID_ANY,
-                                     'Auth Url')
+                                     'Server')
         inputAuthUrl = wx.TextCtrl(self, wx.ID_ANY,
                                    'https://store-it.mweb.co.za/v1/auth')
 
@@ -185,7 +207,7 @@ class SettingsPanel(wx.Panel):
                        flag=wx.ALL | wx.EXPAND)
 
         self.SetSizer(panelSizer)
-        #panelSizer.Fit(parent)
+        #panelSizer.Fit(parent)"""
 
 
 class Settings(wx.Frame):
@@ -193,9 +215,9 @@ class Settings(wx.Frame):
         # we don't want the user to be able to resize - since it's a very
         # basic menu - so we build up the style ourselves
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
-                          style=wx.MINIMIZE_BOX | wx.MAXIMIZE_BOX |
-                          wx.CLOSE_BOX | wx.SYSTEM_MENU |
-                          wx.CAPTION)
+                          style=wx.CLOSE_BOX | wx.SYSTEM_MENU |
+                          wx.CAPTION | wx.WS_EX_CONTEXTHELP)
+        self.SetExtraStyle(wx.FRAME_EX_CONTEXTHELP)
 
         self.icon = wx.Icon('digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon(self.icon)
@@ -231,6 +253,11 @@ class Settings(wx.Frame):
         #         flag=wx.EXPAND | wx.ALL)
         vbox.Add(settingsPanel, proportion=1, flag=wx.EXPAND | wx.ALL,
                  border=10)
+
+        testConnectionPanel = TestConnectionPanel(framePanel, wx.ID_ANY)
+        vbox.Add(testConnectionPanel, border=5, proportion=0,
+                 flag=wx.EXPAND | wx.ALL)
+
         vbox.Add(statusPanel, border=5, proportion=0,
                  flag=wx.EXPAND | wx.ALL)
         framePanel.SetSizer(vbox)

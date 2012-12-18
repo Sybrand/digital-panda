@@ -9,14 +9,16 @@ import wx.lib.newevent
 
 ExitEvent, EVT_EXIT = wx.lib.newevent.NewEvent()
 SettingsEvent, EVT_SETTINGS = wx.lib.newevent.NewEvent()
+OpenFolderEvent, EVT_OPEN_FOLDER = wx.lib.newevent.NewEvent()
 
 
 class CustomButton(wx.PyControl):
     def __init__(self, parent, id=wx.ID_ANY, bitmap=None,
                  label="", pos=wx.DefaultPosition,
-                 size=(130, 10), style=wx.NO_BORDER,
+                 size=(180, 10), style=wx.NO_BORDER,
                  validator=wx.DefaultValidator,
-                 name="CustomButton"):
+                 name="CustomButton",
+                 font_weight=wx.FONTWEIGHT_NORMAL):
         wx.PyControl.__init__(self, parent, id,
                               pos, size, style, validator, name)
         self.label = label
@@ -32,6 +34,7 @@ class CustomButton(wx.PyControl):
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.SetTransparent(50)
         self.active = True
+        self.font_weight = font_weight
 
     def SetInactive(self):
         self.active = False
@@ -87,8 +90,6 @@ class CustomButton(wx.PyControl):
         if not width or not height:
             return
 
-        textWidth, textHeight = dc.GetTextExtent(self.label)
-
         # http://docs.wxwidgets.org/2.8/wx_wxsystemsettings.html
         backColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
         backBrush = wx.Brush(backColour, wx.SOLID)
@@ -124,6 +125,7 @@ class CustomButton(wx.PyControl):
         dc.SetTextForeground(textColour)
         font = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
         font.SetPointSize(9)
+        font.SetWeight(self.font_weight)
         font.SetFaceName('Segoe UI')
 
         #font = wx.Font(9, wx.FONTFAMILY_DEFAULT,
@@ -134,6 +136,7 @@ class CustomButton(wx.PyControl):
         dc.SetFont(font)
 
         textXpos = self.GetSpacing()
+        textWidth, textHeight = dc.GetTextExtent(self.label)
         textYpos = (height - textHeight) / 2
         dc.DrawText(self.label, textXpos, textYpos)
 
@@ -169,6 +172,13 @@ class ActionPanel(wx.Panel):
         self.parent = parent
 
         vbox = wx.BoxSizer(wx.VERTICAL)
+
+        settingsButton = CustomButton(self, wx.ID_ANY,
+                                      label='Open Digital Panda folder',
+                                      font_weight=wx.FONTWEIGHT_BOLD)
+        settingsButton.Bind(wx.EVT_BUTTON, self.on_open_folder_clicked)
+        vbox.Add(item=settingsButton, proportion=1,
+                 flag=wx.ALL | wx.EXPAND, border=1)
 
         #settingsButton = platebtn.PlateButton(self, -1, 'Settings...',
         #                                      style=platebtn.PB_STYLE_SQUARE)
@@ -222,6 +232,10 @@ class ActionPanel(wx.Panel):
 
     def on_settings_clicked(self, event):
         event = SettingsEvent()
+        wx.PostEvent(self.parent, event)
+
+    def on_open_folder_clicked(self, event):
+        event = OpenFolderEvent()
         wx.PostEvent(self.parent, event)
 
 

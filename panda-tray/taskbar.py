@@ -7,6 +7,16 @@ Created on December 11, 2012
 import wx
 import settings
 import panda_menu
+import sys
+import os
+import os.path
+import subprocess
+
+if sys.platform == 'win32':
+    def open_folder(path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+        subprocess.call(['explorer', path])
 
 
 class PandaMenu(wx.Menu):
@@ -43,6 +53,11 @@ class TaskBar(wx.TaskBarIcon):
     def create_popup_menu(self):
         menu = wx.Menu()
 
+        # open folder
+        item = wx.MenuItem(menu, -1, 'Open Digital Panda folder')
+        menu.Bind(wx.EVT_MENU, self.open_folder, id=item.GetId())
+        menu.AppendItem(item)
+
         # settings
         item = wx.MenuItem(menu, -1, 'Settings...')
         menu.Bind(wx.EVT_MENU, self.show_settings, id=item.GetId())
@@ -63,6 +78,7 @@ class TaskBar(wx.TaskBarIcon):
 
         advancedMenu.Bind(panda_menu.EVT_EXIT, self.on_exit)
         advancedMenu.Bind(panda_menu.EVT_SETTINGS, self.show_settings)
+        advancedMenu.Bind(panda_menu.EVT_OPEN_FOLDER, self.open_folder)
 
         return advancedMenu
 
@@ -86,13 +102,25 @@ class TaskBar(wx.TaskBarIcon):
             self.dialog.SetWindowStyle(style | wx.STAY_ON_TOP)
             self.dialog.SetWindowStyle(style)
 
+    def open_folder(self, event):
+        if self.advancedMenu:
+            self.advancedMenu.Show(False)
+        home = os.path.expanduser('~')
+        panda = os.path.join(home, 'Digital Panda')
+        if not os.path.exists(panda):
+            try:
+                os.makedirs(panda)
+            except:
+                print "TODO: need to handle folder creation failure!"
+        open_folder(panda)
+
     def show_advanced_menu(self):
         if not self.advancedMenu:
             self.advancedMenu = self.create_advanced_menu()
 
         menuSize = self.advancedMenu.GetSize()
         mousePosition = wx.GetMousePosition()
-        pos = (mousePosition[0] - menuSize.width,
+        pos = (mousePosition[0],
                mousePosition[1] - menuSize.height)
         self.advancedMenu.Move(pos)
 
