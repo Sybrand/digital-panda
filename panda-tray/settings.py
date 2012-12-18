@@ -20,21 +20,10 @@ class StatusPanel(wx.Panel):
         labelStatus = wx.StaticText(self, wx.ID_ANY,
                                     'Status: Online', style=wx.ALIGN_RIGHT)
 
-        """
-        image = wx.Image('digital-panda-online-1616.png', wx.BITMAP_TYPE_ANY)
-        bitmap = image.ConvertToBitmap()
-        position = (0, 0)
-        size = (bitmap.GetWidth(), bitmap.GetHeight())
-        staticBitmap = wx.StaticBitmap(self, -1, bitmap, position, size)
-        """
-
         panelSizer = wx.BoxSizer(wx.HORIZONTAL)
         panelSizer.Add(item=labelStatus, proportion=1,
                        flag=wx.ALL | wx.EXPAND, border=5)
-        """
-        panelSizer.Add(item=staticBitmap, proportion=0,
-                       flag=wx.ALL, border=5)
-        """
+
         self.SetSizer(panelSizer)
 
 
@@ -44,28 +33,17 @@ class LogoPanel(wx.Panel):
                           style=wx.NO_BORDER)
         self.SetBackgroundColour((0, 255, 0))
 
-        image = wx.Image('digital-panda-header.png', wx.BITMAP_TYPE_ANY)
+        image = wx.Image('gfx/digital-panda-header.png', wx.BITMAP_TYPE_ANY)
         bitmap = image.ConvertToBitmap()
         position = (0, 0)
         size = (bitmap.GetWidth(), bitmap.GetHeight())
         staticBitmap = wx.StaticBitmap(self, -1,
                                        bitmap, position, size)
-        #self.SetSize(size)
-
-        """
-        logoLabel = wx.StaticText(self, wx.ID_ANY,
-                                  'Digital Panda')
-        font = wx.Font(pointSize=20, family=wx.FONTFAMILY_DEFAULT,
-                       style=wx.FONTSTYLE_NORMAL,
-                       weight=wx.FONTWEIGHT_BOLD)
-        logoLabel.SetFont(font)
-        """
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         hbox.Add(item=staticBitmap, proportion=0,
                  flag=wx.LEFT, border=0)
-        """hbox.Add(item=logoLabel, proportion=0,
-                 flag=wx.ALL, border=5)"""
+
         self.SetSizer(hbox)
 
 
@@ -76,7 +54,7 @@ class TestConnectionPanel(wx.Panel):
 
         testButton = wx.Button(self, -1, 'Test now')
 
-        image = wx.Image('connection-ok.png', wx.BITMAP_TYPE_ANY)
+        image = wx.Image('gfx/connection-ok.png', wx.BITMAP_TYPE_ANY)
         bitmap = image.ConvertToBitmap()
         position = (0, 0)
         size = (bitmap.GetWidth(), bitmap.GetHeight())
@@ -251,7 +229,7 @@ class Settings(wx.Frame):
                           wx.CAPTION | wx.WS_EX_CONTEXTHELP)
         self.SetExtraStyle(wx.FRAME_EX_CONTEXTHELP)
 
-        self.icon = wx.Icon('digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
+        self.icon = wx.Icon('gfx/digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon(self.icon)
         self.SetMinSize((400, 200))
 

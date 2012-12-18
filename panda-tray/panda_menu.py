@@ -157,7 +157,8 @@ class LogoPanel(wx.Panel):
 
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        image = wx.Image('digital-panda-menu-graphic.png', wx.BITMAP_TYPE_ANY)
+        image = wx.Image('gfx/digital-panda-menu-graphic.png',
+                         wx.BITMAP_TYPE_ANY)
         bitmap = image.ConvertToBitmap()
         size = (bitmap.GetWidth(), bitmap.GetHeight())
         staticBitmap = wx.StaticBitmap(self, -1, bitmap, (0, 0), size)

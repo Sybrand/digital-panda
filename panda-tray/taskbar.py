@@ -23,7 +23,8 @@ class PandaMenu(wx.Menu):
     def __init__(self):
         wx.Menu.__init__(self)
 
-        image = wx.Image('digital-panda-online-1616.png', wx.BITMAP_TYPE_ANY)
+        image = wx.Image('gfx/digital-panda-online-1616.png',
+                         wx.BITMAP_TYPE_ANY)
         self.bitmap = image.ConvertToBitmap()
         wx.EVT_PAINT(self, self.on_paint)
 
@@ -31,8 +32,8 @@ class PandaMenu(wx.Menu):
 class TaskBar(wx.TaskBarIcon):
     def __init__(self):
         super(TaskBar, self).__init__()
-        #icon = wx.IconFromBitmap(wx.Bitmap("panda3232.png"))
-        icon = wx.Icon('digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
+        icon = wx.IconFromBitmap(wx.Bitmap("gfx/icon1616.png"))
+        #icon = wx.Icon('digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon(icon, "Digital Panda\r\nCloud Storage Sync Client\r\n" +
                      "Online")
         self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)

@@ -1,4 +1,9 @@
 #!/usr/bin/python
+'''
+Created on December 11, 2012
+
+@author: Sybrand Strauss
+'''
 import wx
 import taskbar
 
