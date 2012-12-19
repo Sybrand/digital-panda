@@ -2,34 +2,15 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 
-	<head>
+        <head>
 
-	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-	    <title>Digital Panda</title>    
+            <title>Digital Panda</title>    
 
-	</head>
+        </head>
 
-	<body>
-		<h1>Digital Panda</h1>
-		<p>
-			<a href="https://github.com/Sybrand/digital-panda">Digital Panda on GitHub</a>
-		</p>
-		<h2>Openstack Swift</h2>
-		<p>
-			<a href="http://docs.openstack.org/api/openstack-object-storage/1.0/content/">OpenStack Object Storage Developer Guide</a>
-		</p>
-		<h2>wx Widgets</h2>		
-		<p>
-			<a href="http://docs.wxwidgets.org/trunk/index.html">wxWidgets Documentation</a>
-		</p>
-		<p>
-			<a href="http://wxpython.org/docs/api/wx-module.html">wxpython package wx</a>
-		</p>
-		<p>
-			<a href="http://wxpython.org/docs/api/">http://wxpython.org/docs/api/</a>
-		</p>
-	</body>
-
+        <body>
+The panda is coming...
+        </body>
 </html>
-
