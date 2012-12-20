@@ -29,6 +29,14 @@
 		<p>
 			<a href="http://wxpython.org/docs/api/">http://wxpython.org/docs/api/</a>
 		</p>
+		<h2>Automatic Updates</h2>
+		<p>
+			<a href="http://winsparkle.org/">http://winsparkle.org/</a>
+		</p>
+		<p>
+			<a href="http://code.google.com/p/omaha/">http://code.google.com/p/omaha/</a>
+		</p>
+
 	</body>
 
 </html>
