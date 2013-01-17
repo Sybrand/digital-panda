@@ -6,6 +6,7 @@ Created on December 11, 2012
 '''
 import wx
 import wx.lib.newevent
+import config
 
 ApplyEvent, EVT_APPLY = wx.lib.newevent.NewEvent()
 OkEvent, EVT_OK = wx.lib.newevent.NewEvent()
@@ -189,6 +190,8 @@ class SettingsPanel(wx.Panel):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
 
+        appConfig = config.Config()
+
         self.SetHelpText('This is a panel')
 
         #sizer = wx.FlexGridSizer(1, 2)
@@ -213,6 +216,7 @@ class SettingsPanel(wx.Panel):
                                       'Username')
         inputUsername = wx.TextCtrl(self, wx.ID_ANY, '')
         inputUsername.SetHelpText(tipText)
+        inputUsername.SetValue(appConfig.get_username())
         inputUsername.SetToolTip(wx.ToolTip(tipText))
         labelUsername.SetToolTip(wx.ToolTip(tipText))
 
