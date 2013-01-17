@@ -3,6 +3,11 @@
 Created on December 11, 2012
 
 @author: Sybrand Strauss
+
+known issues:
+1) apply button: after clicking cancel, the apply button remains
+    enabled. what should happen, is that the default settings
+    should be reloaded, and apply should be disabled
 '''
 import wx
 import wx.lib.newevent
@@ -11,6 +16,7 @@ import config
 ApplyEvent, EVT_APPLY = wx.lib.newevent.NewEvent()
 OkEvent, EVT_OK = wx.lib.newevent.NewEvent()
 CancelEvent, EVT_CANCEL = wx.lib.newevent.NewEvent()
+SettingsChanged, EVT_SETTINGS = wx.lib.newevent.NewEvent()
 
 
 class StatusPanel(wx.Panel):
@@ -105,7 +111,7 @@ class OkCancelApply(wx.Panel):
 
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
-                          style=wx.NO_BORDER)
+                          style=wx.NO_BORDER | wx.TAB_TRAVERSAL)
         self.parent = parent
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -140,6 +146,10 @@ class OkCancelApply(wx.Panel):
         event = ApplyEvent()
         wx.PostEvent(self.parent, event)
 
+    def OnEnableApply(self, event):
+        print "OnEnableApply"
+        self.EnableApply()
+
     def EnableApply(self):
         self.btnApply.Enable()
 
@@ -154,7 +164,7 @@ class BottomPanel(wx.Panel):
     """
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
-                          style=wx.NO_BORDER)
+                          style=wx.NO_BORDER | wx.TAB_TRAVERSAL)
         self.parent = parent
 
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -167,8 +177,8 @@ class BottomPanel(wx.Panel):
         sizer.Add(item=spacer, proportion=1,
                   flag=wx.ALL, border=0)
 
-        okCancelApply = OkCancelApply(self, wx.RIGHT)
-        sizer.Add(item=okCancelApply, proportion=0,
+        self.okCancelApply = OkCancelApply(self, wx.RIGHT)
+        sizer.Add(item=self.okCancelApply, proportion=0,
                   flag=wx.ALL, border=5)
         self.Bind(EVT_OK, self.HandleEvent)
         self.Bind(EVT_CANCEL, self.HandleEvent)
@@ -188,9 +198,9 @@ class SettingsPanel(wx.Panel):
     """
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
-                          style=wx.NO_BORDER)
+                          style=wx.NO_BORDER | wx.TAB_TRAVERSAL)
 
-        appConfig = config.Config()
+        self.parent = parent
 
         self.SetHelpText('This is a panel')
 
@@ -204,44 +214,72 @@ class SettingsPanel(wx.Panel):
                   'storage provider'
         labelAuthUrl = wx.StaticText(self, wx.ID_ANY,
                                      'Server')
-        inputAuthUrl = wx.TextCtrl(self, wx.ID_ANY,
-                                   'https://store-it.mweb.co.za/v1/auth')
-        inputAuthUrl.SetHelpText(tipText)
-        inputAuthUrl.SetToolTip(wx.ToolTip(tipText))
+        self.inputAuthUrl = wx.TextCtrl(self, wx.ID_ANY)
+        # if the server is changed - we need to handle it
+        self.inputAuthUrl.SetHelpText(tipText)
+        self.inputAuthUrl.SetToolTip(wx.ToolTip(tipText))
         labelAuthUrl.SetToolTip(wx.ToolTip(tipText))
 
+        appConfig = config.Config()
         # username
         tipText = 'Cloud storage account user'
         labelUsername = wx.StaticText(self, wx.ID_ANY,
                                       'Username')
-        inputUsername = wx.TextCtrl(self, wx.ID_ANY, '')
-        inputUsername.SetHelpText(tipText)
-        inputUsername.SetValue(appConfig.get_username())
-        inputUsername.SetToolTip(wx.ToolTip(tipText))
+        self.inputUsername = wx.TextCtrl(self, wx.ID_ANY, '')
+        self.inputUsername.SetHelpText(tipText)
+        self.inputUsername.SetValue(appConfig.get_username())
+        self.inputUsername.SetToolTip(wx.ToolTip(tipText))
         labelUsername.SetToolTip(wx.ToolTip(tipText))
 
         # password
         tipText = 'Cloud storage account password'
         labelPassword = wx.StaticText(self, wx.ID_ANY,
                                       'Password')
-        inputAuthUrl.SetHelpText('''Password''')
-        inputPassword = wx.TextCtrl(self, wx.ID_ANY, '',
-                                    style=wx.TE_PASSWORD)
+        labelPassword.SetHelpText('''Password''')
+        self.inputPassword = wx.TextCtrl(self, wx.ID_ANY,
+                                         appConfig.get_password(),
+                                         style=wx.TE_PASSWORD)
         labelPassword.SetToolTip(wx.ToolTip(tipText))
-        inputPassword.SetToolTip(wx.ToolTip(tipText))
+        self.inputPassword.SetToolTip(wx.ToolTip(tipText))
+
+        self.SetDefaultValues()
+        self.BindHandleTextChanged()
 
         sizer.AddGrowableCol(1)
         sizer.Add(item=labelAuthUrl, flag=wx.EXPAND | wx.TOP,
                   pos=(0, 0), border=5)
-        sizer.Add(item=inputAuthUrl, flag=wx.EXPAND, pos=(0, 1))
+        sizer.Add(item=self.inputAuthUrl, flag=wx.EXPAND, pos=(0, 1))
         sizer.Add(item=labelUsername, flag=wx.EXPAND | wx.TOP,
                   pos=(1, 0), border=5)
-        sizer.Add(item=inputUsername, flag=wx.EXPAND, pos=(1, 1))
+        sizer.Add(item=self.inputUsername, flag=wx.EXPAND, pos=(1, 1))
         sizer.Add(item=labelPassword, flag=wx.EXPAND | wx.TOP,
                   pos=(2, 0), border=5)
-        sizer.Add(item=inputPassword, flag=wx.EXPAND, pos=(2, 1))
+        sizer.Add(item=self.inputPassword, flag=wx.EXPAND, pos=(2, 1))
 
         self.SetSizer(sizer)
+
+    def GetUserName(self):
+        return self.inputUsername.GetValue()
+
+    def GetUrl(self):
+        return self.inputAuthUrl.GetValue()
+
+    def GetPassword(self):
+        return self.inputPassword.GetValue()
+
+    def BindHandleTextChanged(self):
+        self.inputPassword.Bind(wx.EVT_TEXT, self.HandleTextChange)
+        self.inputAuthUrl.Bind(wx.EVT_TEXT, self.HandleTextChange)
+        self.inputUsername.Bind(wx.EVT_TEXT, self.HandleTextChange)
+
+    def HandleTextChange(self, event):
+        event = SettingsChanged()
+        wx.PostEvent(self, event)
+
+    def SetDefaultValues(self):
+        print("setting default values")
+        appConfig = config.Config()
+        self.inputAuthUrl.SetValue(appConfig.get_authUrl())
 
 
 class Settings(wx.Frame):
@@ -253,7 +291,7 @@ class Settings(wx.Frame):
         # basic menu - so we build up the style ourselves
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
                           style=wx.CLOSE_BOX | wx.SYSTEM_MENU |
-                          wx.CAPTION | wx.WS_EX_CONTEXTHELP)
+                          wx.CAPTION | wx.WS_EX_CONTEXTHELP | wx.TAB_TRAVERSAL)
         self.SetExtraStyle(wx.FRAME_EX_CONTEXTHELP)
 
         self.icon = wx.Icon('gfx/digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
@@ -270,7 +308,7 @@ class Settings(wx.Frame):
         midPanelSizer = wx.BoxSizer(wx.VERTICAL)
         midPanel.SetSizer(midPanelSizer)
 
-        settingsPanel = SettingsPanel(framePanel, wx.ID_ANY)
+        self.settingsPanel = SettingsPanel(framePanel, wx.ID_ANY)
 
         #statusPanel = StatusPanel(framePanel, wx.ID_ANY)
 
@@ -280,7 +318,7 @@ class Settings(wx.Frame):
                  flag=wx.EXPAND | wx.ALL)
         #vbox.Add(line, border=10, proportion=0,
         #         flag=wx.EXPAND | wx.ALL)
-        vbox.Add(settingsPanel, proportion=1, flag=wx.EXPAND | wx.ALL,
+        vbox.Add(self.settingsPanel, proportion=1, flag=wx.EXPAND | wx.ALL,
                  border=10)
 
         statusPanel = StatusPanel(framePanel, wx.ID_ANY)
@@ -293,23 +331,46 @@ class Settings(wx.Frame):
                  flag=wx.EXPAND | wx.ALL)"""
 
         #bottomPanel = StatusPanel(framePanel, wx.ID_ANY)
-        bottomPanel = BottomPanel(framePanel, wx.ID_ANY)
-        bottomPanel.Bind(EVT_APPLY, self.HandleApply)
-        bottomPanel.Bind(EVT_OK, self.HandleOk)
-        bottomPanel.Bind(EVT_CANCEL, self.HandleCancel)
+        self.bottomPanel = BottomPanel(framePanel, wx.ID_ANY)
+        self.bottomPanel.Bind(EVT_APPLY, self.HandleApply)
+        self.bottomPanel.Bind(EVT_OK, self.HandleOk)
+        self.bottomPanel.Bind(EVT_CANCEL, self.HandleCancel)
         #bottomPanel = OkCancelApply(framePanel, wx.ID_ANY)
         #bottomPanel = HelpPanel(framePanel, wx.ID_ANY)
-        vbox.Add(bottomPanel, border=0, proportion=0,
+        vbox.Add(self.bottomPanel, border=0, proportion=0,
                  flag=wx.EXPAND | wx.ALL)
+
+        # this is probably a very ugly way of binding things together!
+        # need to replace this with a pretier way of doing things
+        # if this control changes, or get's re-factored, stringing
+        # things toghether like this is going to be a nightmare!
+        self.settingsPanel.Bind(EVT_SETTINGS, self.HandleSettings)
 
         framePanel.SetSizer(vbox)
         vbox.Fit(self)
 
+    def HandleSettings(self, event):
+        print("settings changed!")
+        self.bottomPanel.okCancelApply.EnableApply()
+
     def HandleOk(self, event):
         self.Show(False)
+        self.bottomPanel.okCancelApply.DisableApply()
+        self.SaveSettings()
 
     def HandleCancel(self, event):
         self.Show(False)
+        # reset the default values
+        self.settingsPanel.SetDefaultValues()
+        print("going to disable apply")
+        self.bottomPanel.okCancelApply.DisableApply()
 
     def HandleApply(self, event):
-        pass
+        self.bottomPanel.okCancelApply.DisableApply()
+        self.SaveSettings()
+
+    def SaveSettings(self):
+        appConfig = config.Config()
+        appConfig.set_username(self.settingsPanel.GetUserName())
+        appConfig.set_password(self.settingsPanel.GetPassword())
+        appConfig.set_authUrl(self.settingsPanel.GetUrl())

@@ -1,9 +1,10 @@
 from abc import ABCMeta, abstractmethod
 
+
 class BucketFile(object):
     """
     This class defines the contract for a file, that is used across
-    all buckts
+    all buckets
 
     """
     def __init__(self, path, name):
@@ -17,6 +18,7 @@ class BucketFile(object):
     @property
     def name(self):
         return self._name
+
 
 class AbstractBucket:
     """
@@ -37,3 +39,10 @@ class AbstractBucket:
     @abstractmethod
     def get_current_dir(self):
         return NotImplemented
+
+    @abstractmethod
+    def authenticate(self):
+        """
+        Return True is it works, False if it fails
+        """
+        return False
