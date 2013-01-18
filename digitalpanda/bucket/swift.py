@@ -3,28 +3,36 @@ import json
 import urllib
 import logging
 import httplib
-from ..digitalpanda import Config
+#from ..digitalpanda import Config
 from abstract import AbstractBucket
+import threading
 
 
+# BUCKET? really? that's a bad name
 class SwiftBucket(AbstractBucket):
-    def __init__(self):
-        """ this class pulls swift into a common interface - as defined in AbstractBucket
+    def __init__(self, auth_url, username, password):
+        """ this class pulls swift into a common interface
+        as defined in AbstractBucket
 
         """
-        config = Config().config;
-        self._swift = SwiftAPI(auth_url = config.get('Swift', 'swift_auth_url'),
-            username = config.get('Swift', 'swift_username'),
-            password = config.get('Swift', 'swift_password'))
+        #config = Config().config
+        self._swift = SwiftAPI(auth_url=auth_url,
+                               username=username,
+                               password=password)
+
+        """
         try:
             self._swift.authenticate()
         except:
             # TODO: feed this error to the user - nicely
             logging.error('could not authenticate!')
         # use / convention to indicate root
-        # in swift context - we will take this to mean that 
+        # in swift context - we will take this to mean that
         # no container has yet been selected
-        self._current_path = '/';
+        self._current_path = '/'
+        """
+        self._current_path = None
+        self.lock = threading.Lock()
 
     def delete_object(self, path):
         raise NotImplemented
@@ -46,24 +54,40 @@ class SwiftBucket(AbstractBucket):
 
     def get_current_dir(self):
         storageUrl = self._swift.get_storage_url()
-        return '%s://%s%s%s' % (storageUrl.scheme, storageUrl.netloc, storageUrl.path, self._current_path)
+        return '%s://%s%s%s' % (storageUrl.scheme,
+                                storageUrl.netloc,
+                                storageUrl.path,
+                                self._current_path)
+
+    def authenticate(self):
+        try:
+            if self.lock.acquire(True):
+                self._swift.authenticate()
+                return True
+            else:
+                return False
+        except:
+            return False
+        finally:
+            self.lock.release()
 
 
 class SwiftAPI(object):
-    """ class that wraps OpenStack Swift REST API 
-    as specfied @ http://docs.openstack.org/api/openstack-object-storage/1.0/content/
+    """ class that wraps OpenStack Swift REST API
+    as specfied @ http://docs.openstack.org/api/openstack-object-storage/
+                         1.0/content/
 
     """
     def __init__(self, auth_url, username, password):
-        """ 
+        """
         auth_url: string representing authentication url
 
         we need to remember authentication details,
         so that if we ever get a 401, we can retry
 
         """
-        logging.debug('auth_url: %s ; username = %s' 
-            % (auth_url, username))
+        logging.debug('auth_url: %s ; username = %s'
+                      % (auth_url, username))
         self._auth_url = urlparse(auth_url)
         logging.debug('self._auth_url = %s' % (self._auth_url.scheme))
         self._username = username
@@ -79,27 +103,27 @@ class SwiftAPI(object):
         else:
             host = url.hostname
         logging.debug('host = %r' % host)
-        if (url.scheme=='https'):
+        if (url.scheme == 'https'):
             return httplib.HTTPSConnection(host)
         else:
             return httplib.HTTPConnection(host)
-
 
     def authenticate(self):
         """ authenticate against swift, store X-Auth-Token and
         X-Storage-Url
 
         """
-        headers = {'X-Storage-User': self._username, 
+        headers = {'X-Storage-User': self._username,
                    'X-Storage-Pass': self._password}
 
         connection = self._open_connection(self._auth_url)
         connection.request('GET', self._auth_url.path, None, headers)
         result = connection.getresponse()
 
-        if result.status==200:
+        if result.status == 200:
             self._auth_token = result.getheader('X-Auth-Token')
             self._storage_url = urlparse(result.getheader('X-Storage-Url'))
+            print('storage token is %r' % self._auth_token)
         else:
             raise Exception('login failed ; status = %r' % result.status)
 
@@ -109,13 +133,13 @@ class SwiftAPI(object):
     def get_storage_url(self):
         return self._storage_url
 
-    def put_container(self, container, retry_on_unauthorized = True):
+    def put_container(self, container, retry_on_unauthorized=True):
         """ create a swift container
 
         """
 
-        path = "%s/%s" % (self._storage_url.path, 
-            urllib.quote(container))
+        path = "%s/%s" % (self._storage_url.path,
+                          urllib.quote(container))
         connection = self._open_connection(self._storage_url)
         connection.request('PUT', path, None, self._create_headers())
         result = connection.getresponse()
@@ -126,13 +150,13 @@ class SwiftAPI(object):
             self.put_container(container, False)
         else:
             raise Exception('failed to put container %s ; status = %r' %
-                (container, result.status))
+                            (container, result.status))
 
-    def get_containers(self, retry_on_unauthorized = True):
+    def get_containers(self, retry_on_unauthorized=True):
         """ return a list of containers
 
         """
-        
+
         path = "%s?format=json" % (self._storage_url.path)
         connection = self._open_connection(self._storage_url)
         connection.request('GET', path, None, self._create_headers())
@@ -140,16 +164,16 @@ class SwiftAPI(object):
         logging.debug('get containers returned %r' % result.status)
 
         containers = None
-        if result.status == 200:            
+        if result.status == 200:
             containers = json.loads(result.read())
         elif result.status == 401 and retry_on_unauthorized:
             return self.get_containers(False)
         else:
-            raise Exception('failed get catalogue; status = - %r' % (result.status))
+            raise Exception('failed get catalogue; status = - %r' %
+                            (result.status))
 
     def get_container_meta_data(self, container, retry_on_unauthorized):
         """ return container meta data
-        
         """
         path = "%s/%s" % (self._storage_url.path, urllib.quote(container))
         connection = self._open_connection(self._storage_url)
@@ -162,9 +186,11 @@ class SwiftAPI(object):
         elif result.status == 401 and retry_on_unauthorized:
             return self.get_container_meta_data(container, False)
         else:
-            raise Exception('failed to get container meta data; status = %r' % (result.status))
+            raise Exception('failed to get container meta data; status = %r' %
+                            (result.status))
 
-    def get_object_meta_data(self, container, name, retry_on_unauthorized = True):
+    def get_object_meta_data(self, container, name,
+                             retry_on_unauthorized=True):
         """ return object meta data
 
         """
@@ -179,11 +205,11 @@ class SwiftAPI(object):
         elif result.status == 401 and retry_on_unauthorized:
             return self.get_object_meta_data(container, name, False)
         else:
-            raise Exception('failed to get container meta data; status = %r' % (result.status))
+            raise Exception('failed to get container meta data; status = %r' %
+                            (result.status))
 
-
-
-    def delete_object(self, container, name, retry_on_unauthorized = True):
+    def delete_object(self, container, name,
+                      retry_on_unauthorized=True):
         """ delete a swift object - given the container
         and object name
 
@@ -202,8 +228,8 @@ class SwiftAPI(object):
             self.authenticate()
             self.delete_object(container, name, False)
         else:
-            raise Exception('failed to delete %s ; status = %r' % 
-                (path, result.status))
+            raise Exception('failed to delete %s ; status = %r' %
+                            (path, result.status))
 
     def _escape_string(self, value):
         """ input string is escaped and returned in format
@@ -216,14 +242,13 @@ class SwiftAPI(object):
     def _create_headers(self):
         """ all swift request (subsequent to authentication)
         require an authentication token
-
         """
-        return {'X-Auth-Token' : self._auth_token}
+        return {'X-Auth-Token': self._auth_token}
 
     def _prepare_object_path(self, container, name):
         """ format an object name correctly for swift
 
         """
-        return "%s/%s/%s" % (self._storage_url.path, 
-            urllib.quote(container),
-            self._escape_string(name))
+        return "%s/%s/%s" % (self._storage_url.path,
+                             urllib.quote(container),
+                             self._escape_string(name))

@@ -24,18 +24,23 @@ class StatusPanel(wx.Panel):
 
     """
 
-    def __init__(self, parent, id):
+    def __init__(self, parent, id, status):
         wx.Panel.__init__(self, parent, id, wx.DefaultPosition,
                           style=wx.NO_BORDER)
 
-        labelStatus = wx.StaticText(self, wx.ID_ANY,
-                                    'Status: Online', style=wx.ALIGN_RIGHT)
+        self.labelStatus = wx.StaticText(self, wx.ID_ANY,
+                                         'Status: %s' % status,
+                                         style=wx.ALIGN_RIGHT)
 
         panelSizer = wx.BoxSizer(wx.HORIZONTAL)
-        panelSizer.Add(item=labelStatus, proportion=1,
+        panelSizer.Add(item=self.labelStatus, proportion=1,
                        flag=wx.ALL | wx.EXPAND, border=5)
 
         self.SetSizer(panelSizer)
+
+    def set_status(self, status):
+        self.status = status
+        self.labelStatus.SetLabel('Status: %s' % status)
 
 
 class LogoPanel(wx.Panel):
@@ -286,7 +291,7 @@ class Settings(wx.Frame):
     """ The frame that pops up when you click settings
     """
 
-    def __init__(self, parent, id, title):
+    def __init__(self, parent, id, title, status):
         # we don't want the user to be able to resize - since it's a very
         # basic menu - so we build up the style ourselves
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
@@ -321,8 +326,8 @@ class Settings(wx.Frame):
         vbox.Add(self.settingsPanel, proportion=1, flag=wx.EXPAND | wx.ALL,
                  border=10)
 
-        statusPanel = StatusPanel(framePanel, wx.ID_ANY)
-        vbox.Add(statusPanel, proportion=0, flag=wx.EXPAND | wx.RIGHT,
+        self.statusPanel = StatusPanel(framePanel, wx.ID_ANY, status)
+        vbox.Add(self.statusPanel, proportion=0, flag=wx.EXPAND | wx.RIGHT,
                  border=5)
 
         """
@@ -348,6 +353,9 @@ class Settings(wx.Frame):
 
         framePanel.SetSizer(vbox)
         vbox.Fit(self)
+
+    def SetStatus(self, status):
+        self.statusPanel.set_status(status)
 
     def HandleSettings(self, event):
         print("settings changed!")

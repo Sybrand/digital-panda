@@ -30,3 +30,12 @@ There's not much to see right now... especially if you don't have a swift server
 ## Dependancies
 
 python-wx (for ubuntu: apt-get install python-wxgtk2.8)
+
+## Known issues
+Panda-Tray:
+- In settings dialog, Apply doesn't disable after clicking cancel
+- Tabbing in settings dialog doesn't work right (not jumping to buttons after text)
+- In settings dialog, first textbox should be selected by default
+- On tray menu, the panda looks like it's crying!
+- Event handling is just bloody crazy right now!
+- Something is causing a freeze on startup - no idea what!

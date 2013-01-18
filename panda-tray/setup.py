@@ -12,4 +12,6 @@ from distutils.core import setup
 
 import py2exe
 
-setup(windows=['__main__.py'])
+setup(
+    name='Digital Panda Tray Application',
+    windows=['__main__.py'])

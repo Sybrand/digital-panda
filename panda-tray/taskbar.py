@@ -11,6 +11,8 @@ import sys
 import os
 import os.path
 import subprocess
+import threading
+import response_event
 
 
 if sys.platform == 'win32':
@@ -41,17 +43,43 @@ class TaskBar(wx.TaskBarIcon):
 
     """
 
-    def __init__(self):
+    def __init__(self, requestQueue, responseQueue):
         super(TaskBar, self).__init__()
-        icon = wx.IconFromBitmap(wx.Bitmap("gfx/icon1616.png"))
+        print "initializing TaskBar"
+        self.icon = wx.IconFromBitmap(wx.Bitmap("gfx/icon1616.png"))
         #icon = wx.Icon('digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
-        self.SetIcon(icon, "Digital Panda\r\nCloud Storage Sync Client\r\n" +
-                     "Online")
         self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
         self.Bind(wx.EVT_TASKBAR_RIGHT_DOWN, self.on_right_down)
 
         self.dialog = None
-        self.advancedMenu = None
+        self.requestQueue = requestQueue
+        self.responseQueue = responseQueue
+        self.set_status('Connecting...')
+        """self.timer = wx.Timer(self)
+        self.timer.Bind(wx.EVT_TIMER, self.on_timer)
+        self.timer.Start(100)"""
+        self.advancedMenu = self.create_advanced_menu()
+
+        t = threading.Thread(target=self.queue_listener)
+        t.daemon = True
+        t.start()
+
+    def queue_listener(self):
+        print("starting queue listener thread")
+        while True:
+            item = self.responseQueue.get()
+            print('popped from queue: %r' % item)
+            self.set_status(item)
+            wx.PostEvent(self.advancedMenu,
+                         response_event.ResponseEvent(attr1=item))
+
+    def set_status(self, status):
+        self.status = status
+        self.SetIcon(self.icon, "Digital Panda\r\n" +
+                                "Cloud Storage Sync Client\r\n" +
+                                self.status)
+        if self.dialog:
+            self.dialog.SetStatus(self.status)
 
     def on_left_down(self, event):
         self.show_advanced_menu()
@@ -83,7 +111,7 @@ class TaskBar(wx.TaskBarIcon):
         menu.AppendItem(item)
 
         # status
-        item = wx.MenuItem(menu, -1, 'Status: Online')
+        item = wx.MenuItem(menu, -1, 'Status: %s' % self.status)
         menu.AppendItem(item)
         return menu
 
@@ -109,10 +137,12 @@ class TaskBar(wx.TaskBarIcon):
 
     def show_settings(self, event):
         if not self.dialog:
-            self.dialog = settings.Settings(None, -1, 'Digital Panda Settings')
+            self.dialog = settings.Settings(None, -1, 'Digital Panda Settings',
+                                            self.status)
             self.dialog.Center()
             self.dialog.Show(True)
         else:
+            self.dialog.SetStatus(self.status)
             self.dialog.Show(True)
             # simply calling .Raise() doesn't work in windows
             # so we change the style to on top, and back again
@@ -135,9 +165,6 @@ class TaskBar(wx.TaskBarIcon):
         open_folder(panda)
 
     def show_advanced_menu(self):
-        if not self.advancedMenu:
-            self.advancedMenu = self.create_advanced_menu()
-
         menuSize = self.advancedMenu.GetSize()
         mousePosition = wx.GetMousePosition()
         pos = (mousePosition[0],

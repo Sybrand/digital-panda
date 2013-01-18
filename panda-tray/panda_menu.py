@@ -6,6 +6,7 @@ Created on December 11, 2012
 '''
 import wx
 import wx.lib.newevent
+import response_event
 
 ExitEvent, EVT_EXIT = wx.lib.newevent.NewEvent()
 SettingsEvent, EVT_SETTINGS = wx.lib.newevent.NewEvent()
@@ -35,6 +36,10 @@ class CustomButton(wx.PyControl):
         self.SetTransparent(50)
         self.active = True
         self.font_weight = font_weight
+
+    def SetLabel(self, text):
+        self.label = text
+        self.Invalidate()
 
     def SetInactive(self):
         self.active = False
@@ -220,9 +225,10 @@ class ActionPanel(wx.Panel):
         vbox.Add(item=labelStatus, proportion=1,
                  flag=wx.ALL | wx.EXPAND, border=10)"""
 
-        statusButton = CustomButton(self, wx.ID_ANY, label='Status: Online')
-        statusButton.SetInactive()
-        vbox.Add(item=statusButton, proportion=1,
+        self.statusButton = CustomButton(self, wx.ID_ANY,
+                                         label='Status: Disconnected')
+        self.statusButton.SetInactive()
+        vbox.Add(item=self.statusButton, proportion=1,
                  flag=wx.ALL | wx.EXPAND, border=1)
 
         self.SetSizer(vbox)
@@ -239,6 +245,10 @@ class ActionPanel(wx.Panel):
         event = OpenFolderEvent()
         wx.PostEvent(self.parent, event)
 
+    def set_status(self, status):
+        self.stats = status
+        self.statusButton.SetLabel('Status: %s' % status)
+
 
 class PandaMenu(wx.Frame):
     def __init__(self, parent, id, title, pos=wx.DefaultPosition):
@@ -248,7 +258,7 @@ class PandaMenu(wx.Frame):
                           size=(500, 200))
 
         logoPanel = LogoPanel(self, wx.ID_ANY)
-        actionPanel = ActionPanel(self, wx.ID_ANY)
+        self.actionPanel = ActionPanel(self, wx.ID_ANY)
 
         backColour = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
         self.SetBackgroundColour(backColour)
@@ -258,7 +268,7 @@ class PandaMenu(wx.Frame):
         hbox.Add(item=logoPanel, proportion=0,
                  flag=wx.ALL | wx.EXPAND, border=0)
 
-        hbox.Add(item=actionPanel, proportion=1,
+        hbox.Add(item=self.actionPanel, proportion=1,
                  flag=wx.EXPAND | wx.ALL,
                  border=0)
 
@@ -266,7 +276,12 @@ class PandaMenu(wx.Frame):
         hbox.Fit(self)
         #"""
 
+        self.Bind(response_event.EVT_RESPONSE_EVENT, self.on_response_event)
         self.Bind(wx.EVT_ACTIVATE, self.on_activate)
+
+    def on_response_event(self, event):
+        print "menu has on_response_event"
+        self.actionPanel.set_status(event.attr1)
 
     def on_activate(self, event):
         if not event.GetActive():

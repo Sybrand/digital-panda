@@ -15,9 +15,10 @@ class Config(object):
         appConfigFolder = os.path.join(appDataFolder, 'digitalpanda')
         self.configFilePath = os.path.join(appConfigFolder, 'settings')
         print('config file is %r' % self.configFilePath)
-
         if not os.path.isdir(appConfigFolder):
+            print('creating config dir')
             os.mkdir(appConfigFolder)
+        print('done init config')
 
     def get_key(self, section, key):
         config = ConfigParser.RawConfigParser()
