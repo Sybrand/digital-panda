@@ -37,6 +37,9 @@ class Download(object):
             logging.debug('download_file, path: %s' % f.path)
             logging.debug('download_file, name: %s' % f.name)
             logging.debug('download_file, contentType: %s' % f.contentType)
+        else:
+            # the file already exists - do we overwrite it?
+            pass
 
     def download_folder(self, folder):
         # does the folder exist locally?
