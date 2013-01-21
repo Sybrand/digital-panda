@@ -7,9 +7,11 @@ class BucketFile(object):
     all buckets
 
     """
-    def __init__(self, path, name):
+    def __init__(self, path, name, folder, contentType=None):
         self._path = path
         self._name = name
+        self._folder = folder
+        self._contentType = contentType
 
     @property
     def path(self):
@@ -18,6 +20,14 @@ class BucketFile(object):
     @property
     def name(self):
         return self._name
+
+    @property
+    def isFolder(self):
+        return self._folder
+
+    @property
+    def contentType(self):
+        return self._contentType
 
 
 class AbstractBucket:
@@ -33,11 +43,7 @@ class AbstractBucket:
         return NotImplemented
 
     @abstractmethod
-    def list_current_dir(self):
-        return NotImplemented
-
-    @abstractmethod
-    def get_current_dir(self):
+    def list_dir(self, path):
         return NotImplemented
 
     @abstractmethod

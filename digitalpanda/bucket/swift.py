@@ -4,12 +4,12 @@ import urllib
 import logging
 import httplib
 #from ..digitalpanda import Config
-from abstract import AbstractBucket
+import abstract
 import threading
 
 
 # BUCKET? really? that's a bad name
-class SwiftBucket(AbstractBucket):
+class SwiftBucket(abstract.AbstractBucket):
     def __init__(self, auth_url, username, password):
         """ this class pulls swift into a common interface
         as defined in AbstractBucket
@@ -20,49 +20,86 @@ class SwiftBucket(AbstractBucket):
                                username=username,
                                password=password)
 
-        """
-        try:
-            self._swift.authenticate()
-        except:
-            # TODO: feed this error to the user - nicely
-            logging.error('could not authenticate!')
         # use / convention to indicate root
         # in swift context - we will take this to mean that
         # no container has yet been selected
-        self._current_path = '/'
-        """
         self._current_path = None
         self.lock = threading.Lock()
 
     def delete_object(self, path):
         raise NotImplemented
-
-    def list_current_dir(self):
+ 
+    def list_dir(self, path):
+        logging.debug('list_dir(path = %s)' % path)
         # default to empty array
         files = []
-        if self._current_path == '/':
+        if path:
+            # if not at "root" - we list everything in the current
+            # get the container
+            end = path.find('/')
+            container = None
+            pseudoFolder = None
+            if end > 0:
+                container = path[:end]
+                pseudoFolder = path[end:]
+            else:
+                container = path
+            objects = self._swift.get_container_objects(container,
+                                                        delimiter='/',
+                                                        pseudoFolder=pseudoFolder)
+            if objects:
+                for o in objects:
+                    f = None
+                    if 'subdir' in o:
+                        remotePath = '%s/%s' % (container,
+                                                o['subdir'])
+                        fileName = o['subdir']
+                        f = abstract.BucketFile(remotePath,
+                                                fileName,
+                                                True,
+                                                'application/directory')
+                    else:
+                        remotePath = '%s/%s' % (container,
+                                                o['name'])
+                        fileName = o['name']
+                        if '/' in fileName:
+                            last = fileName.rfind('/')
+                            if last > 0:
+                                fileName = fileName[last:]
+                        f = abstract.BucketFile(remotePath,
+                                                fileName,
+                                                self.is_folder(o),
+                                                o['content_type'])
+                    files.append(f)
+
+        else:
             # at our "root" - we list containers
             containers = self._swift.get_containers()
             if containers:
                 for container in containers:
-                    files.append(container, container)
-        else:
-            # if not at "root" - we list everything in the current "directory"
-            raise NotImplemented
-
+                    f = abstract.BucketFile(container['name'],
+                                            container['name'],
+                                            True)
+                    files.append(f)
         return files
 
+    def is_folder(self, swiftObject):
+        folderType = 'application/directory'
+        return swiftObject['content_type'] == folderType
+
+    """
     def get_current_dir(self):
         storageUrl = self._swift.get_storage_url()
         return '%s://%s%s%s' % (storageUrl.scheme,
                                 storageUrl.netloc,
                                 storageUrl.path,
-                                self._current_path)
+                                self._current_path)"""
 
     def authenticate(self):
         try:
             if self.lock.acquire(True):
                 self._swift.authenticate()
+                self._current_path = '/'
                 return True
             else:
                 return False
@@ -152,6 +189,54 @@ class SwiftAPI(object):
             raise Exception('failed to put container %s ; status = %r' %
                             (container, result.status))
 
+    def get_container_objects(self, container, pseudoFolder=None,
+                              delimiter=None):
+        """ return list of objects in pseudoFolder
+
+        """
+        logging.debug('get_container_objects(container=%r, pseudoFolder=%r'
+                      ', delimiter=%r)' %
+                      (container, pseudoFolder, delimiter))
+        if pseudoFolder:
+            logging.debug('pseudoFolder = %s' % pseudoFolder)
+            pseudoFolder = pseudoFolder.strip('/')
+            pseudoFolder = urllib.quote(pseudoFolder.encode('utf8'))
+            if delimiter:
+                path = ('%s/%s?prefix=%s/&delimiter=%s'
+                        '&format=json' %
+                        (self._storage_url.path, container,
+                        pseudoFolder, delimiter))
+
+            else:
+                path = '%s/%s?prefix=%s/' % (self._storage_url.path,
+                                             container,
+                                             pseudoFolder)
+        else:
+            if delimiter:
+                path = ('%s/%s?delimiter=%s'
+                        '&format=json' %
+                        (self._storage_url.path, container,
+                        delimiter))
+            else:
+                path = '%s/%s' % (self._storage_url.path,
+                                  container)
+
+        logging.debug(path)
+        connection = self._open_connection(self._storage_url)
+        connection.request('GET', path, None, self._create_headers())
+        result = connection.getresponse()
+
+        objects = None
+        if result.status == 200:
+            jsonString = result.read()
+            if jsonString:
+                logging.debug(jsonString)
+                objects = json.loads(jsonString)
+        else:
+            raise Exception('failed to get object list %r' %
+                            result.status)
+        return objects
+
     def get_containers(self, retry_on_unauthorized=True):
         """ return a list of containers
 
@@ -171,6 +256,7 @@ class SwiftAPI(object):
         else:
             raise Exception('failed get catalogue; status = - %r' %
                             (result.status))
+        return containers
 
     def get_container_meta_data(self, container, retry_on_unauthorized):
         """ return container meta data

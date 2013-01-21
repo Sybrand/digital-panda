@@ -18,7 +18,6 @@ class Config(object):
         if not os.path.isdir(appConfigFolder):
             print('creating config dir')
             os.mkdir(appConfigFolder)
-        print('done init config')
 
     def get_key(self, section, key):
         config = ConfigParser.RawConfigParser()
@@ -58,3 +57,6 @@ class Config(object):
     def set_authUrl(self, url):
         print('set url to %r' % url)
         return self.set_key(AUTH_SECTION, URL, url)
+
+    def get_home_folder(self):
+        return os.path.join(os.environ['USERPROFILE'], 'Digital Panda')

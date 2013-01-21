@@ -13,9 +13,11 @@ from bucket.swift import SwiftBucket
 import mediator
 import config
 import Queue
+import logging
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG)
     useWxTaskBarIcon = True
 
     if os.name == 'posix':
@@ -41,15 +43,13 @@ def main():
                                           cfg.get_password()),
                               requestQueue,
                               responseQueue)
-        print "starting thread"
         m.start()
         try:
-            print "entering main loop"
             app.MainLoop()
         finally:
             m.stop()
     else:
-        print('Wups - we''re trying to get Ubuntu 12.10 to work!')
+        logging.error('Wups - we''re trying to get Ubuntu 12.10 to work!')
 
 if __name__ == '__main__':
     main()
