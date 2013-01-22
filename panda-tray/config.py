@@ -12,12 +12,12 @@ URL = 'url'
 class Config(object):
     def __init__(self):
         appDataFolder = os.environ['APPDATA']
-        appConfigFolder = os.path.join(appDataFolder, 'digitalpanda')
-        self.configFilePath = os.path.join(appConfigFolder, 'settings')
+        self.configFolder = os.path.join(appDataFolder, 'digitalpanda')
+        self.configFilePath = os.path.join(self.configFolder, 'settings')
         print('config file is %r' % self.configFilePath)
-        if not os.path.isdir(appConfigFolder):
+        if not os.path.isdir(self.configFolder):
             print('creating config dir')
-            os.mkdir(appConfigFolder)
+            os.mkdir(self.configFolder)
 
     def get_key(self, section, key):
         config = ConfigParser.RawConfigParser()
@@ -60,3 +60,6 @@ class Config(object):
 
     def get_home_folder(self):
         return os.path.join(os.environ['USERPROFILE'], 'Digital Panda')
+
+    def get_database_path(self):
+        return os.path.join(self.configFolder, 'sync.db')

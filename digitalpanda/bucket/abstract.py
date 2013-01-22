@@ -12,6 +12,20 @@ class BucketFile(object):
         self._name = name
         self._folder = folder
         self._contentType = contentType
+        self._hash = None
+        self._dateModified = None
+
+    def get_hash(self):
+        return self._hash
+
+    def set_hash(self, value):
+        self._hash = value
+
+    def get_dateModified(self):
+        return self._dateModified
+
+    def set_dateModified(self, value):
+        self._dateModified = value
 
     @property
     def path(self):
@@ -28,6 +42,10 @@ class BucketFile(object):
     @property
     def contentType(self):
         return self._contentType
+
+    hash = property(get_hash, set_hash)
+
+    dateModified = property(get_dateModified, set_dateModified)
 
 
 class AbstractBucket:
@@ -52,3 +70,10 @@ class AbstractBucket:
         Return True is it works, False if it fails
         """
         return False
+
+    @abstractmethod
+    def download_object(self, sourcePath, targetPath):
+        """
+        Download source to target
+        """
+        return NotImplemented

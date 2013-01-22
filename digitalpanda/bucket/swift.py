@@ -6,6 +6,11 @@ import httplib
 #from ..digitalpanda import Config
 import abstract
 import threading
+import os
+import tempfile
+
+
+ENCODING = 'utf8'
 
 
 # BUCKET? really? that's a bad name
@@ -49,6 +54,7 @@ class SwiftBucket(abstract.AbstractBucket):
                                                         pseudoFolder=pseudoFolder)
             if objects:
                 for o in objects:
+                    #print(o)
                     f = None
                     if 'subdir' in o:
                         remotePath = '%s/%s' % (container,
@@ -66,10 +72,15 @@ class SwiftBucket(abstract.AbstractBucket):
                             last = fileName.rfind('/')
                             if last > 0:
                                 fileName = fileName[last:]
+                        isFolder = self.is_folder(o)
                         f = abstract.BucketFile(remotePath,
                                                 fileName,
-                                                self.is_folder(o),
+                                                isFolder,
                                                 o['content_type'])
+                        if not isFolder:
+                            f.hash = o['hash']
+                            f.dateModified = o['last_modified']
+
                     files.append(f)
 
         else:
@@ -95,6 +106,31 @@ class SwiftBucket(abstract.AbstractBucket):
                                 storageUrl.path,
                                 self._current_path)"""
 
+    def download_object(self, sourcePath, targetPath):
+        try:
+            if self.lock.acquire(True):
+                # create a temporary path (we only move the file to the
+                # targetPath, once it's been completely downloaded)
+                logging.info('going to download %s to %s' %
+                             (sourcePath, targetPath))
+                container, name = self._split_path(sourcePath)
+                logging.info('container=%s;name=%s' % (container, name))
+                self._swift.get_object(container, name, targetPath)
+            else:
+                raise Exception('unable to lock')
+        finally:
+            self.lock.release()
+
+    def upload_object(self, sourcePath, targetPath):
+        try:
+            if self.lock.acquire(True):
+                logging.info('going to upload %s to %s' %
+                             (sourcePath, targetPath))
+            else:
+                raise Exception('unable to lock')
+        finally:
+            self.lock.release()
+
     def authenticate(self):
         try:
             if self.lock.acquire(True):
@@ -107,6 +143,22 @@ class SwiftBucket(abstract.AbstractBucket):
             return False
         finally:
             self.lock.release()
+
+    def get_file_info(self, path):
+        try:
+            if self.lock.acquire(True):
+                container, name = self._split_path(path)
+                return self._swift.get_object_meta_data(container, name)
+            else:
+                raise Exception('failed to lock')
+        finally:
+            self.lock.release()
+
+    def _split_path(self, path):
+        end = path.find('/')
+        container = path[0:end]
+        name = path[end + 1:]
+        return (container, name)
 
 
 class SwiftAPI(object):
@@ -139,7 +191,7 @@ class SwiftAPI(object):
             host = "%s:%d" % (url.hostname, url.port)
         else:
             host = url.hostname
-        logging.debug('host = %r' % host)
+        #logging.debug('host = %r' % host)
         if (url.scheme == 'https'):
             return httplib.HTTPSConnection(host)
         else:
@@ -194,13 +246,12 @@ class SwiftAPI(object):
         """ return list of objects in pseudoFolder
 
         """
-        logging.debug('get_container_objects(container=%r, pseudoFolder=%r'
-                      ', delimiter=%r)' %
-                      (container, pseudoFolder, delimiter))
+        #logging.debug('get_container_objects(container=%r, pseudoFolder=%r'
+        #              ', delimiter=%r)' %
+        #              (container, pseudoFolder, delimiter))
         if pseudoFolder:
-            logging.debug('pseudoFolder = %s' % pseudoFolder)
             pseudoFolder = pseudoFolder.strip('/')
-            pseudoFolder = urllib.quote(pseudoFolder.encode('utf8'))
+            pseudoFolder = urllib.quote(pseudoFolder.encode(ENCODING))
             if delimiter:
                 path = ('%s/%s?prefix=%s/&delimiter=%s'
                         '&format=json' %
@@ -221,7 +272,6 @@ class SwiftAPI(object):
                 path = '%s/%s' % (self._storage_url.path,
                                   container)
 
-        logging.debug(path)
         connection = self._open_connection(self._storage_url)
         connection.request('GET', path, None, self._create_headers())
         result = connection.getresponse()
@@ -230,7 +280,6 @@ class SwiftAPI(object):
         if result.status == 200:
             jsonString = result.read()
             if jsonString:
-                logging.debug(jsonString)
                 objects = json.loads(jsonString)
         else:
             raise Exception('failed to get object list %r' %
@@ -282,14 +331,17 @@ class SwiftAPI(object):
         """
         path = self._prepare_object_path(container, name)
         connection = self._open_connection(self._storage_url)
-        connection.request('HEAD', path, None, headers)
+        connection.request('HEAD', path, None, self._create_headers())
         result = connection.getresponse()
         response = None
 
         if result.status == 204 or result.status == 200:
             response = result.getheaders()
+            return response
         elif result.status == 401 and retry_on_unauthorized:
             return self.get_object_meta_data(container, name, False)
+        elif result.status == 404:
+            return None
         else:
             raise Exception('failed to get container meta data; status = %r' %
                             (result.status))
@@ -317,12 +369,40 @@ class SwiftAPI(object):
             raise Exception('failed to delete %s ; status = %r' %
                             (path, result.status))
 
+    def get_object(self, container, name, targetPath):
+        # we download to a temporary path
+        tmpPath = os.path.join(tempfile.gettempdir(), '~tmp')
+        if os.path.exists(tmpPath):
+            os.remove(tmpPath)
+
+        path = self._prepare_object_path(container, name)
+        connection = self._open_connection(self._storage_url)
+        connection.request('GET', path, None, self._create_headers())
+        result = connection.getresponse()
+        if result.status == 200:
+            targetFile = open(tmpPath, 'wb')
+            chunkSize = 524288
+            data = result.read(chunkSize)
+            targetFile.write(data)
+            while (len(data) == chunkSize):
+                data = result.read(chunkSize)
+                targetFile.write(data)
+            targetFile.flush()
+            targetFile.close()
+            # file download is complete - so we
+            # replace it
+            os.rename(tmpPath, targetPath)
+        else:
+            raise Exception('failed to download %s/%s to %s ; status = %r' %
+                            (container, name,
+                             targetPath, result.status))
+
     def _escape_string(self, value):
         """ input string is escaped and returned in format
         acceptable to swift
 
         """
-        value = urllib.quote(value)
+        value = urllib.quote(value.encode(ENCODING))
         return value.replace('/', '%2F')
 
     def _create_headers(self):
@@ -337,4 +417,4 @@ class SwiftAPI(object):
         """
         return "%s/%s/%s" % (self._storage_url.path,
                              urllib.quote(container),
-                             self._escape_string(name))
+                             self._escape_string(name))    

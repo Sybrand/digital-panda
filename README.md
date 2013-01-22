@@ -38,4 +38,6 @@ Panda-Tray:
 - In settings dialog, first textbox should be selected by default
 - On tray menu, the panda looks like it's crying!
 - Event handling is just bloody crazy right now!
-- Something is causing a freeze on startup - no idea what!
+- Downloads don't resume - doesn't show upload/download status
+- The status message isn't updating nicely ()
+- Quitting the panda - background downloads keep going
