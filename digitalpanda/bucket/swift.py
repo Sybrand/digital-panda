@@ -8,6 +8,7 @@ import abstract
 import threading
 import os
 import tempfile
+import mmap
 
 
 ENCODING = 'utf8'
@@ -32,10 +33,15 @@ class SwiftBucket(abstract.AbstractBucket):
         self.lock = threading.Lock()
 
     def delete_object(self, path):
-        raise NotImplemented
- 
+        try:
+            if self.lock.acquire(True):
+                container, name = self._split_path(path)
+                self._swift.delete_object(container, name)
+        finally:
+            self.lock.release()
+
     def list_dir(self, path):
-        logging.debug('list_dir(path = %s)' % path)
+        #logging.debug('list_dir(path = %s)' % path)
         # default to empty array
         files = []
         if path:
@@ -49,9 +55,10 @@ class SwiftBucket(abstract.AbstractBucket):
                 pseudoFolder = path[end:]
             else:
                 container = path
-            objects = self._swift.get_container_objects(container,
-                                                        delimiter='/',
-                                                        pseudoFolder=pseudoFolder)
+            swift = self._swift
+            objects = swift.get_container_objects(container,
+                                                  delimiter='/',
+                                                  pseudoFolder=pseudoFolder)
             if objects:
                 for o in objects:
                     #print(o)
@@ -126,6 +133,8 @@ class SwiftBucket(abstract.AbstractBucket):
             if self.lock.acquire(True):
                 logging.info('going to upload %s to %s' %
                              (sourcePath, targetPath))
+                container, name = self._split_path(targetPath)
+                self._swift.put_object(container, name, sourcePath)
             else:
                 raise Exception('unable to lock')
         finally:
@@ -148,7 +157,21 @@ class SwiftBucket(abstract.AbstractBucket):
         try:
             if self.lock.acquire(True):
                 container, name = self._split_path(path)
-                return self._swift.get_object_meta_data(container, name)
+                metaData = self._swift.get_object_meta_data(container, name)
+                fileInfo = None
+                if metaData:
+                    fileInfo = abstract.BucketFile(path, name, None)
+                    for data in metaData:
+                        key = data[0].lower()
+                        if key == 'etag':
+                            fileInfo.hash = data[1]
+                        elif key == 'last-modified':
+                            fileInfo.dateModified = data[1]
+                        elif key == 'content-type':
+                            fileInfo.contentType = data[1]
+                        #else:
+                        #    logging.debug('not handling %s' % key)
+                return fileInfo
             else:
                 raise Exception('failed to lock')
         finally:
@@ -295,7 +318,7 @@ class SwiftAPI(object):
         connection = self._open_connection(self._storage_url)
         connection.request('GET', path, None, self._create_headers())
         result = connection.getresponse()
-        logging.debug('get containers returned %r' % result.status)
+        #logging.debug('get containers returned %r' % result.status)
 
         containers = None
         if result.status == 200:
@@ -312,12 +335,11 @@ class SwiftAPI(object):
         """
         path = "%s/%s" % (self._storage_url.path, urllib.quote(container))
         connection = self._open_connection(self._storage_url)
-        connection.request('HEAD', path, None, headers)
+        connection.request('HEAD', path, None, self._create_headers())
         result = connection.getresponse()
-        response = None
 
         if result.status == 204 or result.status == 200:
-            response = result.getheaders()
+            return result.getheaders()
         elif result.status == 401 and retry_on_unauthorized:
             return self.get_container_meta_data(container, False)
         else:
@@ -369,6 +391,30 @@ class SwiftAPI(object):
             raise Exception('failed to delete %s ; status = %r' %
                             (path, result.status))
 
+    def put_object(self, container, name, localPath):
+        connection = self._open_connection(self._storage_url)
+        sourceFile = open(localPath, 'rb')
+        fileNo = sourceFile.fileno()
+        fileSize = os.path.getsize(localPath)
+        path = self._prepare_object_path(container, name)
+        if (fileSize > 0):
+            # TODO: this has to change - we need to be able interrupt the
+            # request
+            mappedFile = mmap.mmap(fileNo, fileSize, access=mmap.ACCESS_READ)
+            connection.request('PUT', path, mappedFile, self._create_headers())
+        else:
+            logging.debug("file is empty - so going to write an empty string")
+            headers = self._create_headers()
+            headers['Content-Length'] = 0
+            connection.request('PUT', path, '', headers)
+        result = connection.getresponse()
+        if (mappedFile is not None):
+            mappedFile.close()
+        sourceFile.close()
+        if (result.status != 201):
+            raise Exception('failed to upload %r ; status = %r' %
+                            (path, result.status))
+
     def get_object(self, container, name, targetPath):
         # we download to a temporary path
         tmpPath = os.path.join(tempfile.gettempdir(), '~tmp')
@@ -417,4 +463,4 @@ class SwiftAPI(object):
         """
         return "%s/%s/%s" % (self._storage_url.path,
                              urllib.quote(container),
-                             self._escape_string(name))    
+                             self._escape_string(name))

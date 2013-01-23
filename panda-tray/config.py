@@ -14,9 +14,7 @@ class Config(object):
         appDataFolder = os.environ['APPDATA']
         self.configFolder = os.path.join(appDataFolder, 'digitalpanda')
         self.configFilePath = os.path.join(self.configFolder, 'settings')
-        print('config file is %r' % self.configFilePath)
         if not os.path.isdir(self.configFolder):
-            print('creating config dir')
             os.mkdir(self.configFolder)
 
     def get_key(self, section, key):
@@ -63,3 +61,9 @@ class Config(object):
 
     def get_database_path(self):
         return os.path.join(self.configFolder, 'sync.db')
+
+    def get_log_file_folder(self):
+        return self.configFolder
+
+    def get_log_file_name(self):
+        return os.path.join(self.configFolder, 'logging.log')

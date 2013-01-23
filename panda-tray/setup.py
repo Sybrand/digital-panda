@@ -14,4 +14,4 @@ import py2exe
 
 setup(
     name='Digital Panda Tray Application',
-    windows=['__main__.py'])
+    windows=['exe.py'])

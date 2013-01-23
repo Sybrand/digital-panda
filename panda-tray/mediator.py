@@ -24,7 +24,7 @@ class Upload(object):
         files = os.listdir(self.localSyncPath)
         for f in files:
             fullPath = os.path.join(self.localSyncPath, f)
-            logging.debug(f)
+            #logging.debug(f)
             if os.path.isdir(fullPath):
                 #logging.debug('is directory')
                 self.upload_directory(f)
@@ -91,12 +91,15 @@ class Upload(object):
                 self.objectStore.upload_object(localPath, remotePath)
 
     def fileHasBeenUploaded(self, path):
+        logging.warn('fileHasBeenUploaded - not implemented')
         return False
 
     def getLocalFileInfo(self, path):
+        logging.warn('getLocalFileInfo - not implemented')
         return None
 
     def compareFile(self, fileInfoA, fileInfoB):
+        logging.warn('compareFile - not implemented')
         return True
 
 
@@ -109,7 +112,7 @@ class Download(object):
     def perform(self):
         # get the current directory
         files = self.objectStore.list_dir(None)
-        logging.debug('got %r files' % len(files))
+        #logging.debug('got %r files' % len(files))
         for f in files:
             if f.isFolder:
                 self.download_folder(f)
@@ -120,7 +123,8 @@ class Download(object):
     def download_file(self, f):
         localPath = self.get_local_path(f.path)
         if not os.path.exists(localPath):
-            if self.already_downloaded_file(f.path):
+            logging.debug('does not exist: %s' % localPath)
+            if self.already_synced_file(f.path):
                 # if we've already downloaded this file,
                 # it means we have to delete it remotely!
                 self.delete_remote_file(f.path)
@@ -176,17 +180,29 @@ class Download(object):
         logging.warn('already_downloaded_folder - not implemented')
         return False
 
-    def already_downloaded_file(self, path):
+    def already_synced_file(self, path):
         """ See: already_downloaded_folder
         """
-        logging.warn('already_downloaded_file - not implemented')
-        return False
+        state = statestore.StateStore()
+        syncInfo = state.getObjectSyncInfo(path)
+        if syncInfo:
+            remoteFileInfo = self.objectStore.get_file_info(path)
+            if remoteFileInfo.hash == syncInfo.hash:
+                # the hash of the file we synced, is the
+                # same as the one online.
+                # this means, we've already synced this file!
+                return True
+            return False
+        else:
+            return False
 
     def delete_remote_folder(self):
         logging.warn('delete_remote_folder - not implemented')
 
-    def delete_remote_file(self):
-        logging.warn('delete_remote_file - not implemented')
+    def delete_remote_file(self, path):
+        state = statestore.StateStore()
+        #self.objectStore.delete_object(path)
+        state.removeObjectSyncRecord(path)
 
 
 class Mediator(threading.Thread):
@@ -225,14 +241,14 @@ class Mediator(threading.Thread):
                 nextTask = self.getNextTask()
                 if nextTask:
                     if nextTask.perform():
-                        logging.debug("task complete! time for next task!")
+                        #logging.debug("task complete! time for next task!")
                         if isinstance(nextTask, Download):
-                            logging.debug('we completed a download')
+                            #logging.debug('we completed a download')
                             # after downloading - we check for uploads
                             self.scheduleUploadTask()
                         elif isinstance(nextTask, Upload):
-                            logging.debug('we completed a upload')
-                            #self.scheduleDownloadTask()
+                            #logging.debug('we completed a upload')
+                            self.scheduleDownloadTask()
                 else:
                     time.sleep(0.1)
         logging.info('done running the mediator')

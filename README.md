@@ -10,7 +10,8 @@ This Software is licensed under the MIT License (MIT), please refer to LICENSE f
 
 ## How to run
 
-Currently runs on Ubuntu 12.04 - but should work on any OS with the correct dependancies installed.
+Currently runs on Windows 7
+With a little work/luck it might run on Ubuntu 12.04
 
 There's not much to see right now... especially if you don't have a swift server to connect to!
 
@@ -41,3 +42,6 @@ Panda-Tray:
 - Downloads don't resume - doesn't show upload/download status
 - The status message isn't updating nicely ()
 - Quitting the panda - background downloads keep going
+- The panda is very chatty at the moment (it keeps looking for uploads/downloads never resting!)
+- Not working with Unity on Ubuntu
+- Password is being stored in clear text!

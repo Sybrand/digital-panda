@@ -17,7 +17,8 @@ import logging
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
+    c = config.Config()
+    logging.basicConfig(filename=c.get_log_file_name(), level=logging.DEBUG)
     useWxTaskBarIcon = True
 
     if os.name == 'posix':
@@ -52,4 +53,5 @@ def main():
         logging.error('Wups - we''re trying to get Ubuntu 12.10 to work!')
 
 if __name__ == '__main__':
+    # rather call exe.py (for py2exe) or dev.py
     main()

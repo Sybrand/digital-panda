@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+    <Product Id="7B3BCDE8-2207-4178-8D19-7A5E5C70EC7D" Name="Digital Panda Syncronisation Client" Language="1033" Version="0.0.0.1" Manufacturer="Digital Panda" UpgradeCode="A649FF1E-9EE7-4679-94F8-DE8165F7B9CD">
+        <Package Description="Test file in a Product" Comments="Simple test" InstallerVersion="200" Compressed="yes" />
+        <Media Id="1" Cabinet="simple.cab" EmbedCab="yes" />
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFilesFolder" Name="PFiles">
+                <Directory Name="Digital Panda" Id="DIGITAL_PANDA">
+                    <Directory Name="Sync Client" Id="SYNC_CLIENT">
+                        <Component Id="BZ2.PYD" DiskId="1" Guid="A828B6B0-2019-46F5-97CE-E3674B9C38CF">
+                            <File Id="BZ2.PYD" Name="bz2.pyd" Source="dist\bz2.pyd" />
+                        </Component>
+                        <Component Id="LIBRARY.ZIP" DiskId="1" Guid="EC8F8A90-86E3-4E5F-88D9-B79B68241605">
+                            <File Id="LIBRARY.ZIP" Name="library.zip" Source="dist\library.zip" />
+                        </Component>
+                        <Component Id="PANDA_TRAY.EXE" DiskId="1" Guid="3F7963C4-4440-4B1A-A03C-09C118DAE492">
+                            <File Id="PANDA_TRAY.EXE" Name="panda-tray.exe" Source="dist\panda-tray.exe">
+                                <Shortcut Id="ExeShortcut" Directory="ProgramMenuDir" WorkingDirectory="SYNC_CLIENT" Name="Digital Panda Synchronisation" Advertise="yes" Icon="StartMenuIcon.exe" IconIndex="0" />
+                            </File>
+                        </Component>
+                        <Component Id="PYEXPAT.PYD" DiskId="1" Guid="53093F24-B34C-485F-9173-2265AB57619D">
+                            <File Id="PYEXPAT.PYD" Name="pyexpat.pyd" Source="dist\pyexpat.pyd" />
+                        </Component>
+                        <Component Id="PYTHON27.DLL" DiskId="1" Guid="D197BEFF-7E3F-4612-A223-F858C5FE3794">
+                            <File Id="PYTHON27.DLL" Name="python27.dll" Source="dist\python27.dll" />
+                        </Component>
+                        <Component Id="SELECT.PYD" DiskId="1" Guid="819538F1-6D01-455D-9610-FC60F9156A2E">
+                            <File Id="SELECT.PYD" Name="select.pyd" Source="dist\select.pyd" />
+                        </Component>
+                        <Component Id="SQLITE3.DLL" DiskId="1" Guid="B2EB40EC-AF19-4BBB-BAC4-8AB187993A33">
+                            <File Id="SQLITE3.DLL" Name="sqlite3.dll" Source="dist\sqlite3.dll" />
+                        </Component>
+                        <Component Id="UNICODEDATA.PYD" DiskId="1" Guid="633390AF-D216-48E5-AB4D-8F842E09CEDA">
+                            <File Id="UNICODEDATA.PYD" Name="unicodedata.pyd" Source="dist\unicodedata.pyd" />
+                        </Component>
+                        <Component Id="WX._CONTROLS_.PYD" DiskId="1" Guid="361FA5A2-D8A3-4D0F-A58D-56A694A23C5B">
+                            <File Id="WX._CONTROLS_.PYD" Name="wx._controls_.pyd" Source="dist\wx._controls_.pyd" />
+                        </Component>
+                        <Component Id="WX._CORE_.PYD" DiskId="1" Guid="BCBCE11D-C232-4177-AA86-D884C3C94FFA">
+                            <File Id="WX._CORE_.PYD" Name="wx._core_.pyd" Source="dist\wx._core_.pyd" />
+                        </Component>
+                        <Component Id="WX._GDI_.PYD" DiskId="1" Guid="CB162858-2C53-4EA4-962D-630A9A55C398">
+                            <File Id="WX._GDI_.PYD" Name="wx._gdi_.pyd" Source="dist\wx._gdi_.pyd" />
+                        </Component>
+                        <Component Id="WX._MISC_.PYD" DiskId="1" Guid="FDE2C5F2-78C3-4177-BA87-BC92373F2123">
+                            <File Id="WX._MISC_.PYD" Name="wx._misc_.pyd" Source="dist\wx._misc_.pyd" />
+                        </Component>
+                        <Component Id="WX._WINDOWS_.PYD" DiskId="1" Guid="73A75D90-0D75-4951-B104-51DA40103D32">
+                            <File Id="WX._WINDOWS_.PYD" Name="wx._windows_.pyd" Source="dist\wx._windows_.pyd" />
+                        </Component>
+                        <Component Id="WXBASE28UH_NET_VC.DLL" DiskId="1" Guid="9D45BEE4-F65D-499F-A739-12200257AB52">
+                            <File Id="WXBASE28UH_NET_VC.DLL" Name="wxbase28uh_net_vc.dll" Source="dist\wxbase28uh_net_vc.dll" />
+                        </Component>
+                        <Component Id="WXBASE28UH_VC.DLL" DiskId="1" Guid="6209F6FA-9553-4134-9C1B-28EC3677EE36">
+                            <File Id="WXBASE28UH_VC.DLL" Name="wxbase28uh_vc.dll" Source="dist\wxbase28uh_vc.dll" />
+                        </Component>
+                        <Component Id="WXMSW28UH_ADV_VC.DLL" DiskId="1" Guid="F4394C9D-5118-4508-B1F9-8A7D1987F44B">
+                            <File Id="WXMSW28UH_ADV_VC.DLL" Name="wxmsw28uh_adv_vc.dll" Source="dist\wxmsw28uh_adv_vc.dll" />
+                        </Component>
+                        <Component Id="WXMSW28UH_CORE_VC.DLL" DiskId="1" Guid="E01C8D02-E361-4F19-BCFE-4191B704476F">
+                            <File Id="WXMSW28UH_CORE_VC.DLL" Name="wxmsw28uh_core_vc.dll" Source="dist\wxmsw28uh_core_vc.dll" />
+                        </Component>
+                        <Component Id="WXMSW28UH_HTML_VC.DLL" DiskId="1" Guid="EB8261B1-2141-420A-B80C-94ABB06F62A8">
+                            <File Id="WXMSW28UH_HTML_VC.DLL" Name="wxmsw28uh_html_vc.dll" Source="dist\wxmsw28uh_html_vc.dll" />
+                        </Component>
+                        <Component Id="_HASHLIB.PYD" DiskId="1" Guid="CCDCF522-EAF2-4098-831D-72903924CC5C">
+                            <File Id="_HASHLIB.PYD" Name="_hashlib.pyd" Source="dist\_hashlib.pyd" />
+                        </Component>
+                        <Component Id="_SOCKET.PYD" DiskId="1" Guid="B7C98C10-7093-4B29-A32F-4CFE226668BD">
+                            <File Id="_SOCKET.PYD" Name="_socket.pyd" Source="dist\_socket.pyd" />
+                        </Component>
+                        <Component Id="_SQLITE3.PYD" DiskId="1" Guid="621F4E37-35E6-4781-81CA-24C1A5982F65">
+                            <File Id="_SQLITE3.PYD" Name="_sqlite3.pyd" Source="dist\_sqlite3.pyd" />
+                        </Component>
+                        <Component Id="_SSL.PYD" DiskId="1" Guid="C8B932A7-57D5-441B-9701-7B9FC5AF471E">
+                            <File Id="_SSL.PYD" Name="_ssl.pyd" Source="dist\_ssl.pyd" />
+                        </Component>
+                        <Directory Id="GFX" Name="gfx">
+                            <Component Id="CONNECTION_OK.PNG" DiskId="1" Guid="93E97687-0D0C-4C59-A689-1DBAAC4A53E5">
+                                <File Id="CONNECTION_OK.PNG" Name="connection-ok.png" Source="dist\gfx\connection-ok.png" />
+                            </Component>
+                            <Component Id="DIGITAL_PANDA_HEADER.PNG" DiskId="1" Guid="6668434D-0AFC-4CF2-986A-A52E66542CFC">
+                                <File Id="DIGITAL_PANDA_HEADER.PNG" Name="digital-panda-header.png" Source="dist\gfx\digital-panda-header.png" />
+                            </Component>
+                            <Component Id="DIGITAL_PANDA_ICON.ICO" DiskId="1" Guid="FA92CD39-BE90-41F0-918A-8A587935C3A8">
+                                <File Id="DIGITAL_PANDA_ICON.ICO" Name="digital-panda-icon.ico" Source="dist\gfx\digital-panda-icon.ico" />
+                            </Component>
+                            <Component Id="DIGITAL_PANDA_MENU_GRAPHIC.PNG" DiskId="1" Guid="CEBB4093-2586-44B6-A5CA-7F7669B02ECC">
+                                <File Id="DIGITAL_PANDA_MENU_GRAPHIC.PNG" Name="digital-panda-menu-graphic.png" Source="dist\gfx\digital-panda-menu-graphic.png" />
+                            </Component>
+                            <Component Id="DIGITAL_PANDA_ONLINE_1616.PNG" DiskId="1" Guid="7EA84800-136D-47F4-9687-A63F2B19B058">
+                                <File Id="DIGITAL_PANDA_ONLINE_1616.PNG" Name="digital-panda-online-1616.png" Source="dist\gfx\digital-panda-online-1616.png" />
+                            </Component>
+                            <Component Id="ICON1616.PNG" DiskId="1" Guid="3AE51AA6-F7AF-47A8-ABA6-AA470AB3AE65">
+                                <File Id="ICON1616.PNG" Name="icon1616.png" Source="dist\gfx\icon1616.png" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="ProgramMenuDir" Name="Digital Panda">
+                    <Component Id="StartMenuShortcuts" Guid="67BFEC91-B5BE-4593-B074-DB72C1DEDC5D">
+                        <RemoveFolder Id="ProgramMenuDir" On="uninstall" />
+                        <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" />
+                        <util:InternetShortcut Id="WebsiteShortcut" Name="Digital Panda Website" Target="http://www.digitalpanda.co.za/" />
+                    </Component>
+                </Directory>
+            </Directory>
+        </Directory>
+        <Feature Id="DefaultFeature" Title="Main Feature" Level="1">
+            <ComponentRef Id="BZ2.PYD" />
+            <ComponentRef Id="LIBRARY.ZIP" />
+            <ComponentRef Id="PANDA_TRAY.EXE" />
+            <ComponentRef Id="PYEXPAT.PYD" />
+            <ComponentRef Id="PYTHON27.DLL" />
+            <ComponentRef Id="SELECT.PYD" />
+            <ComponentRef Id="SQLITE3.DLL" />
+            <ComponentRef Id="UNICODEDATA.PYD" />
+            <ComponentRef Id="WX._CONTROLS_.PYD" />
+            <ComponentRef Id="WX._CORE_.PYD" />
+            <ComponentRef Id="WX._GDI_.PYD" />
+            <ComponentRef Id="WX._MISC_.PYD" />
+            <ComponentRef Id="WX._WINDOWS_.PYD" />
+            <ComponentRef Id="WXBASE28UH_NET_VC.DLL" />
+            <ComponentRef Id="WXBASE28UH_VC.DLL" />
+            <ComponentRef Id="WXMSW28UH_ADV_VC.DLL" />
+            <ComponentRef Id="WXMSW28UH_CORE_VC.DLL" />
+            <ComponentRef Id="WXMSW28UH_HTML_VC.DLL" />
+            <ComponentRef Id="_HASHLIB.PYD" />
+            <ComponentRef Id="_SOCKET.PYD" />
+            <ComponentRef Id="_SQLITE3.PYD" />
+            <ComponentRef Id="_SSL.PYD" />
+            <ComponentRef Id="CONNECTION_OK.PNG" />
+            <ComponentRef Id="DIGITAL_PANDA_HEADER.PNG" />
+            <ComponentRef Id="DIGITAL_PANDA_ICON.ICO" />
+            <ComponentRef Id="DIGITAL_PANDA_MENU_GRAPHIC.PNG" />
+            <ComponentRef Id="DIGITAL_PANDA_ONLINE_1616.PNG" />
+            <ComponentRef Id="ICON1616.PNG" />
+            <ComponentRef Id="StartMenuShortcuts" />
+        </Feature>
+        <UI />
+        <UIRef Id="WixUI_Minimal" />
+        <Icon Id="StartMenuIcon.exe" SourceFile="dist/panda-tray.exe" />
+        <WixVariable Id="WixUILicenseRtf" Value="../LICENSE.rtf" />
+        <WixVariable Id="WixUIBannerBmp" Value="../gfx/digitalpanda_install_banner.bmp" />
+    </Product>
+</Wix>

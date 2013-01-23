@@ -27,6 +27,12 @@ class BucketFile(object):
     def set_dateModified(self, value):
         self._dateModified = value
 
+    def get_content_type(self):
+        return self._contentType
+
+    def set_content_type(self, value):
+        self._contentType = value
+
     @property
     def path(self):
         return self._path
@@ -39,9 +45,7 @@ class BucketFile(object):
     def isFolder(self):
         return self._folder
 
-    @property
-    def contentType(self):
-        return self._contentType
+    contentType = property(get_content_type, set_content_type)
 
     hash = property(get_hash, set_hash)
 
