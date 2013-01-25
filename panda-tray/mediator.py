@@ -235,8 +235,8 @@ class Mediator(threading.Thread):
                 if not self.authenticated:
                     time.sleep(self.retryWait)
                 else:
-                    #self.scheduleDownloadTask()
-                    self.scheduleUploadTask()
+                    self.scheduleDownloadTask()
+                    #self.scheduleUploadTask()
             else:
                 nextTask = self.getNextTask()
                 if nextTask:

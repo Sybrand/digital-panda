@@ -12,7 +12,7 @@ URL = 'url'
 class Config(object):
     def __init__(self):
         appDataFolder = os.environ['APPDATA']
-        self.configFolder = os.path.join(appDataFolder, 'digitalpanda')
+        self.configFolder = os.path.join(appDataFolder, 'Digital Panda')
         self.configFilePath = os.path.join(self.configFolder, 'settings')
         if not os.path.isdir(self.configFolder):
             os.mkdir(self.configFolder)

@@ -30,7 +30,17 @@ There's not much to see right now... especially if you don't have a swift server
 
 ## Dependancies
 
-python-wx (for ubuntu: apt-get install python-wxgtk2.8)
+python (ubuntu: 2.7, windows 2.7 32bit (64 bit is an issue, because of WinSparkle))
+
+python-wx (for ubuntu: apt-get install python-wxgtk2.8, for windows: wxPython2.8-win32-unicode-2.8.12.1-py27.exe)
+
+setuptools (for ubunutu: should just work, for windows: http://pypi.python.org/pypi/setuptools)
+
+install the digitalpanda module (python setup.py develop)
+
+install py2exe
+
+wix (for windows installer)
 
 ## Known issues
 Panda-Tray:

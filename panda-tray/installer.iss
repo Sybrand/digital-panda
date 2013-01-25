@@ -31,9 +31,9 @@ SolidCompression=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "C:\Users\sstrau\digital-panda\panda-tray\dist\panda-tray-w.exe"; DestDir: "{userappdata}"; Flags: ignoreversion
-Source: "C:\Users\sstrau\digital-panda\panda-tray\dist\python27.dll"; DestDir: "{userappdata}"; Flags: ignoreversion
-Source: "C:\Users\sstrau\digital-panda\panda-tray\dist\Digital Panda Tray Application-0.3.win32\*"; DestDir: "{userappdata}\Digital Panda Tray Application-0.3.win32"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\panda-tray-w.exe"; DestDir: "{userappdata}"; Flags: ignoreversion
+Source: "dist\python27.dll"; DestDir: "{userappdata}"; Flags: ignoreversion
+Source: "dist\Digital Panda Tray Application-0.3.win32\*"; DestDir: "{userappdata}\Digital Panda Tray Application-0.3.win32"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

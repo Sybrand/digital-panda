@@ -14,11 +14,32 @@ import mediator
 import config
 import Queue
 import logging
+import esky
+import sys
+
+
+def check_for_update():
+    if getattr(sys,"frozen",False):
+        updateUrl = 'http://www.digitalpanda.co.za/updates/'
+        logging.info('checking for update...')
+        try:
+            app = esky.Esky(sys.executable, updateUrl)
+            logging.info('currently running %s' % app.active_version)
+            try:
+                app.auto_update()
+            except Exception, e:
+                logging.error('error updating app: %r' % e)
+            finally:
+                app.cleanup()
+        except Exception, e:
+            logging.error('error updating app: %r' % e)
+        logging.info('update check complete')
+    else:
+        logging.info('not running in frozen mode - no update check')
 
 
 def main():
-    c = config.Config()
-    logging.basicConfig(filename=c.get_log_file_name(), level=logging.DEBUG)
+    check_for_update()
     useWxTaskBarIcon = True
 
     if os.name == 'posix':
@@ -52,6 +73,6 @@ def main():
     else:
         logging.error('Wups - we''re trying to get Ubuntu 12.10 to work!')
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     # rather call exe.py (for py2exe) or dev.py
-    main()
+#    main()
