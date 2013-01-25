@@ -40,7 +40,9 @@ install the digitalpanda module (python setup.py develop)
 
 install py2exe
 
-wix (for windows installer)
+install esky (https://github.com/cloudmatrix/esky)
+
+using innosetup for installer (windows)
 
 ## Known issues
 Panda-Tray:
@@ -55,3 +57,6 @@ Panda-Tray:
 - The panda is very chatty at the moment (it keeps looking for uploads/downloads never resting!)
 - Not working with Unity on Ubuntu
 - Password is being stored in clear text!
+- Installer fails if already installed and running
+- If authentication is failing, changing the settings and clicking apply don't seem to work. You need to restart the application.
+- Application is installed for the current user only! If user changes it will probably break!

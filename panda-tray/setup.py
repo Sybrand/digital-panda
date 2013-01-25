@@ -26,7 +26,7 @@ if sys.platform in ['win32', 'win64', 'cygwin']:
     setup(
         data_files=data_files,
         name='Digital Panda Tray Application',
-        version="0.4",
+        version="0.5",
         scripts=[Executable(script='panda-tray-w.pyw',
                             icon='gfx/digital-panda-icon.ico',
                             gui_only=True,)],

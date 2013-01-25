@@ -67,3 +67,6 @@ class Config(object):
 
     def get_log_file_name(self):
         return os.path.join(self.configFolder, 'logging.log')
+
+    def get_config_folder(self):
+        return self.configFolder

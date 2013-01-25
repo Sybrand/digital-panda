@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Digital Panda Synchronisation Client"
-#define MyAppVersion "0.3"
+#define MyAppVersion "0.4"
 #define MyAppPublisher "Digital Panda"
 #define MyAppURL "http://www.digitalpanda.co.za"
 #define MyAppExeName "panda-tray-w.exe"
@@ -33,12 +33,13 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: "dist\panda-tray-w.exe"; DestDir: "{userappdata}"; Flags: ignoreversion
 Source: "dist\python27.dll"; DestDir: "{userappdata}"; Flags: ignoreversion
-Source: "dist\Digital Panda Tray Application-0.3.win32\*"; DestDir: "{userappdata}\Digital Panda Tray Application-0.3.win32"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\Digital Panda Tray Application-0.4.win32\*"; DestDir: "{userappdata}\Digital Panda Tray Application-0.4.win32"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+Name: "{userstartup}\{#MyAppName}"; Filename: "{userappdata}\{#MyAppExeName}"
 
 [Run]
 Filename: "{userappdata}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

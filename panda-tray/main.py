@@ -16,10 +16,17 @@ import Queue
 import logging
 import esky
 import sys
+import threading
+
+
+if os.name == 'nt':
+    from win32event import CreateMutex
+    from win32api import CloseHandle, GetLastError
+    from winerror import ERROR_ALREADY_EXISTS
 
 
 def check_for_update():
-    if getattr(sys,"frozen",False):
+    if getattr(sys, "frozen", False):
         updateUrl = 'http://www.digitalpanda.co.za/updates/'
         logging.info('checking for update...')
         try:
@@ -38,9 +45,34 @@ def check_for_update():
         logging.info('not running in frozen mode - no update check')
 
 
+class SingleInstance(object):
+    def __init__(self):
+        if os.name == 'nt':
+            mutexName = '{4A475CB1-CDB5-46b5-B221-4E36602FC47E}'
+            self.mutex = CreateMutex(None, False, mutexName)
+            self.lasterror = GetLastError()
+
+    def alreadyRunning(self):
+        if os.name == 'nt':
+            return (self.lasterror == ERROR_ALREADY_EXISTS)
+        else:
+            logging.warn('alreadyRunning not implemented')
+            return False
+
+    def __del__(self):
+        if os.name == 'nt':
+            if self.mutex:
+                CloseHandle(self.mutex)
+
+myapp = SingleInstance()
+
+
 def main():
-    check_for_update()
     useWxTaskBarIcon = True
+    if myapp.alreadyRunning():
+        logging.info('another instance of the sync tool as already running')
+        # already running! i'm out of here!
+        return
 
     if os.name == 'posix':
         # running on posix? is it ubuntu?
@@ -60,16 +92,20 @@ def main():
         taskbar.TaskBar(requestQueue, responseQueue)
 
         cfg = config.Config()
-        m = mediator.Mediator(SwiftBucket(cfg.get_authUrl(),
-                                          cfg.get_username(),
-                                          cfg.get_password()),
-                              requestQueue,
-                              responseQueue)
-        m.start()
+        mediatorThread = mediator.Mediator(SwiftBucket(cfg.get_authUrl(),
+                                           cfg.get_username(),
+                                           cfg.get_password()),
+                                           requestQueue,
+                                           responseQueue)
+        updateThread = threading.Thread(target=check_for_update)
+
+        mediatorThread.start()
+        updateThread.start()
         try:
             app.MainLoop()
         finally:
-            m.stop()
+            mediatorThread.stop()
+            updateThread.join()
     else:
         logging.error('Wups - we''re trying to get Ubuntu 12.10 to work!')
 

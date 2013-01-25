@@ -11,6 +11,15 @@
         </head>
 
         <body>
-The panda is coming...
+			<p>The panda (alpha) is here:</p>
+			<p>
+				<a href='http://www.digitalpanda.co.za/downloads/Setup.Digital Panda Tray Application-0.4.win32.exe'>Windows 7</a>
+			</p>
+			<p>
+				Ubuntu 12.10 - Soon
+			</p>
+			<p>
+				Mac OS X -  Donations are welcome...
+			</p>
         </body>
 </html>

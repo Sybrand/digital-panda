@@ -11,11 +11,13 @@ import logging
 import os
 import config
 import statestore
+from bucket.local import LocalBucket
 
 
 class Upload(object):
     def __init__(self, objectStore):
         self.objectStore = objectStore
+        self.localStore = LocalBucket()
         c = config.Config()
         self.localSyncPath = c.get_home_folder()
 
@@ -61,8 +63,9 @@ class Upload(object):
         if remoteFileInfo:
             # we compare local file, with remote file
             # if they are the same - we do nothing
-            localFileInfo = self.getLocalFileInfo(localPath)
+            localFileInfo = self.localStore.get_file_info(localPath)
             if not self.compareFile(localFileInfo, remoteFileInfo):
+                logging.warn('files are not the same!')
                 # the files are NOT the same - so either the local
                 # one is new, or the remote on is new
                 # this is a nasty nasty problem with no perfect solution!
@@ -94,13 +97,8 @@ class Upload(object):
         logging.warn('fileHasBeenUploaded - not implemented')
         return False
 
-    def getLocalFileInfo(self, path):
-        logging.warn('getLocalFileInfo - not implemented')
-        return None
-
     def compareFile(self, fileInfoA, fileInfoB):
-        logging.warn('compareFile - not implemented')
-        return True
+        return fileInfoA.hash == fileInfoB.hash
 
 
 class Download(object):

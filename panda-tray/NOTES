@@ -1,0 +1,39 @@
+
+------------------------------
+Auto Update
+------------------------------
+
+**********
+WinSparkle
+**********
+Issue: Uses VERSIONINFO to establish if upgrade is required. I have no idea how to make this variable available in something packaged in py2exe. (Potentially it is setable using win_sparkle_set_app_details, but that doesn't seem to be implemented yet.)
+Decision: Don't use
+
+*****
+Omaha
+*****
+Issues: Way too many dependancies.
+Decisions: Don't use
+
+****
+esky
+****
+Issues: No obvious way of updating applications installed in Program Files
+Decision: Using (application is pretty much installed in Local User AppData)
+
+
+--------------------------------
+Installer
+--------------------------------
+
+***
+Wix
+***
+Issues: Oh hell it's complicated!
+Decision: If a more complicated setup is needed - might relook this
+
+*********
+InnoSetup
+*********
+Issues: ?
+Decision: Really easy to get going, using this for now
