@@ -1,6 +1,8 @@
 from abstract import AbstractBucket, BucketFile
 import os
 import hashlib
+import datetime
+import logging
 
 
 class LocalBucket(AbstractBucket):
@@ -36,8 +38,16 @@ class LocalBucket(AbstractBucket):
     def list_dir(self, path):
         raise NotImplemented
 
+    def get_last_modified_date(self, path):
+        """ Return a string representing the date and time in ISO 8601 format
+        """
+        mt = os.path.getmtime(path)
+        dt = datetime.datetime.fromtimestamp(mt)
+        return dt.isoformat()
+
     def get_file_info(self, path):
         # this is a computationally expensive call!
+        logging.info('calculating md5 hash for %s' % path)
         fileInfo = BucketFile(path, None, None)
         md5 = hashlib.md5()
         with open(path, 'rb') as f:

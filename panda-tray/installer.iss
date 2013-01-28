@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Digital Panda Synchronisation Client"
-#define MyAppVersion "0.4"
+#define MyAppVersion "0.5"
 #define MyAppPublisher "Digital Panda"
 #define MyAppURL "http://www.digitalpanda.co.za"
 #define MyAppExeName "panda-tray-w.exe"
@@ -26,6 +26,7 @@ LicenseFile=C:\Users\sstrau\digital-panda\LICENSE.rtf
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
+; SignTool=Standard /d $qDigital Panda Synchronisation Client$q $f
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -33,7 +34,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: "dist\panda-tray-w.exe"; DestDir: "{userappdata}"; Flags: ignoreversion
 Source: "dist\python27.dll"; DestDir: "{userappdata}"; Flags: ignoreversion
-Source: "dist\Digital Panda Tray Application-0.4.win32\*"; DestDir: "{userappdata}\Digital Panda Tray Application-0.4.win32"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\Digital Panda Tray Application-0.5.win32\*"; DestDir: "{userappdata}\Digital Panda Tray Application-0.5.win32"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

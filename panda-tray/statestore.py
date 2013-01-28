@@ -30,7 +30,7 @@ class StateStore(object):
     def __init__(self):
         c = config.Config()
         self.databasePath = c.get_database_path()
-        logging.debug('database path = %r' % self.databasePath)
+        #logging.debug('database path = %r' % self.databasePath)
         conn = self.getConnection()
         #conn.execute('create table if not exists container '
         #             '(path)')

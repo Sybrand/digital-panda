@@ -59,4 +59,12 @@ Panda-Tray:
 - Password is being stored in clear text!
 - Installer fails if already installed and running
 - If authentication is failing, changing the settings and clicking apply don't seem to work. You need to restart the application.
-- Application is installed for the current user only! If user changes it will probably break!
+- Application is installed for the current user only! If user changes it breaks!
+- If you quit the panda - while it's upgrading - it keeps running in the background until
+	the upgrade is complete. If you try to start up the panda while it's upgrading, it
+	won't start. You have to wait until the update is complete, and then start the panda.
+	That's a silly yourney - the users shouldn't have to worry about that!
+
+## Missing features
+Panda-Tray:
+- Show version in hover

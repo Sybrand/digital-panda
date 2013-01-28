@@ -70,3 +70,6 @@ class Config(object):
 
     def get_config_folder(self):
         return self.configFolder
+
+    def get_temporary_folder(self):
+        return self.configFolder

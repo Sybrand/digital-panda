@@ -12,8 +12,9 @@
 
 	<body>
 		<h1>Digital Panda - Help</h1>
+		<h2>Connecting to MWeb Store-It</h2>
 		<p>
-			Help for using digital panda to go here
+			Server: https://store-it.mweb.co.za/auth/v1.0
 		</p>
 	</body>
 

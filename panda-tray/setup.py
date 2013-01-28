@@ -12,6 +12,7 @@ import sys
 from esky.bdist_esky import Executable
 from esky import bdist_esky
 from glob import glob
+import version
 
 # for windows
 if sys.platform in ['win32', 'win64', 'cygwin']:
@@ -26,7 +27,7 @@ if sys.platform in ['win32', 'win64', 'cygwin']:
     setup(
         data_files=data_files,
         name='Digital Panda Tray Application',
-        version="0.5",
+        version=version.version,
         scripts=[Executable(script='panda-tray-w.pyw',
                             icon='gfx/digital-panda-icon.ico',
                             gui_only=True,)],

@@ -13,6 +13,7 @@ import os.path
 import subprocess
 import threading
 import response_event
+import version
 
 
 if sys.platform == 'win32':
@@ -75,9 +76,10 @@ class TaskBar(wx.TaskBarIcon):
 
     def set_status(self, status):
         self.status = status
-        self.SetIcon(self.icon, "Digital Panda\r\n" +
-                                "Cloud Storage Sync Client\r\n" +
-                                self.status)
+        self.SetIcon(self.icon, 'Digital Panda v%s\r\n'
+                                'Cloud Storage Sync Client\r\n'
+                                '%s' %
+                                (version.version, self.status))
         if self.dialog:
             self.dialog.SetStatus(self.status)
 
