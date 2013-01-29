@@ -8,41 +8,19 @@ import wx
 import taskbar
 import os
 # right now, this requires python setup.py develop to be run on digitalpanda
-from bucket.swift import SwiftBucket
+from bucket.swift import SwiftBucket, SwiftCredentials
 #.bucket.swift import SwiftBucket
 import mediator
 import config
 import Queue
 import logging
-import esky
-import sys
-import threading
+import messages
 
 
 if os.name == 'nt':
     from win32event import CreateMutex
     from win32api import CloseHandle, GetLastError
     from winerror import ERROR_ALREADY_EXISTS
-
-
-def check_for_update():
-    if getattr(sys, "frozen", False):
-        updateUrl = 'http://www.digitalpanda.co.za/updates/'
-        logging.info('checking for update...')
-        try:
-            app = esky.Esky(sys.executable, updateUrl)
-            logging.info('currently running %s' % app.active_version)
-            try:
-                app.auto_update()
-            except Exception, e:
-                logging.error('error updating app: %r' % e)
-            finally:
-                app.cleanup()
-        except Exception, e:
-            logging.error('error updating app: %r' % e)
-        logging.info('update check complete')
-    else:
-        logging.info('not running in frozen mode - no update check')
 
 
 class SingleInstance(object):
@@ -61,13 +39,12 @@ class SingleInstance(object):
 
     def __del__(self):
         if os.name == 'nt':
-            if self.mutex:
+            if self and self.mutex:
                 CloseHandle(self.mutex)
-
-myapp = SingleInstance()
 
 
 def main():
+    myapp = SingleInstance()
     useWxTaskBarIcon = True
     if myapp.alreadyRunning():
         logging.info('another instance of the sync tool as already running')
@@ -87,27 +64,31 @@ def main():
         wx.HelpProvider_Set(provider)
 
         requestQueue = Queue.Queue()
-        responseQueue = Queue.Queue()
+        messageQueue = Queue.Queue()
         app = wx.PySimpleApp()
-        taskbar.TaskBar(requestQueue, responseQueue)
+        taskbar.TaskBar(requestQueue, messageQueue)
 
         cfg = config.Config()
-        mediatorThread = mediator.Mediator(SwiftBucket(cfg.get_authUrl(),
-                                           cfg.get_username(),
-                                           cfg.get_password()),
+        swiftCredentials = SwiftCredentials(cfg.authUrl,
+                                            cfg.username,
+                                            cfg.password)
+        mediatorThread = mediator.Mediator(SwiftBucket(swiftCredentials),
                                            requestQueue,
-                                           responseQueue)
-        updateThread = threading.Thread(target=check_for_update)
+                                           messageQueue)
+
+        if not swiftCredentials.authUrl or len(swiftCredentials.authUrl) == 0:
+            # no auth url? this must be the first time it's running
+            messageQueue.put(messages.ShowSettings())
 
         mediatorThread.start()
-        updateThread.start()
         try:
             app.MainLoop()
         finally:
             mediatorThread.stop()
-            updateThread.join()
     else:
         logging.error('Wups - we''re trying to get Ubuntu 12.10 to work!')
+
+    del myapp
 
 #if __name__ == '__main__':
     # rather call exe.py (for py2exe) or dev.py

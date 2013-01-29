@@ -14,23 +14,44 @@ import mmap
 ENCODING = 'utf8'
 
 
+class SwiftCredentials(object):
+    def __init__(self, auth_url, username, password):
+        self._auth_url = auth_url
+        self._username = username
+        self._password = password
+
+    def _get_auth_url(self):
+        return self._auth_url
+
+    def _get_username(self):
+        return self._username
+
+    def _get_password(self):
+        return self._password
+
+    authUrl = property(_get_auth_url)
+    username = property(_get_username)
+    password = property(_get_password)
+
+
 # BUCKET? really? that's a bad name
 class SwiftBucket(abstract.AbstractBucket):
-    def __init__(self, auth_url, username, password):
+    def __init__(self, credentials):
         """ this class pulls swift into a common interface
         as defined in AbstractBucket
 
         """
         #config = Config().config
-        self._swift = SwiftAPI(auth_url=auth_url,
-                               username=username,
-                               password=password)
+        self._swift = SwiftAPI(auth_url=credentials.authUrl,
+                               username=credentials.username,
+                               password=credentials.password)
 
         # use / convention to indicate root
         # in swift context - we will take this to mean that
         # no container has yet been selected
         self._current_path = None
         self.lock = threading.Lock()
+        self._credentials = credentials
 
     def delete_object(self, path):
         try:
@@ -41,7 +62,7 @@ class SwiftBucket(abstract.AbstractBucket):
             self.lock.release()
 
     def list_dir(self, path):
-        logging.debug('list_dir(path = %s)' % path)
+        #logging.debug('list_dir(path = %s)' % path)
         # default to empty array
         files = []
         if path:
@@ -174,6 +195,15 @@ class SwiftBucket(abstract.AbstractBucket):
         finally:
             self.lock.release()
 
+    def _set_credentials(self, credentials):
+        self._credentials = credentials
+        self._swift.username = credentials.username
+        self._swift.password = credentials.password
+        self._swift.authUtrl = credentials.authUrl
+
+    def _get_credentials(self):
+        return self._credentials
+
     def _split_path(self, path):
         end = path.find('/')
         container = path[0:end]
@@ -191,6 +221,8 @@ class SwiftBucket(abstract.AbstractBucket):
             elif key == 'content-type':
                 fileInfo.contentType = data[1]
         return fileInfo
+
+    credentials = property(_get_credentials, _set_credentials)
 
 
 class SwiftAPI(object):
@@ -234,6 +266,7 @@ class SwiftAPI(object):
         X-Storage-Url
 
         """
+        logging.debug('swift authenticating...')
         headers = {'X-Storage-User': self._username,
                    'X-Storage-Pass': self._password}
 
@@ -244,7 +277,7 @@ class SwiftAPI(object):
         if result.status == 200:
             self._auth_token = result.getheader('X-Auth-Token')
             self._storage_url = urlparse(result.getheader('X-Storage-Url'))
-            print('storage token is %r' % self._auth_token)
+            logging.info('storage token is %r' % self._auth_token)
         else:
             raise Exception('login failed ; status = %r' % result.status)
 
@@ -478,3 +511,25 @@ class SwiftAPI(object):
         return "%s/%s/%s" % (self._storage_url.path,
                              urllib.quote(container),
                              self._escape_string(name))
+
+    def _get_username(self):
+        return self._username
+
+    def _set_username(self, value):
+        self._username = value
+
+    def _get_password(self):
+        return self._password
+
+    def _set_password(self, value):
+        self._password = value
+
+    def _get_auth_url(self):
+        return self._auth_url
+
+    def _set_auth_url(self, value):
+        self._auth_url = value
+
+    username = property(_get_username, _set_username)
+    password = property(_get_password, _set_password)
+    authUrl = property(_get_auth_url, _set_auth_url)

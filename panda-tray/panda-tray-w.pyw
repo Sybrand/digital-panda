@@ -23,6 +23,8 @@ if __name__ == '__main__':
     c = config.Config()
     logFileFolder = c.get_log_file_folder()
     redirect_std(logFileFolder)
-    logging.basicConfig(filename=c.get_log_file_name(), level=logging.DEBUG)
+    format = '%(asctime)s;%(levelname)s;%(message)s'
+    logging.basicConfig(filename=c.get_log_file_name(), level=logging.DEBUG,
+                        format=format)
     print('exe starting in: %s' % os.getcwd())
     main.main()

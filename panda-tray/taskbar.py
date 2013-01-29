@@ -14,6 +14,8 @@ import subprocess
 import threading
 import response_event
 import version
+import messages
+import logging
 
 
 if sys.platform == 'win32':
@@ -44,7 +46,7 @@ class TaskBar(wx.TaskBarIcon):
 
     """
 
-    def __init__(self, requestQueue, responseQueue):
+    def __init__(self, outputQueue, inputQueue):
         super(TaskBar, self).__init__()
         print "initializing TaskBar"
         self.icon = wx.IconFromBitmap(wx.Bitmap("gfx/icon1616.png"))
@@ -53,26 +55,39 @@ class TaskBar(wx.TaskBarIcon):
         self.Bind(wx.EVT_TASKBAR_RIGHT_DOWN, self.on_right_down)
 
         self.dialog = None
-        self.requestQueue = requestQueue
-        self.responseQueue = responseQueue
+        self.outputQueue = outputQueue
+        self.inputQueue = inputQueue
         self.set_status('Connecting...')
         """self.timer = wx.Timer(self)
         self.timer.Bind(wx.EVT_TIMER, self.on_timer)
         self.timer.Start(100)"""
         self.advancedMenu = self.create_advanced_menu()
 
-        t = threading.Thread(target=self.queue_listener)
-        t.daemon = True
-        t.start()
+        self.inputQueueThread = threading.Thread(target=self.queue_listener)
+        self.isRunning = True
+        self.inputQueueThread.start()
 
     def queue_listener(self):
-        print("starting queue listener thread")
-        while True:
-            item = self.responseQueue.get()
-            print('popped from queue: %r' % item)
-            self.set_status(item)
-            wx.PostEvent(self.advancedMenu,
-                         response_event.ResponseEvent(attr1=item))
+        while self.isRunning:
+            item = self.inputQueue.get()
+            if item:
+                if isinstance(item, messages.ShowSettings):
+                    event = panda_menu.SettingsEvent()
+                    wx.PostEvent(self.advancedMenu, event)
+                elif isinstance(item, messages.Status):
+                    self.set_status(item.message)
+                    wx.PostEvent(self.advancedMenu,
+                                 response_event.ResponseEvent(attr1=item.message))
+                elif isinstance(item, messages.Stop):
+                    break
+                else:
+                    try:
+                        self.set_status(item)
+                        wx.PostEvent(self.advancedMenu,
+                                     response_event.ResponseEvent(attr1=item))
+                    finally:
+                        logging.info('exception')
+                        pass
 
     def set_status(self, status):
         self.status = status
@@ -131,6 +146,10 @@ class TaskBar(wx.TaskBarIcon):
         return advancedMenu
 
     def on_exit(self, event):
+        self.isRunning = False
+        self.inputQueue.put(messages.Stop())
+        logging.debug('putting stop on queue')
+        self.outputQueue.put(messages.Stop())
         wx.CallAfter(self.Destroy)
         if self.dialog:
             self.dialog.Destroy()
@@ -138,9 +157,11 @@ class TaskBar(wx.TaskBarIcon):
             self.advancedMenu.Destroy()
 
     def show_settings(self, event):
+        logging.debug('show_settings')
         if not self.dialog:
             self.dialog = settings.Settings(None, -1, 'Digital Panda Settings',
-                                            self.status)
+                                            self.status, self.outputQueue)
+
             self.dialog.Center()
             self.dialog.Show(True)
         else:

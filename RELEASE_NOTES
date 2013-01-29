@@ -1,5 +1,17 @@
 
+
 ## Panda-Tray:
+0.9
+* Bug fixes:
+- Application now works for all users
+- Syncronisation now works a bit better
+- Changing login credentials now works better (no need to exit and restart)
+- Status updates formatting fixed
+* New functionality
+- The panda is less chatty - it sleeps for a while after uploading/downloading
+- Checking for updates before doing anything else
+
+
 0.5
 Bug fixes:
 - 

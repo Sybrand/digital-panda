@@ -34,18 +34,18 @@ class Config(object):
         with open(self.configFilePath, 'wb') as configFile:
             config.write(configFile)
 
-    def get_username(self):
+    def _get_username(self):
         return self.get_key(AUTH_SECTION, USERNAME)
 
-    def set_username(self, username):
+    def _set_username(self, username):
         print('set username to %r' % username)
         self.set_key(AUTH_SECTION, USERNAME, username)
 
-    def get_password(self):
+    def _get_password(self):
         # TODO: need to figure out how we're going to do encryption here
         return self.get_key(AUTH_SECTION, PASSWORD)
 
-    def set_password(self, password):
+    def _set_password(self, password):
         print('set password to %r' % password)
         self.set_key(AUTH_SECTION, PASSWORD, password)
 
@@ -55,6 +55,10 @@ class Config(object):
     def set_authUrl(self, url):
         print('set url to %r' % url)
         return self.set_key(AUTH_SECTION, URL, url)
+
+    authUrl = property(get_authUrl, set_authUrl)
+    username = property(_get_username, _set_username)
+    password = property(_get_password, _set_password)
 
     def get_home_folder(self):
         return os.path.join(os.environ['USERPROFILE'], 'Digital Panda')

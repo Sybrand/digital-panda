@@ -52,18 +52,15 @@ Panda-Tray:
 - On tray menu, the panda looks like it's crying!
 - Event handling is just bloody crazy right now!
 - Downloads don't resume - doesn't show upload/download status
-- The status message isn't updating nicely ()
 - Quitting the panda - background downloads keep going
-- The panda is very chatty at the moment (it keeps looking for uploads/downloads never resting!)
 - Not working with Unity on Ubuntu
 - Password is being stored in clear text!
 - Installer fails if already installed and running
-- If authentication is failing, changing the settings and clicking apply don't seem to work. You need to restart the application.
-- Application is installed for the current user only! If user changes it breaks!
 - If you quit the panda - while it's upgrading - it keeps running in the background until
 	the upgrade is complete. If you try to start up the panda while it's upgrading, it
 	won't start. You have to wait until the update is complete, and then start the panda.
 	That's a silly yourney - the users shouldn't have to worry about that!
+- Status needs to include checking for updates!
 
 ## Missing features
 Panda-Tray:

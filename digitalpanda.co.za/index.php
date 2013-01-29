@@ -13,7 +13,7 @@
         <body>
 			<p>The panda (alpha) is here:</p>
 			<p>
-				<a href='http://www.digitalpanda.co.za/downloads/Setup.Digital Panda Tray Application-0.5.win32.exe'>Windows 7</a>
+				<a href='http://www.digitalpanda.co.za/downloads/Setup.Digital Panda Tray Application-0.7.win32.exe'>Windows 7 / 8</a>
 			</p>
 			<p>
 				Ubuntu 12.10 - Soon

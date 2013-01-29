@@ -12,6 +12,7 @@ known issues:
 import wx
 import wx.lib.newevent
 import config
+import messages
 
 ApplyEvent, EVT_APPLY = wx.lib.newevent.NewEvent()
 OkEvent, EVT_OK = wx.lib.newevent.NewEvent()
@@ -30,7 +31,8 @@ class StatusPanel(wx.Panel):
 
         self.labelStatus = wx.StaticText(self, wx.ID_ANY,
                                          'Status: %s' % status,
-                                         style=wx.ALIGN_RIGHT)
+                                         style=wx.ALIGN_RIGHT |
+                                         wx.ST_NO_AUTORESIZE)
 
         panelSizer = wx.BoxSizer(wx.HORIZONTAL)
         panelSizer.Add(item=self.labelStatus, proportion=1,
@@ -232,7 +234,7 @@ class SettingsPanel(wx.Panel):
                                       'Username')
         self.inputUsername = wx.TextCtrl(self, wx.ID_ANY, '')
         self.inputUsername.SetHelpText(tipText)
-        self.inputUsername.SetValue(appConfig.get_username())
+        self.inputUsername.SetValue(appConfig.username)
         self.inputUsername.SetToolTip(wx.ToolTip(tipText))
         labelUsername.SetToolTip(wx.ToolTip(tipText))
 
@@ -242,7 +244,7 @@ class SettingsPanel(wx.Panel):
                                       'Password')
         labelPassword.SetHelpText('''Password''')
         self.inputPassword = wx.TextCtrl(self, wx.ID_ANY,
-                                         appConfig.get_password(),
+                                         appConfig.password,
                                          style=wx.TE_PASSWORD)
         labelPassword.SetToolTip(wx.ToolTip(tipText))
         self.inputPassword.SetToolTip(wx.ToolTip(tipText))
@@ -291,13 +293,14 @@ class Settings(wx.Frame):
     """ The frame that pops up when you click settings
     """
 
-    def __init__(self, parent, id, title, status):
+    def __init__(self, parent, id, title, status, outputQueue):
         # we don't want the user to be able to resize - since it's a very
         # basic menu - so we build up the style ourselves
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition,
                           style=wx.CLOSE_BOX | wx.SYSTEM_MENU |
                           wx.CAPTION | wx.WS_EX_CONTEXTHELP | wx.TAB_TRAVERSAL)
         self.SetExtraStyle(wx.FRAME_EX_CONTEXTHELP)
+        self.outputQueue = outputQueue
 
         self.icon = wx.Icon('gfx/digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
         self.SetIcon(self.icon)
@@ -350,6 +353,7 @@ class Settings(wx.Frame):
         # if this control changes, or get's re-factored, stringing
         # things toghether like this is going to be a nightmare!
         self.settingsPanel.Bind(EVT_SETTINGS, self.HandleSettings)
+        self.parent = parent
 
         framePanel.SetSizer(vbox)
         vbox.Fit(self)
@@ -378,7 +382,10 @@ class Settings(wx.Frame):
         self.SaveSettings()
 
     def SaveSettings(self):
+        # change config
         appConfig = config.Config()
-        appConfig.set_username(self.settingsPanel.GetUserName())
-        appConfig.set_password(self.settingsPanel.GetPassword())
-        appConfig.set_authUrl(self.settingsPanel.GetUrl())
+        appConfig.username = self.settingsPanel.GetUserName()
+        appConfig.password = self.settingsPanel.GetPassword()
+        appConfig.authUrl = self.settingsPanel.GetUrl()
+        # push event
+        self.outputQueue.put(messages.SettingsChanged())
