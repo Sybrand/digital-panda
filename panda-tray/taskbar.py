@@ -48,7 +48,6 @@ class TaskBar(wx.TaskBarIcon):
 
     def __init__(self, outputQueue, inputQueue):
         super(TaskBar, self).__init__()
-        print "initializing TaskBar"
         self.icon = wx.IconFromBitmap(wx.Bitmap("gfx/icon1616.png"))
         #icon = wx.Icon('digital-panda-icon.ico', wx.BITMAP_TYPE_ICO)
         self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)

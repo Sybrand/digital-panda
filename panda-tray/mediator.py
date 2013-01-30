@@ -12,6 +12,7 @@ import Queue
 import messages
 import config
 import bucket.swift
+import traceback
 from update import Update
 from upload import Upload
 from download import Download
@@ -154,6 +155,7 @@ class Mediator(threading.Thread):
                 except:
                     logging.info('exception processing: %r' %
                                  sys.exc_info()[0])
+                    traceback.print_exc(file=sys.stdout)
                 finally:
                     self.addNewTasks()
         logging.info('done running the mediator')
@@ -171,12 +173,11 @@ class Mediator(threading.Thread):
                         self.taskList.put(download)
                     elif isinstance(self.currentTask, Download):
                         #logging.debug('we completed a upload')
-                        self.taskList.put(Sleep(60))
+                        self.taskList.put(Sleep(1))
                         upload = Upload(self.objectStore)
                         self.taskList.put(upload)
                     elif isinstance(self.currentTask, Authenticate):
                         if self.currentTask.isAuthenticated:
-                            logging.debug('we authenticated!')
                             upload = Upload(self.objectStore)
                             self.taskList.put(upload)
                         else:

@@ -9,9 +9,11 @@ import threading
 import os
 import tempfile
 import mmap
+#import sys
 
 
 ENCODING = 'utf8'
+FOLDER_TYPE = 'application/directory'
 
 
 class SwiftCredentials(object):
@@ -42,14 +44,14 @@ class SwiftBucket(abstract.AbstractBucket):
 
         """
         #config = Config().config
-        self._swift = SwiftAPI(auth_url=credentials.authUrl,
-                               username=credentials.username,
-                               password=credentials.password)
+        if credentials:
+            self._swift = SwiftAPI(auth_url=credentials.authUrl,
+                                   username=credentials.username,
+                                   password=credentials.password)
 
         # use / convention to indicate root
         # in swift context - we will take this to mean that
         # no container has yet been selected
-        self._current_path = None
         self.lock = threading.Lock()
         self._credentials = credentials
 
@@ -123,20 +125,19 @@ class SwiftBucket(abstract.AbstractBucket):
         return files
 
     def is_folder(self, swiftObject):
-        folderType = 'application/directory'
-        return swiftObject['content_type'] == folderType
+        return swiftObject['content_type'] == FOLDER_TYPE
 
-    """
-    def get_current_dir(self):
-        storageUrl = self._swift.get_storage_url()
-        return '%s://%s%s%s' % (storageUrl.scheme,
-                                storageUrl.netloc,
-                                storageUrl.path,
-                                self._current_path)"""
+    def create_folder(self, targetPath):
+        if self.lock.acquire(True):
+            try:
+                container, name = self._split_path(targetPath)
+                self._swift.put_empty_object(container, name, FOLDER_TYPE)
+            finally:
+                self.lock.release()
 
     def download_object(self, sourcePath, targetPath):
-        try:
-            if self.lock.acquire(True):
+        if self.lock.acquire(True):
+            try:
                 # create a temporary path (we only move the file to the
                 # targetPath, once it's been completely downloaded)
                 logging.info('going to download %s to %s' %
@@ -144,10 +145,8 @@ class SwiftBucket(abstract.AbstractBucket):
                 container, name = self._split_path(sourcePath)
                 logging.info('container=%s;name=%s' % (container, name))
                 self._swift.get_object(container, name, targetPath)
-            else:
-                raise Exception('unable to lock')
-        finally:
-            self.lock.release()
+            finally:
+                self.lock.release()
 
     def upload_object(self, sourcePath, targetPath, md5Hash=None):
         try:
@@ -172,42 +171,53 @@ class SwiftBucket(abstract.AbstractBucket):
         try:
             if self.lock.acquire(True):
                 self._swift.authenticate()
-                self._current_path = '/'
                 return True
             else:
                 return False
         except:
+            # TODO: handle the reason for not authing - feedback
+            # to the user could be usefull to resolve issues
+            #for message in sys.exc_info():
+            #    logging.warn('%r' % message)
             return False
         finally:
             self.lock.release()
 
     def get_file_info(self, path):
-        try:
-            if self.lock.acquire(True):
+        #logging.info('get file info for: %s' % path)
+        if self.lock.acquire(True):
+            try:
                 container, name = self._split_path(path)
                 metaData = self._swift.get_object_meta_data(container, name)
                 fileInfo = None
                 if metaData:
                     fileInfo = self._headers_to_fileInfo(metaData, path, name)
                 return fileInfo
-            else:
-                raise Exception('failed to lock')
-        finally:
-            self.lock.release()
+            finally:
+                self.lock.release()
 
     def _set_credentials(self, credentials):
         self._credentials = credentials
+        logging.debug('credentials changed to:')
+        logging.debug('username: %s' % credentials.username)
+        logging.debug('password: %s' % credentials.password)
+        logging.debug('authUrl: %s' % credentials.authUrl)
         self._swift.username = credentials.username
         self._swift.password = credentials.password
-        self._swift.authUtrl = credentials.authUrl
+        self._swift.authUrl = credentials.authUrl
 
     def _get_credentials(self):
         return self._credentials
 
     def _split_path(self, path):
+        path = path.strip('/')
         end = path.find('/')
-        container = path[0:end]
-        name = path[end + 1:]
+        if end == -1:
+            container = path[0:]
+            name = None
+        else:
+            container = path[0:end]
+            name = path[end + 1:]
         return (container, name)
 
     def _headers_to_fileInfo(self, headers, path, name):
@@ -239,10 +249,7 @@ class SwiftAPI(object):
         so that if we ever get a 401, we can retry
 
         """
-        logging.debug('auth_url: %s ; username = %s'
-                      % (auth_url, username))
         self._auth_url = urlparse(auth_url)
-        logging.debug('self._auth_url = %s' % (self._auth_url.scheme))
         self._username = username
         self._password = password
 
@@ -255,7 +262,6 @@ class SwiftAPI(object):
             host = "%s:%d" % (url.hostname, url.port)
         else:
             host = url.hostname
-        #logging.debug('host = %r' % host)
         if (url.scheme == 'https'):
             return httplib.HTTPSConnection(host)
         else:
@@ -266,7 +272,6 @@ class SwiftAPI(object):
         X-Storage-Url
 
         """
-        logging.debug('swift authenticating...')
         headers = {'X-Storage-User': self._username,
                    'X-Storage-Pass': self._password}
 
@@ -277,7 +282,6 @@ class SwiftAPI(object):
         if result.status == 200:
             self._auth_token = result.getheader('X-Auth-Token')
             self._storage_url = urlparse(result.getheader('X-Storage-Url'))
-            logging.info('storage token is %r' % self._auth_token)
         else:
             raise Exception('login failed ; status = %r' % result.status)
 
@@ -393,6 +397,8 @@ class SwiftAPI(object):
         """ return object meta data
 
         """
+        #logging.debug('get object meta data for container = %r ; name = %r' %
+        #              (container, name))
         path = self._prepare_object_path(container, name)
         connection = self._open_connection(self._storage_url)
         connection.request('HEAD', path, None, self._create_headers())
@@ -431,6 +437,21 @@ class SwiftAPI(object):
             self.delete_object(container, name, False)
         else:
             raise Exception('failed to delete %s ; status = %r' %
+                            (path, result.status))
+
+    def put_empty_object(self, container, name, content_type):
+        logging.debug('put_empty_object(%r, %r, %r)' %
+                      (container, name, content_type))
+        connection = self._open_connection(self._storage_url)
+        path = self._prepare_object_path(container, name)
+        headers = self._create_headers()
+        headers['Content-Length'] = 0
+        headers['Content-Type'] = content_type
+        connection.request('PUT', path, None, headers)
+        result = connection.getresponse()
+        if (result.status != 201):
+            raise Exception('failed to put empty object upload %r ;'
+                            ' status = %r' %
                             (path, result.status))
 
     def put_object(self, container, name, localPath, md5Hash=None):
@@ -508,9 +529,14 @@ class SwiftAPI(object):
         """ format an object name correctly for swift
 
         """
-        return "%s/%s/%s" % (self._storage_url.path,
-                             urllib.quote(container),
-                             self._escape_string(name))
+        container = container.strip('/')
+        if name:
+            return "%s/%s/%s" % (self._storage_url.path,
+                                 urllib.quote(container),
+                                 self._escape_string(name))
+        else:
+            return "%s/%s" % (self._storage_url.path,
+                              urllib.quote(container))
 
     def _get_username(self):
         return self._username
@@ -528,7 +554,7 @@ class SwiftAPI(object):
         return self._auth_url
 
     def _set_auth_url(self, value):
-        self._auth_url = value
+        self._auth_url = urlparse(value)
 
     username = property(_get_username, _set_username)
     password = property(_get_password, _set_password)

@@ -18,25 +18,30 @@ class Upload(object):
         pass
 
     def perform(self):
-        logging.debug('Upload::perform - begin')
-
         if not os.path.exists(self.localSyncPath):
             os.makedirs(self.localSyncPath)
         files = os.listdir(self.localSyncPath)
         for f in files:
+            #logging.debug('upload: %s' % f)
             fullPath = os.path.join(self.localSyncPath, f)
-            #logging.debug(f)
             if os.path.isdir(fullPath):
                 #logging.debug('is directory')
                 self.upload_directory(f)
             elif os.path.isfile(fullPath):
                 self.processFile(fullPath, f)
 
-        logging.debug('Upload::perform - end')
-
     def upload_directory(self, remotePath):
         fullPath = os.path.join(self.localSyncPath, remotePath)
         files = os.listdir(fullPath)
+        remoteDirInfo = self.objectStore.get_file_info(remotePath)
+        if not remoteDirInfo:
+            logging.warn('TODO: implement check to see if we need to delete the local file!')
+            logging.info('creating remote folder %s' % remotePath)
+            self.objectStore.create_folder(remotePath)
+            localMD = self.localStore.get_last_modified_date(fullPath)
+            self.state.markObjectAsSynced(remotePath,
+                                          None,
+                                          localMD)
         for f in files:
             # we want everything in unicode!
             if isinstance(f, str):

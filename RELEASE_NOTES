@@ -1,6 +1,10 @@
 
 
 ## Panda-Tray:
+0.11
+* Bug fixes:
+- <TODO: busy doing folder syncing - specifically, upload/delete folder depending>
+
 0.10
 * Bug fixes:
 - Changed panda in tray icon menu, so it doesn't look like it's crying anymore

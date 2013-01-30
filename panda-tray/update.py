@@ -58,7 +58,8 @@ class Update(object):
                 logging.error('error updating app: %r' % e)
             logging.info('update check complete')
         else:
-            logging.info('not running in frozen mode - no update check')
+            # not running in frozen mode - no update check
+            pass
 
     def stop(self):
         pass

@@ -20,7 +20,6 @@ class Download(object):
         pass
 
     def perform(self):
-        logging.debug('Download::perform - begin')
         # get the current directory
         files = self.objectStore.list_dir(None)
         for f in files:
@@ -28,7 +27,6 @@ class Download(object):
                 self.download_folder(f)
             else:
                 self.download_file(f)
-        logging.debug('Download::perform - end')
 
     def download_file(self, f):
         localPath = self.get_local_path(f.path)
@@ -129,12 +127,16 @@ class Download(object):
             #     if we haven't marked this folder as being downloaded,
             #     then we get it now
             if self.already_downloaded_folder(folder.path):
-                logging.info('we need to delete %r!' % localPath)
+                logging.info('we need to delete %r!' % folder.path)
                 self.delete_remote_folder(folder.path)
                 downloadFolderContents = False
             else:
                 logging.info('creating %r..' % localPath)
                 os.makedirs(localPath)
+                localMD = self.localStore.get_last_modified_date(localPath)
+                self.state.markObjectAsSynced(folder.path,
+                                              None,
+                                              localMD)
                 logging.info('done creating %r' % localPath)
         if downloadFolderContents:
             files = self.objectStore.list_dir(folder.path)
@@ -156,9 +158,20 @@ class Download(object):
         downloaded it, it can only be missing if it was deleted, and
         thusly, we delete it remotely.
         """
-        logging.warn('TODO: implement check to see '
-                     'if %s has already been downloaded' % path)
-        return False
+        alreadySynced = False
+        syncInfo = self.state.getObjectSyncInfo(path)
+        if syncInfo:
+            # if we have sync info for this path - it means we've
+            # already download
+            # or uploaded it
+            logging.info('we have sync info for %s' % path)
+            alreadySynced = True
+        else:
+            # if we don't have sync info for this path
+            # - it means we haven't
+            # downloaded it yet
+            logging.info('no sync info for %s' % path)
+        return alreadySynced
 
     def already_synced_file(self, path):
         """ See: already_downloaded_folder
@@ -175,8 +188,8 @@ class Download(object):
         else:
             return False
 
-    def delete_remote_folder(self):
-        logging.warn('delete_remote_folder - not implemented')
+    def delete_remote_folder(self, path):
+        self.delete_remote_file(path)
 
     def delete_remote_file(self, path):
         self.objectStore.delete_object(path)
