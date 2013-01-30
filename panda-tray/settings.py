@@ -13,6 +13,7 @@ import wx
 import wx.lib.newevent
 import config
 import messages
+import logging
 
 ApplyEvent, EVT_APPLY = wx.lib.newevent.NewEvent()
 OkEvent, EVT_OK = wx.lib.newevent.NewEvent()
@@ -209,10 +210,22 @@ class SettingsPanel(wx.Panel):
 
         self.parent = parent
 
-        self.SetHelpText('This is a panel')
+        appConfig = config.Config()
 
         #sizer = wx.FlexGridSizer(1, 2)
         sizer = wx.GridBagSizer(vgap=5, hgap=5)
+
+        # storage provider
+        # move this to config files
+        tipText = 'The name of your cloud storage provider'
+        labelStorageProvider = wx.StaticText(self, wx.ID_ANY,
+                                             'Storage provider')
+        labelStorageProvider.SetToolTip(wx.ToolTip(tipText))
+        self.cmbProvider = wx.ComboBox(self, wx.ID_ANY,
+                                       choices=appConfig.providers,
+                                       style=wx.CB_READONLY)
+        self.cmbProvider.Bind(wx.EVT_COMBOBOX, self.HandleProviderChanged)
+        self.cmbProvider.SetToolTip(wx.ToolTip(tipText))
 
         # auth url
         # using "Auth Url - is waaaay too technical - so instead
@@ -227,7 +240,6 @@ class SettingsPanel(wx.Panel):
         self.inputAuthUrl.SetToolTip(wx.ToolTip(tipText))
         labelAuthUrl.SetToolTip(wx.ToolTip(tipText))
 
-        appConfig = config.Config()
         # username
         tipText = 'Cloud storage account user'
         labelUsername = wx.StaticText(self, wx.ID_ANY,
@@ -253,15 +265,19 @@ class SettingsPanel(wx.Panel):
         self.BindHandleTextChanged()
 
         sizer.AddGrowableCol(1)
-        sizer.Add(item=labelAuthUrl, flag=wx.EXPAND | wx.TOP,
+        sizer.Add(item=labelStorageProvider, flag=wx.EXPAND | wx.TOP,
                   pos=(0, 0), border=5)
-        sizer.Add(item=self.inputAuthUrl, flag=wx.EXPAND, pos=(0, 1))
-        sizer.Add(item=labelUsername, flag=wx.EXPAND | wx.TOP,
+        sizer.Add(item=self.cmbProvider, flag=wx.EXPAND | wx.TOP,
+                  pos=(0, 1), border=5)
+        sizer.Add(item=labelAuthUrl, flag=wx.EXPAND | wx.TOP,
                   pos=(1, 0), border=5)
-        sizer.Add(item=self.inputUsername, flag=wx.EXPAND, pos=(1, 1))
-        sizer.Add(item=labelPassword, flag=wx.EXPAND | wx.TOP,
+        sizer.Add(item=self.inputAuthUrl, flag=wx.EXPAND, pos=(1, 1))
+        sizer.Add(item=labelUsername, flag=wx.EXPAND | wx.TOP,
                   pos=(2, 0), border=5)
-        sizer.Add(item=self.inputPassword, flag=wx.EXPAND, pos=(2, 1))
+        sizer.Add(item=self.inputUsername, flag=wx.EXPAND, pos=(2, 1))
+        sizer.Add(item=labelPassword, flag=wx.EXPAND | wx.TOP,
+                  pos=(3, 0), border=5)
+        sizer.Add(item=self.inputPassword, flag=wx.EXPAND, pos=(3, 1))
 
         self.SetSizer(sizer)
 
@@ -274,10 +290,33 @@ class SettingsPanel(wx.Panel):
     def GetPassword(self):
         return self.inputPassword.GetValue()
 
+    def GetStorageProvider(self):
+        return self.cmbProvider.GetValue()
+
     def BindHandleTextChanged(self):
+        self.inputAuthUrl.Bind(wx.EVT_TEXT, self.HandleAuthUrlChanged)
         self.inputPassword.Bind(wx.EVT_TEXT, self.HandleTextChange)
-        self.inputAuthUrl.Bind(wx.EVT_TEXT, self.HandleTextChange)
         self.inputUsername.Bind(wx.EVT_TEXT, self.HandleTextChange)
+
+    def HandleProviderChanged(self, event):
+        appConfig = config.Config()
+        provider = self.cmbProvider.GetValue()
+        authUrl = appConfig.get_provider_url(provider)
+        if authUrl != self.inputAuthUrl.GetValue():
+            if not authUrl:
+                authUrl = ''
+            self.inputAuthUrl.SetValue(authUrl)
+
+    def HandleAuthUrlChanged(self, event):
+        appConfig = config.Config()
+        provider = appConfig.get_provider_by_url(self.inputAuthUrl.GetValue())
+        if provider:
+            self.cmbProvider.SetValue(provider)
+        else:
+            customProvider = appConfig.get_custom_provider()
+            if customProvider != self.cmbProvider.GetValue():
+                self.cmbProvider.SetValue(customProvider)
+        self.HandleTextChange(event)
 
     def HandleTextChange(self, event):
         event = SettingsChanged()
@@ -286,7 +325,17 @@ class SettingsPanel(wx.Panel):
     def SetDefaultValues(self):
         print("setting default values")
         appConfig = config.Config()
-        self.inputAuthUrl.SetValue(appConfig.get_authUrl())
+        # provider
+        provider = appConfig.storageProvider
+        if not provider:
+            logging.debug('no provider - going for default')
+            provider = appConfig.defaultProvider
+        self.cmbProvider.SetValue(provider)
+        # auth url
+        if appConfig.authUrl:
+            self.inputAuthUrl.SetValue(appConfig.authUrl)
+        else:
+            self.inputAuthUrl.SetValue(appConfig.defaultAuthUrl)
 
 
 class Settings(wx.Frame):
@@ -387,5 +436,6 @@ class Settings(wx.Frame):
         appConfig.username = self.settingsPanel.GetUserName()
         appConfig.password = self.settingsPanel.GetPassword()
         appConfig.authUrl = self.settingsPanel.GetUrl()
+        appConfig.storageProvider = self.settingsPanel.GetStorageProvider()
         # push event
         self.outputQueue.put(messages.SettingsChanged())

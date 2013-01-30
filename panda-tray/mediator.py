@@ -23,41 +23,49 @@ class Sleep(object):
         self.queue = Queue.Queue()
 
     def perform(self):
-        logging.debug('Sleep::perform - begin')
+        #logging.debug('Sleep::perform - begin')
         try:
             self.queue.get(timeout=self._sleepTime)
         except:
             # we don't really care if our sleep is
             # interrupted
             pass
-        logging.debug('Sleep::perform - end')
+        #logging.debug('Sleep::perform - end')
 
     def stop(self):
         self.queue.put(1)
 
 
 class Authenticate(object):
-    def __init__(self, objectStore, uiResponseQueue):
-        self.uiResponseQueue = uiResponseQueue
+    def __init__(self, objectStore, outputQueue):
+        self.outputQueue = outputQueue
         self.objectStore = objectStore
         self.isAuthenticated = False
         self.retryWait = 1
 
+    def can_authenticate(self):
+        return (self.objectStore.credentials.authUrl and
+                self.objectStore.credentials.username and
+                self.objectStore.credentials.password)
+
     def perform(self):
-        if self.objectStore.credentials.authUrl:
-            self.uiResponseQueue.put(messages.Status('Authenticating...'))
+        if self.can_authenticate():
+            self.outputQueue.put(messages.Status('Authenticating...'))
             if self.objectStore.authenticate():
-                self.uiResponseQueue.put(messages.Status('Authenticated'))
+                self.outputQueue.put(messages.Status('Authenticated'))
                 self.isAuthenticated = True
                 self.retryWait = 1
             else:
                 self.isAuthenticated = False
-                self.uiResponseQueue.put(messages.Status('Connection failed'))
+                self.outputQueue.put(messages.Status('Connection failed'))
                 self.retryWait = min(120, self.retryWait * 2)
         else:
-            self.uiResponseQueue.put(messages.Status('Server url '
-                                                     'not set'))
-            self.retryWait = min(120, self.retryWait * 2)
+            status = 'Waiting for settings'
+            self.outputQueue.put(messages.Status(status))
+            self.retryWait = 1
+        #else:
+        #    self.outputQueue.put(messages.Status('Server url '
+        #                                             'not set'))
 
     def get_retry_wait(self):
         return self._retryWait
@@ -124,12 +132,13 @@ class Mediator(threading.Thread):
                                                        self.outputQueue))
                     finally:
                         self.lock.release()
+                        logging.debug('released lock')
             else:
                 logging.info('unhandeled message type recieve: %r' % message)
 
     def run(self):
         # the first thing we try to do, is connect
-        self.taskList.put(Update())
+        self.taskList.put(Update(self.outputQueue))
         self.taskList.put(Authenticate(self.objectStore,
                                        self.outputQueue))
         while self.running:
@@ -142,7 +151,7 @@ class Mediator(threading.Thread):
             if self.currentTask:
                 try:
                     self.currentTask.perform()
-                except ValueError:
+                except:
                     logging.info('exception processing: %r' %
                                  sys.exc_info()[0])
                 finally:
@@ -172,9 +181,9 @@ class Mediator(threading.Thread):
                             self.taskList.put(upload)
                         else:
                             sleep = Sleep(self.currentTask.retryWait)
-                            logging.info('failed to auth'
-                                         ' - sleeping for %r'
-                                         % self.currentTask.retryWait)
+                            #logging.info('failed to auth'
+                            #             ' - sleeping for %r'
+                            #             % self.currentTask.retryWait)
                             self.taskList.put(sleep)
                             self.taskList.put(self.currentTask)
                     elif isinstance(self.currentTask, Sleep):

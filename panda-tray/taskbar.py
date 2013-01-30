@@ -57,7 +57,7 @@ class TaskBar(wx.TaskBarIcon):
         self.dialog = None
         self.outputQueue = outputQueue
         self.inputQueue = inputQueue
-        self.set_status('Connecting...')
+        self.set_status('Starting...')
         """self.timer = wx.Timer(self)
         self.timer.Bind(wx.EVT_TIMER, self.on_timer)
         self.timer.Start(100)"""

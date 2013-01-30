@@ -1,0 +1,21 @@
+div.banner {
+	background-color: #6aa73e;
+	padding: 20px;
+}
+
+p {
+	font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: normal;
+}
+
+h1 {
+	font-size: 30px;
+}
+
+h1, h2 {
+	font-family: 'PT Sans', serif;
+	font-style: normal;
+	font-weight: normal;
+}

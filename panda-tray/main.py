@@ -76,7 +76,9 @@ def main():
                                            requestQueue,
                                            messageQueue)
 
-        if not swiftCredentials.authUrl or len(swiftCredentials.authUrl) == 0:
+        if (not swiftCredentials.authUrl or
+                not swiftCredentials.username or
+                not swiftCredentials.password):
             # no auth url? this must be the first time it's running
             messageQueue.put(messages.ShowSettings())
 

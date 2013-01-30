@@ -1,9 +1,13 @@
 import esky
 import logging
 import sys
+import messages
 
 
 class Update(object):
+    def __init__(self, outputQueue):
+        self._outputQueue = outputQueue
+
     def perform(self):
         if getattr(sys, "frozen", False):
             updateUrl = 'http://www.digitalpanda.co.za/updates/'
@@ -15,6 +19,8 @@ class Update(object):
                 try:
                     #app.auto_update()
                     # look for a new verion
+                    message = messages.Status('Checking for updates')
+                    self._outputQueue.put(message)
                     v = app.find_update()
                     if v:
                         logging.info('found new version: %s' % v)
@@ -25,9 +31,12 @@ class Update(object):
                             app.get_root()
                         if app.has_root():
                             # if we got root - we do the update
+                            message = messages.Status('Downloading update')
+                            self._outputQueue.put(message)
                             logging.info('fetching new version...')
                             app.fetch_version(v)
                             logging.info('installing new version...')
+                            message = messages.Status('Installing update')
                             app.install_version(v)
                             logging.info('doing cleanup...')
                             app.cleanup()
@@ -41,7 +50,10 @@ class Update(object):
                 except Exception, e:
                     logging.error('error updating app: %r' % e)
                 finally:
-                    app.cleanup()
+                    try:
+                        app.cleanup()
+                    finally:
+                        logging.error('error cleaning up app')
             except Exception, e:
                 logging.error('error updating app: %r' % e)
             logging.info('update check complete')

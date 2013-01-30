@@ -280,7 +280,7 @@ class PandaMenu(wx.Frame):
         self.Bind(wx.EVT_ACTIVATE, self.on_activate)
 
     def on_response_event(self, event):
-        print "menu has on_response_event"
+        #print "menu has on_response_event"
         self.actionPanel.set_status(event.attr1)
 
     def on_activate(self, event):

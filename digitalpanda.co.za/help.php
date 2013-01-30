@@ -5,18 +5,26 @@
 	<head>
 
 	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-
+	    <link rel="stylesheet" type="text/css" href="style.css">
 	    <title>Digital Panda - Help</title>    
 
 	</head>
 
 	<body>
-		<h1>Digital Panda - Help</h1>
-		<h2>Connecting to MWeb Store-It</h2>
+		<div class="banner"><a href="index.php"><img src="gfx/banner.png"/></a></div>
+		<h1>Help</h1>
+		<h2>Connecting to MWEB Store-It</h2>
 		<p>
 			Server: https://store-it.mweb.co.za/auth/v1.0
+		</p>
+		<p>
+			Username: Unfortunately right now this is something rather obscure. MWEB has told me they're
+			working on making your email address work.
+		</p>
+		<h2>Connecting to other Openstack SWIFT compatible servers</h2>
+		<p>
+			Ask your storage provider for an authentication url, username and password.
 		</p>
 	</body>
 
 </html>
-

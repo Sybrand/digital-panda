@@ -49,7 +49,6 @@ Panda-Tray:
 - In settings dialog, Apply doesn't disable after clicking cancel
 - Tabbing in settings dialog doesn't work right (not jumping to buttons after text)
 - In settings dialog, first textbox should be selected by default
-- On tray menu, the panda looks like it's crying!
 - Event handling is just bloody crazy right now!
 - Downloads don't resume - doesn't show upload/download status
 - Quitting the panda - background downloads keep going
@@ -60,7 +59,6 @@ Panda-Tray:
 	the upgrade is complete. If you try to start up the panda while it's upgrading, it
 	won't start. You have to wait until the update is complete, and then start the panda.
 	That's a silly yourney - the users shouldn't have to worry about that!
-- Status needs to include checking for updates!
 
 ## Missing features
 Panda-Tray:

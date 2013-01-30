@@ -1,6 +1,15 @@
 
 
 ## Panda-Tray:
+0.10
+* Bug fixes:
+- Changed panda in tray icon menu, so it doesn't look like it's crying anymore
+* New funtionality
+- New version of panda head for small icons
+- Added Storage provider setting
+- More informative status messages w.r.t connection attemps
+- Status messages now include checking for updates
+
 0.9
 * Bug fixes:
 - Application now works for all users

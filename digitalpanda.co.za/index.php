@@ -5,13 +5,17 @@
         <head>
 
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-
+            <link rel="stylesheet" type="text/css" href="style.css">
             <title>Digital Panda</title>    
 
         </head>
 
         <body>
-			<p>The panda (alpha) is here:</p>
+            <div class="banner"><img src="gfx/banner.png"/></div>
+        	<p>
+        	Digital Panda is a Openstack compatible, cloud storage synchronisation client.
+        	</p>
+            <h1>Downloads:</h1>
 			<p>
 				<a href='http://www.digitalpanda.co.za/downloads/Setup.Digital Panda Tray Application-0.7.win32.exe'>Windows 7 / 8</a>
 			</p>
