@@ -36,9 +36,8 @@ class SwiftCredentials(object):
     password = property(_get_password)
 
 
-# BUCKET? really? that's a bad name
-class SwiftBucket(abstract.AbstractBucket):
-    def __init__(self, credentials):
+class SwiftProvider(abstract.AbstractProvider):
+    def __init__(self, credentials, user_agent):
         """ this class pulls swift into a common interface
         as defined in AbstractBucket
 
@@ -47,7 +46,8 @@ class SwiftBucket(abstract.AbstractBucket):
         if credentials:
             self._swift = SwiftAPI(auth_url=credentials.authUrl,
                                    username=credentials.username,
-                                   password=credentials.password)
+                                   password=credentials.password,
+                                   user_agent=user_agent)
 
         # use / convention to indicate root
         # in swift context - we will take this to mean that
@@ -56,12 +56,12 @@ class SwiftBucket(abstract.AbstractBucket):
         self._credentials = credentials
 
     def delete_object(self, path):
-        try:
-            if self.lock.acquire(True):
+        if self.lock.acquire(True):
+            try:
                 container, name = self._split_path(path)
                 self._swift.delete_object(container, name)
-        finally:
-            self.lock.release()
+            finally:
+                self.lock.release()
 
     def list_dir(self, path):
         #logging.debug('list_dir(path = %s)' % path)
@@ -149,8 +149,8 @@ class SwiftBucket(abstract.AbstractBucket):
                 self.lock.release()
 
     def upload_object(self, sourcePath, targetPath, md5Hash=None):
-        try:
-            if self.lock.acquire(True):
+        if self.lock.acquire(True):
+            try:
                 logging.info('going to upload %s to %s' %
                              (sourcePath, targetPath))
                 container, name = self._split_path(targetPath)
@@ -162,26 +162,17 @@ class SwiftBucket(abstract.AbstractBucket):
                 if headers:
                     self._headers_to_fileInfo(headers, targetPath, name)
                 return fileInfo
-            else:
-                raise Exception('unable to lock')
-        finally:
-            self.lock.release()
+            finally:
+                self.lock.release()
 
     def authenticate(self):
-        try:
-            if self.lock.acquire(True):
+        if self.lock.acquire(True):
+            try:
                 self._swift.authenticate()
                 return True
-            else:
-                return False
-        except:
-            # TODO: handle the reason for not authing - feedback
-            # to the user could be usefull to resolve issues
-            #for message in sys.exc_info():
-            #    logging.warn('%r' % message)
-            return False
-        finally:
-            self.lock.release()
+            finally:
+                self.lock.release()
+        return False
 
     def get_file_info(self, path):
         #logging.info('get file info for: %s' % path)
@@ -241,7 +232,7 @@ class SwiftAPI(object):
                          1.0/content/
 
     """
-    def __init__(self, auth_url, username, password):
+    def __init__(self, auth_url, username, password, user_agent):
         """
         auth_url: string representing authentication url
 
@@ -252,6 +243,7 @@ class SwiftAPI(object):
         self._auth_url = urlparse(auth_url)
         self._username = username
         self._password = password
+        self._user_agent = user_agent
 
     def _open_connection(self, url):
         """ return HTTPConnection/HTTPSConnection depending
@@ -273,7 +265,8 @@ class SwiftAPI(object):
 
         """
         headers = {'X-Storage-User': self._username,
-                   'X-Storage-Pass': self._password}
+                   'X-Storage-Pass': self._password,
+                   'User-Agent': self._user_agent}
 
         connection = self._open_connection(self._auth_url)
         connection.request('GET', self._auth_url.path, None, headers)
@@ -420,10 +413,7 @@ class SwiftAPI(object):
                       retry_on_unauthorized=True):
         """ delete a swift object - given the container
         and object name
-
-
         """
-
         path = self._prepare_object_path(container, name)
         connection = self._open_connection(self._storage_url)
         connection.request('DELETE', path, None, self._create_headers())
@@ -435,6 +425,10 @@ class SwiftAPI(object):
             # we authenticate, and try again
             self.authenticate()
             self.delete_object(container, name, False)
+        elif result.status == 404:
+            # couldn't find the file to delete - no worries!
+            # you wanted it gone - it's gone!
+            logging.info('could not find %s' % path)
         else:
             raise Exception('failed to delete %s ; status = %r' %
                             (path, result.status))
@@ -523,7 +517,8 @@ class SwiftAPI(object):
         """ all swift request (subsequent to authentication)
         require an authentication token
         """
-        return {'X-Auth-Token': self._auth_token}
+        return {'X-Auth-Token': self._auth_token,
+                'User-Agent': self._user_agent}
 
     def _prepare_object_path(self, container, name):
         """ format an object name correctly for swift

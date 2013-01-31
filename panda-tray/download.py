@@ -1,4 +1,4 @@
-from bucket.local import LocalBucket
+from bucket.local import LocalProvider
 import config
 import statestore
 import logging
@@ -9,7 +9,7 @@ import threading
 class Download(object):
     def __init__(self, objectStore):
         self.objectStore = objectStore
-        self.localStore = LocalBucket()
+        self.localStore = LocalProvider()
         c = config.Config()
         self.localSyncPath = c.get_home_folder()
         self.tempDownloadFolder = c.get_temporary_folder()
@@ -21,10 +21,19 @@ class Download(object):
 
     def perform(self):
         # get the current directory
+        #logging.debug('Download::perform')
         files = self.objectStore.list_dir(None)
         for f in files:
+            #logging.debug('f.path = %r' % f.path)
             if f.isFolder:
-                self.download_folder(f)
+                skipChildren = self.download_folder(f)
+                # if we deleted a bunch of stuff - it might
+                # mean our files list is out of wack
+                # so lets rather just break out - and restart
+                # next time round
+                if skipChildren:
+                    logging.info('break')
+                    break
             else:
                 self.download_file(f)
 
@@ -117,6 +126,7 @@ class Download(object):
         #logging.debug('download_folder(%s)' % folder.path)
         localPath = self.get_local_path(folder.path)
         downloadFolderContents = True
+        skipChildren = False
         if not os.path.exists(localPath):
             # the path exists online, but NOT locally
             # we do one of two things, we either
@@ -130,8 +140,10 @@ class Download(object):
                 logging.info('we need to delete %r!' % folder.path)
                 self.delete_remote_folder(folder.path)
                 downloadFolderContents = False
+                skipChildren = True
+                logging.info('done deleting remote folder')
             else:
-                logging.info('creating %r..' % localPath)
+                logging.info('creating: %r' % localPath)
                 os.makedirs(localPath)
                 localMD = self.localStore.get_last_modified_date(localPath)
                 self.state.markObjectAsSynced(folder.path,
@@ -139,14 +151,18 @@ class Download(object):
                                               localMD)
                 logging.info('done creating %r' % localPath)
         if downloadFolderContents:
+            #logging.debug('downloading folder contents for %s' % folder.path)
             files = self.objectStore.list_dir(folder.path)
             #logging.debug('got %r files' % len(files))
             for f in files:
                 if folder.path.strip('/') != f.path.strip('/'):
                     if f.isFolder:
-                        self.download_folder(f)
+                        skipChildren = self.download_folder(f)
+                        if skipChildren:
+                            break
                     else:
                         self.download_file(f)
+        return skipChildren
 
     def get_local_path(self, remote_path):
         return os.path.join(self.localSyncPath, remote_path)
@@ -189,8 +205,20 @@ class Download(object):
             return False
 
     def delete_remote_folder(self, path):
+        # a folder has children - and we need to remove those!
+        children = self.objectStore.list_dir(path)
+        for child in children:
+            logging.info('%s [child] %s' % (path, child.path))
+        for child in children:
+            if child.isFolder:
+                # remove this child folder
+                self.delete_remote_folder(child.path)
+            else:
+                # remove this child file
+                self.delete_remote_file(child.path)
         self.delete_remote_file(path)
 
     def delete_remote_file(self, path):
+        logging.info('delete remote file: %s' % path)
         self.objectStore.delete_object(path)
         self.state.removeObjectSyncRecord(path)

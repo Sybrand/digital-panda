@@ -1,11 +1,11 @@
-from abstract import AbstractBucket, BucketFile
+from abstract import AbstractProvider, BucketFile
 import os
 import hashlib
 import datetime
 import logging
 
 
-class LocalBucket(AbstractBucket):
+class LocalProvider(AbstractProvider):
     def __init__(self):
         """ this class pulls local file io into the contract defined in
         AbstractBucket
@@ -14,6 +14,7 @@ class LocalBucket(AbstractBucket):
     def delete_object(self, path):
         raise NotImplemented
 
+    """
     def list_current_dir(self):
         entries = os.listdir(os.getcwd())
         entries.sort()
@@ -28,6 +29,7 @@ class LocalBucket(AbstractBucket):
             if not os.path.isdir(entry):
                 files.append(BucketFile(os.path.abspath(entry), entry))
         return files
+    """
 
     def get_current_dir(self):
         return os.getcwd()

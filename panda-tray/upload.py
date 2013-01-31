@@ -1,4 +1,4 @@
-from bucket.local import LocalBucket
+from bucket.local import LocalProvider
 from bucket.abstract import BucketFile
 import config
 import statestore
@@ -9,7 +9,7 @@ import os
 class Upload(object):
     def __init__(self, objectStore):
         self.objectStore = objectStore
-        self.localStore = LocalBucket()
+        self.localStore = LocalProvider()
         c = config.Config()
         self.localSyncPath = c.get_home_folder()
         self.state = statestore.StateStore()
@@ -18,6 +18,7 @@ class Upload(object):
         pass
 
     def perform(self):
+        #logging.debug('Upload::perform')
         if not os.path.exists(self.localSyncPath):
             os.makedirs(self.localSyncPath)
         files = os.listdir(self.localSyncPath)
@@ -30,18 +31,52 @@ class Upload(object):
             elif os.path.isfile(fullPath):
                 self.processFile(fullPath, f)
 
+    def remove_local_dir(self, localPath, remotePath):
+        #logging.info('TODO: implement directory out of sync scenario')
+        # TODO: check for environment, where local directory was deleted
+        # but new files have been placed inside remote directory
+        # TODO: check for environment, where remote directory was deleted
+        # but new file have been placed inside local directory
+        # we need to remove the local directory, and all it's contents
+        files = os.listdir(localPath)
+        for f in files:
+            childLocalPath = os.path.join(localPath, f)
+            childRemotePath = '%s/%s' % (remotePath, f)
+            if os.path.isdir(childLocalPath):
+                self.remove_local_dir(childLocalPath, childRemotePath)
+            else:
+                self.state.removeObjectSyncRecord(childRemotePath)
+                logging.info('delete %r' % childLocalPath)
+                os.remove(childLocalPath)
+                #logging.info('local=%s;remote=%s' % (childLocalPath,
+                #                                     childRemotePath))
+        #logging.info('local=%s;remote=%s' % (localPath, remotePath))
+        logging.info('delete %r' % localPath)
+        os.rmdir(localPath)
+        self.state.removeObjectSyncRecord(remotePath)
+
     def upload_directory(self, remotePath):
         fullPath = os.path.join(self.localSyncPath, remotePath)
         files = os.listdir(fullPath)
         remoteDirInfo = self.objectStore.get_file_info(remotePath)
         if not remoteDirInfo:
-            logging.warn('TODO: implement check to see if we need to delete the local file!')
-            logging.info('creating remote folder %s' % remotePath)
-            self.objectStore.create_folder(remotePath)
-            localMD = self.localStore.get_last_modified_date(fullPath)
-            self.state.markObjectAsSynced(remotePath,
-                                          None,
-                                          localMD)
+            # the folder exists locally, but not remotely.
+            # 1) if we've already synced it - it means it was deleted
+            # remotely
+            # 2) if we haven't synced it, it means we have to create it
+            # remotely
+            syncInfo = self.state.getObjectSyncInfo(remotePath)
+            if syncInfo:
+                # the folder has already been synced - so we delete it locally
+                logging.info('removing directory: %s' % fullPath)
+                self.remove_local_dir(fullPath, remotePath)
+            else:
+                logging.info('creating remote folder %s' % remotePath)
+                self.objectStore.create_folder(remotePath)
+                localMD = self.localStore.get_last_modified_date(fullPath)
+                self.state.markObjectAsSynced(remotePath,
+                                              None,
+                                              localMD)
         for f in files:
             # we want everything in unicode!
             if isinstance(f, str):

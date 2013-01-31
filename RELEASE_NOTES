@@ -3,7 +3,9 @@
 ## Panda-Tray:
 0.11
 * Bug fixes:
-- <TODO: busy doing folder syncing - specifically, upload/delete folder depending>
+- Fixed bugs around folder syncing (deleting folders locally - wouldn't sync correctly remotely)
+* New functionality
+- User agent added on swift calls ; attempt to override default for esky
 
 0.10
 * Bug fixes:

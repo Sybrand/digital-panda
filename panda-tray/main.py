@@ -8,13 +8,16 @@ import wx
 import taskbar
 import os
 # right now, this requires python setup.py develop to be run on digitalpanda
-from bucket.swift import SwiftBucket, SwiftCredentials
+from bucket.swift import SwiftProvider, SwiftCredentials
 #.bucket.swift import SwiftBucket
 import mediator
 import config
 import Queue
 import logging
 import messages
+import version
+import platform
+import urllib2
 
 
 if os.name == 'nt':
@@ -53,7 +56,6 @@ def main():
 
     if os.name == 'posix':
         # running on posix? is it ubuntu?
-        import platform
         # get back a tuple: (distname, version, id)
         tuple = platform.linux_distribution('Ubuntu')
         if tuple[1] >= '12.10':
@@ -72,7 +74,17 @@ def main():
         swiftCredentials = SwiftCredentials(cfg.authUrl,
                                             cfg.username,
                                             cfg.password)
-        mediatorThread = mediator.Mediator(SwiftBucket(swiftCredentials),
+        sys, node, r, v, m, processor = platform.uname()
+        userAgent = "DigitalPandaSync/%s (%s %s %s; %s)" % (version.version,
+                                                            sys, r, v, m)
+        # an attempt to insert the user agent on all open requests
+        # i don't actually know if this works!
+        opener = urllib2.build_opener()
+        opener.addheaders = [('User-agent', userAgent)]
+        urllib2.install_opener(opener)
+
+        swiftProvider = SwiftProvider(swiftCredentials, userAgent)
+        mediatorThread = mediator.Mediator(swiftProvider,
                                            requestQueue,
                                            messageQueue)
 

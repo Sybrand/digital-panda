@@ -24,7 +24,7 @@ class Sleep(object):
         self.queue = Queue.Queue()
 
     def perform(self):
-        #logging.debug('Sleep::perform - begin')
+        #logging.debug('Sleep::perform')
         try:
             self.queue.get(timeout=self._sleepTime)
         except:
@@ -50,6 +50,7 @@ class Authenticate(object):
                 self.objectStore.credentials.password)
 
     def perform(self):
+        #logging.debug('Authenticate::perform')
         if self.can_authenticate():
             self.outputQueue.put(messages.Status('Authenticating...'))
             if self.objectStore.authenticate():
@@ -169,11 +170,15 @@ class Mediator(threading.Thread):
                     if isinstance(self.currentTask, Upload):
                         #logging.debug('we completed a download')
                         # after downloading - we check for uploads
+                        # but first we relax for 5 seconds
+                        # it's important to relax - to give swfit a few
+                        # seconds to catch up
+                        self.taskList.put(Sleep(20))
                         download = Download(self.objectStore)
                         self.taskList.put(download)
                     elif isinstance(self.currentTask, Download):
                         #logging.debug('we completed a upload')
-                        self.taskList.put(Sleep(1))
+                        self.taskList.put(Sleep(20))
                         upload = Upload(self.objectStore)
                         self.taskList.put(upload)
                     elif isinstance(self.currentTask, Authenticate):

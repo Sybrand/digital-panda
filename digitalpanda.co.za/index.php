@@ -13,9 +13,12 @@
         <body>
             <div class="banner"><img src="gfx/banner.png"/></div>
         	<p>
-        	Digital Panda is a Openstack compatible, cloud storage synchronisation client.
-        	</p>
+        	Digital Panda is an Openstack compatible, cloud storage synchronisation client.
+        	</p>            
             <h1>Downloads:</h1>
+            <p>
+                <i><b>IMPORTANT:</b> Digital Panda is currently in Alpha (i.e. early and active development) - please make a backup of ALL your data before installing the Panda!</i>
+            </p>
 			<p>
 				<a href='http://www.digitalpanda.co.za/downloads/Setup.Digital Panda Tray Application-0.7.win32.exe'>Windows 7 / 8</a>
 			</p>
@@ -23,7 +26,7 @@
 				Ubuntu 12.10 - Soon
 			</p>
 			<p>
-				Mac OS X -  Donations are welcome...
+				Mac OS X -  <a href="mailto:donations@digitalpanda.co.za">Donations</a> are welcome...
 			</p>
         </body>
 </html>

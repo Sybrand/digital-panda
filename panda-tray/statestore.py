@@ -41,6 +41,7 @@ class StateStore(object):
         return sqlite3.connect(self.databasePath)
 
     def markObjectAsSynced(self, path, objectHash, dateModified):
+        path = path.strip('/')
         logging.info('mark %s with hash %s modified '
                      '@ %s as synced' %
                      (path, objectHash, dateModified))
@@ -63,6 +64,7 @@ class StateStore(object):
         c.close()
 
     def getObjectSyncInfo(self, path):
+        path = path.strip('/')
         conn = self.getConnection()
         c = conn.cursor()
         t = (path,)
@@ -76,9 +78,11 @@ class StateStore(object):
         return syncInfo
 
     def removeObjectSyncRecord(self, path):
+        path = path.strip('/')
         conn = self.getConnection()
         c = conn.cursor()
         t = (path, )
+        logging.info('removing sync info for for %s' % path)
         c.execute('delete from object where path = ?', t)
         conn.commit()
         c.close()

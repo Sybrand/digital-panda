@@ -49,7 +49,7 @@ Panda-Tray:
 - In settings dialog, Apply doesn't disable after clicking cancel
 - Tabbing in settings dialog doesn't work right (not jumping to buttons after text)
 - In settings dialog, first textbox should be selected by default
-- Event handling is just bloody crazy right now!
+- Event handling is just bloody crazy right now! Need to refactor UI code
 - Downloads don't resume - doesn't show upload/download status
 - Quitting the panda - background downloads keep going
 - Not working with Unity on Ubuntu
@@ -59,7 +59,14 @@ Panda-Tray:
 	the upgrade is complete. If you try to start up the panda while it's upgrading, it
 	won't start. You have to wait until the update is complete, and then start the panda.
 	That's a silly yourney - the users shouldn't have to worry about that!
+- If you delete the local directory, but have placed new files in that directory remotely,
+	then the remote files get removed. Appropriate action would be to retain files that
+	have not been downloaded yet, by downloading them - and retaining directory structure as
+	far as is valid
+- The setup program isn't signed - so Windows 8 complains
+- The autoupdate feature, on Windows 8 requires promping to complete
+- On first run, on windows 8, security issue causes prompting
+
 
 ## Missing features
 Panda-Tray:
-- Show version in hover

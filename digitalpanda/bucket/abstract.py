@@ -52,7 +52,7 @@ class BucketFile(object):
     dateModified = property(get_dateModified, set_dateModified)
 
 
-class AbstractBucket:
+class AbstractProvider:
     """
     This class defines a contract for all our different storage sources
     e.g: Amazon S3, Local Files, Openstack Swift etc. etc.
