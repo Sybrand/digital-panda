@@ -70,3 +70,8 @@ Panda-Tray:
 
 ## Missing features
 Panda-Tray:
+- Cool feature would be to open digital panda folder, if you click on the digital panda icon, when digital panda is already running in the tray.
+- Favourites (link to digital panda should be added)
+- I think the panda should ask before updating - but that can wait until we have something more stable
+- Status updates (downloading, uploading etc.)
+- Look if there's a better way to detect online changes than iterating through everything

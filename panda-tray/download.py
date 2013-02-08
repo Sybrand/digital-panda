@@ -4,6 +4,7 @@ import statestore
 import logging
 import os
 import threading
+import traceback
 
 
 class Download(object):
@@ -151,17 +152,22 @@ class Download(object):
                                               localMD)
                 logging.info('done creating %r' % localPath)
         if downloadFolderContents:
-            #logging.debug('downloading folder contents for %s' % folder.path)
-            files = self.objectStore.list_dir(folder.path)
-            #logging.debug('got %r files' % len(files))
-            for f in files:
-                if folder.path.strip('/') != f.path.strip('/'):
-                    if f.isFolder:
-                        skipChildren = self.download_folder(f)
-                        if skipChildren:
-                            break
-                    else:
-                        self.download_file(f)
+            try:
+                #logging.debug('downloading folder
+                #              'contents for %s' % folder.path)
+                files = self.objectStore.list_dir(folder.path)
+                #logging.debug('got %r files' % len(files))
+                for f in files:
+                    if folder.path.strip('/') != f.path.strip('/'):
+                        if f.isFolder:
+                            skipChildren = self.download_folder(f)
+                            if skipChildren:
+                                break
+                        else:
+                            self.download_file(f)
+            except:
+                logging.error('failed to download %s' % folder.path)
+                logging.error(traceback.format_exc())
         return skipChildren
 
     def get_local_path(self, remote_path):

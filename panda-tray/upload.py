@@ -40,7 +40,13 @@ class Upload(object):
         # we need to remove the local directory, and all it's contents
         files = os.listdir(localPath)
         for f in files:
+            if isinstance(f, str):
+                # TODO: this might be an issue on linux/mac
+                # but in windows land, things are stored as latin-1
+                # ... i think... maybe it needs to be utf8 instead?
+                f = f.decode('latin-1')
             childLocalPath = os.path.join(localPath, f)
+            logging.info('childLocalPath=%r' % childLocalPath)
             childRemotePath = '%s/%s' % (remotePath, f)
             if os.path.isdir(childLocalPath):
                 self.remove_local_dir(childLocalPath, childRemotePath)

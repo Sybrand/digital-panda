@@ -78,6 +78,7 @@ class SwiftProvider(abstract.AbstractProvider):
                 pseudoFolder = path[end:]
             else:
                 container = path
+            container = urllib.quote(container.encode(ENCODING))
             swift = self._swift
             objects = swift.get_container_objects(container,
                                                   delimiter='/',
@@ -314,6 +315,7 @@ class SwiftAPI(object):
         if pseudoFolder:
             pseudoFolder = pseudoFolder.strip('/')
             pseudoFolder = urllib.quote(pseudoFolder.encode(ENCODING))
+            container = urllib.quote(container.encode(ENCODING))
             if delimiter:
                 path = ('%s/%s?prefix=%s/&delimiter=%s'
                         '&format=json' %
@@ -344,8 +346,9 @@ class SwiftAPI(object):
             if jsonString:
                 objects = json.loads(jsonString)
         else:
-            raise Exception('failed to get object list %r' %
-                            result.status)
+            raise Exception('failed to get object list - status = %r'
+                            'for path = %r' %
+                            (result.status, path))
         return objects
 
     def get_containers(self, retry_on_unauthorized=True):

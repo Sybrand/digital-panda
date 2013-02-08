@@ -1,6 +1,17 @@
 
 
 ## Panda-Tray:
+
+0.13
+* Bug fixes:
+* New functionality
+<WORKING ON - signing the installer>
+
+0.12
+* Bug fixes:
+- Fixed some bugs syncing containers that contain spaces
+- Fixed a unicode bug that broken syncing local db
+
 0.11
 * Bug fixes:
 - Fixed bugs around folder syncing (deleting folders locally - wouldn't sync correctly remotely)
