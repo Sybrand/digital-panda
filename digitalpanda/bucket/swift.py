@@ -9,7 +9,9 @@ import threading
 import os
 import tempfile
 import mmap
-from internet import Downloader
+import time
+#import math
+#from internet import Downloader
 
 
 ENCODING = 'utf8'
@@ -37,7 +39,7 @@ class SwiftCredentials(object):
 
 
 class SwiftProvider(abstract.AbstractProvider):
-    def __init__(self, credentials, user_agent):
+    def __init__(self, credentials, user_agent, output_queue):
         """ this class pulls swift into a common interface
         as defined in AbstractBucket
 
@@ -47,7 +49,8 @@ class SwiftProvider(abstract.AbstractProvider):
             self._swift = SwiftAPI(auth_url=credentials.authUrl,
                                    username=credentials.username,
                                    password=credentials.password,
-                                   user_agent=user_agent)
+                                   user_agent=user_agent,
+                                   output_queue=output_queue)
 
         # use / convention to indicate root
         # in swift context - we will take this to mean that
@@ -237,7 +240,7 @@ class SwiftAPI(object):
                          1.0/content/
 
     """
-    def __init__(self, auth_url, username, password, user_agent):
+    def __init__(self, auth_url, username, password, user_agent, output_queue):
         """
         auth_url: string representing authentication url
 
@@ -250,8 +253,9 @@ class SwiftAPI(object):
         self._password = password
         self._user_agent = user_agent
         self._lock = threading.Lock()
-        self._downloader = None
         self._isRunning = True
+        self._mappedFile = None
+        self._output_queue = output_queue
 
     def _open_connection(self, url):
         """ return HTTPConnection/HTTPSConnection depending
@@ -464,23 +468,35 @@ class SwiftAPI(object):
         fileNo = sourceFile.fileno()
         fileSize = os.path.getsize(localPath)
         path = self._prepare_object_path(container, name)
-        mappedFile = None
+        self.lock.acquire()
+        # potentially NOT thread safe here!
+        # if self._mappedFile is accessed while we
+        # are setting up this object - things could go badly
+        # wrong - it's a risk we take
+        self._mappedFile = None
         if (fileSize > 0):
             # TODO: this has to change - we need to be able interrupt the
             # request
-            mappedFile = mmap.mmap(fileNo, fileSize, access=mmap.ACCESS_READ)
+            self._mappedFile = mmap.mmap(fileNo,
+                                         fileSize,
+                                         access=mmap.ACCESS_READ)
             headers = self._create_headers()
             if md5Hash:
                 headers['ETag'] = md5Hash
-            connection.request('PUT', path, mappedFile, headers)
+            connection.request('PUT', path, self._mappedFile, headers)
         else:
             logging.debug("file is empty - so going to write an empty string")
             headers = self._create_headers()
             headers['Content-Length'] = 0
             connection.request('PUT', path, '', headers)
         result = connection.getresponse()
-        if mappedFile:
-            mappedFile.close()
+        self.lock.acquire()
+        try:
+            if self._mappedFile:
+                self._mappedFile.close()
+                self._mappedFile = None
+        finally:
+            self.lock.release()
         sourceFile.close()
         if (result.status != 201):
             raise Exception('failed to upload %r ; status = %r' %
@@ -490,6 +506,7 @@ class SwiftAPI(object):
     def get_object(self, container, name, targetPath):
         return self.get_object_url_lib(container, name, targetPath)
 
+    """
     def get_object_twisting(self, container, name, targetPath):
 
         metaData = self.get_object_meta_data(container, name, True)
@@ -529,6 +546,7 @@ class SwiftAPI(object):
             raise Exception('for %r, was expecting %r bytes, but only got %r' %
                             (path, expectedBytes, bytesWritten))
         os.rename(tmpPath, targetPath)
+        """
 
     def get_object_url_lib(self, container, name, targetPath):
         # we download to a temporary path
@@ -547,21 +565,41 @@ class SwiftAPI(object):
         connection.request('GET', path, None, self._create_headers())
         result = connection.getresponse()
         if result.status == 200:
+            t = time.time()
             targetFile = open(tmpPath, 'wb')
             chunkSize = 1048576
             data = result.read(chunkSize)
             targetFile.write(data)
-            bytesRead = len(data)
+            totalBytesRead = len(data)
+            delta = time.time() - t
+            bytesPerSecond = totalBytesRead / delta
+            logging.info('Bps: %r' % bytesPerSecond)
+            #megaBytesPerSecond = math.floor(bytesPerSecond / 1024 / 1024)
             while (len(data) == chunkSize) and self._isRunning:
+                t = time.time()
                 data = result.read(chunkSize)
+                delta = time.time() - t
+                bytesRead = len(data)
+                bytesPerSecond = bytesRead / delta
+                #prevMBPS = megaBytesPerSecond
+                #megaBytesPerSecond = math.floor(bytesPerSecond / 1024 / 1024)
+                self._output_queue.put(abstract.ProgressMessage(path,
+                                                                bytesPerSecond,
+                                                                totalBytesRead,
+                                                                expectedBytes))
+                """if prevMBPS != megaBytesPerSecond:
+                    logging.info('%rMB/%rMB - downloading @ %r MBps' %
+                                 (totalBytesRead / 1024 / 1024,
+                                 expectedBytes / 1024 / 1024,
+                                 megaBytesPerSecond))"""
                 targetFile.write(data)
-                bytesRead += len(data)
+                totalBytesRead += bytesRead
             targetFile.flush()
             targetFile.close()
-            if expectedBytes != bytesRead:
+            if expectedBytes != totalBytesRead:
                 raise Exception('was expecting %r bytes for %r'
                                 ', but only read %r' %
-                                (expectedBytes, path, bytesRead))
+                                (expectedBytes, path, totalBytesRead))
             # file download is complete - so we
             # replace it
             os.rename(tmpPath, targetPath)
@@ -621,8 +659,9 @@ class SwiftAPI(object):
         self._lock.acquire()
         self._isRunning = False
         try:
-            if self._downloader:
-                self._downloader.interrupt()
+            if self._mappedFile:
+                self._mappedFile.close()
+                self._mappedFile = None
         finally:
             self._lock.release()
 

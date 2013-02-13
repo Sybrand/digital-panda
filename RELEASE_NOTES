@@ -25,7 +25,7 @@ Panda-Tray:
 Panda-Tray:
 - Favourites (link to digital panda should be added)
 - I think the panda should ask before updating - but that can wait until we have something more stable
-- Status updates (downloading, uploading etc.)
+- Status: speed uploading/downloading, files up to date etc.
 - Look if there's a better way to detect online changes than iterating through everything
 - "All files up to date"
 
@@ -34,9 +34,11 @@ Panda-Tray:
 
 0.13
 * Bug fixes:
+- Downloads and uploads can be interrupted, so that panda tray doesn't keep running in background
 * New functionality
 - Local files are moved to recycle bin instead of being deleted
-- More detailed status updates (filename of what is being uploaded,deleted,downloaded)
+- More detailed status updates (filename of what is being uploaded,deleted,downloaded), and download 
+  progress & speed
 
 0.12
 * Bug fixes:

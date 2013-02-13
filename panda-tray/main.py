@@ -83,7 +83,8 @@ def main():
         opener.addheaders = [('User-agent', userAgent)]
         urllib2.install_opener(opener)
 
-        swiftProvider = SwiftProvider(swiftCredentials, userAgent)
+        swiftProvider = SwiftProvider(swiftCredentials, userAgent,
+                                      messageQueue)
         mediatorThread = mediator.Mediator(swiftProvider,
                                            requestQueue,
                                            messageQueue)

@@ -16,6 +16,7 @@ import response_event
 import version
 import messages
 import logging
+from bucket.abstract import ProgressMessage
 
 
 if sys.platform == 'win32':
@@ -79,6 +80,16 @@ class TaskBar(wx.TaskBarIcon):
                                  response_event.ResponseEvent(attr1=item.message))
                 elif isinstance(item, messages.Stop):
                     break
+                elif isinstance(item, ProgressMessage):
+                    parts = item.path.split('/')
+                    mBRead = item.bytes_read / 1024 / 1024
+                    mBExpected = item.bytes_expected / 1024 / 1024
+                    mBps = item._bytes_per_second / 1024 / 1024
+
+                    message = ('Downloading %s (%.2fMB/%.2fMB @ %.2fMBps)'
+                               % (parts[-1], mBRead, mBExpected, mBps))
+                    self.set_status(message)
+                    pass
                 else:
                     try:
                         self.set_status(item)

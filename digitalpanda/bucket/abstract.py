@@ -1,6 +1,30 @@
 from abc import ABCMeta, abstractmethod
 
 
+class ProgressMessage(object):
+    def __init__(self, path, bytes_per_second, bytes_read, bytes_expected):
+        self._path = path
+        self._bytes_per_second = bytes_per_second
+        self._bytes_read = bytes_read
+        self._bytes_expected = bytes_expected
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def bytes_per_second(self):
+        return self._bytes_per_second
+
+    @property
+    def bytes_read(self):
+        return self._bytes_read
+
+    @property
+    def bytes_expected(self):
+        return self._bytes_expected
+
+
 class BucketFile(object):
     """
     This class defines the contract for a file, that is used across
