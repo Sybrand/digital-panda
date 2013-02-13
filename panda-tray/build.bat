@@ -34,8 +34,8 @@ rmdir /s /q "dist\Digital Panda Tray Application-%version%.win32"
 echo unzipping %zipfile%
 %zip% x -odist -y %zipfile%
 echo "signing executables"
-"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\signtool.exe" sign /f %pandapfx% /p pandasignpass "dist\panda-tray-w.exe"
-"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\signtool.exe" sign /f %pandapfx% /p pandasignpass "dist\Digital Panda Tray Application-%version%.win32\panda-tray-w.exe"
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f %pandapfx% /p %2 "dist\panda-tray-w.exe"
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f %pandapfx% /p %2 "dist\Digital Panda Tray Application-%version%.win32\panda-tray-w.exe"
 echo "re-creating zip file"
 del %zipfile%
 set f1=".\dist\Digital Panda Tray Application-%version%.win32\panda-tray-w.exe"
@@ -53,7 +53,7 @@ goto end
 :inno
 echo "F.Y.I: you need to install innosetup and have the pfx file in the correct place!"
 del "Output\setup.exe"
-"c:\Program Files (x86)\Inno Setup 5\ISCC.exe" "/sStandard=$qC:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\Bin\signtool.exe$q sign /f %pandapfx% /p pandasignpass /d $qDigital Panda - Cloud Storage Synchronisation Client$q $f" installer.iss
+"c:\Program Files (x86)\Inno Setup 5\ISCC.exe" "/sStandard=$qC:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe$q sign /f %pandapfx% /p %2 /d $qDigital Panda - Cloud Storage Synchronisation Client$q $f" installer.iss
 del "Output\Setup.Digital Panda Tray Application-%version%.win32.exe"
 rename "Output\setup.exe" "Setup.Digital Panda Tray Application-%version%.win32.exe"
 goto end
