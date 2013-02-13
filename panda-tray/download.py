@@ -5,26 +5,35 @@ import logging
 import os
 import threading
 import traceback
+import messages
+from send2trash import send2trash
 
 
 class Download(object):
-    def __init__(self, objectStore):
+    def __init__(self, objectStore, outputQueue):
         self.objectStore = objectStore
+        self.outputQueue = outputQueue
         self.localStore = LocalProvider()
         c = config.Config()
         self.localSyncPath = c.get_home_folder()
         self.tempDownloadFolder = c.get_temporary_folder()
         self.state = statestore.StateStore()
         self.lock = threading.Lock()
+        self.running = True
 
     def stop(self):
-        pass
+        logging.info('Download::stop')
+        self.objectStore.stop()
+        self.running = False
 
     def perform(self):
         # get the current directory
         #logging.debug('Download::perform')
+        self.outputQueue.put(messages.Status('Looking for files to download'))
         files = self.objectStore.list_dir(None)
         for f in files:
+            if not self.running:
+                break
             #logging.debug('f.path = %r' % f.path)
             if f.isFolder:
                 skipChildren = self.download_folder(f)
@@ -49,13 +58,18 @@ class Download(object):
                 self.delete_remote_file(f.path)
             else:
                 # lets get the file
+                head, tail = os.path.split(localPath)
+                self.outputQueue.put(messages.Status('Downloading %s' % tail))
                 tmpFile = self.get_tmp_filename()
                 if os.path.exists(tmpFile):
+                    # if a temporary file with the same name
+                    # exists, delete it
                     os.remove(tmpFile)
                 self.objectStore.download_object(f.path, tmpFile)
                 os.rename(tmpFile, localPath)
                 localMD = self.localStore.get_last_modified_date(localPath)
                 self.state.markObjectAsSynced(f.path, f.hash, localMD)
+                self.outputQueue.put(messages.Status('OK'))
         else:
             # the file already exists - do we overwrite it?
             syncInfo = self.state.getObjectSyncInfo(f.path)
@@ -108,21 +122,28 @@ class Download(object):
             pass
 
     def replace_file(self, f, localPath):
+        head, tail = os.path.split(localPath)
+        self.outputQueue.put(messages.Status('Downloading %s' % tail))
         tmpFile = self.get_tmp_filename()
         if os.path.exists(tmpFile):
+            # if a temporary file with the same name exists, remove it
             os.remove(tmpFile)
         self.objectStore.download_object(f.path, tmpFile)
-        os.remove(localPath)
+        send2trash(localPath)
         os.rename(tmpFile, localPath)
         localMD = self.localStore.get_last_modified_date(localPath)
         self.state.markObjectAsSynced(f.path,
                                       f.hash,
                                       localMD)
+        self.outputQueue.put(messages.Status('OK'))
 
     def get_tmp_filename(self):
         return os.path.join(self.tempDownloadFolder, 'tmpfile')
 
     def download_folder(self, folder):
+        if not self.running:
+            # return true, to indicate that children can be skipped
+            return True
         # does the folder exist locally?
         #logging.debug('download_folder(%s)' % folder.path)
         localPath = self.get_local_path(folder.path)
@@ -226,5 +247,8 @@ class Download(object):
 
     def delete_remote_file(self, path):
         logging.info('delete remote file: %s' % path)
+        head, tail = os.path.split(path)
+        self.outputQueue.put(messages.Status('Deleting %s' % tail))
         self.objectStore.delete_object(path)
         self.state.removeObjectSyncRecord(path)
+        self.outputQueue.put(messages.Status('OK'))

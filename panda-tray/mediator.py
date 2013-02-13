@@ -111,6 +111,12 @@ class Mediator(threading.Thread):
             message = self.inputQueue.get()
             if isinstance(message, messages.Stop):
                 logging.debug('stop message recieved')
+                if self.lock.acquire(True):
+                    try:
+                        if self.currentTask:
+                            self.currentTask.stop()
+                    finally:
+                        self.lock.release()
                 break
             elif isinstance(message,
                             messages.SettingsChanged):
@@ -174,17 +180,21 @@ class Mediator(threading.Thread):
                         # it's important to relax - to give swfit a few
                         # seconds to catch up
                         self.taskList.put(Sleep(20))
-                        download = Download(self.objectStore)
+                        download = Download(self.objectStore, self.outputQueue)
                         self.taskList.put(download)
                     elif isinstance(self.currentTask, Download):
                         #logging.debug('we completed a upload')
                         self.taskList.put(Sleep(20))
-                        upload = Upload(self.objectStore)
+                        upload = Upload(self.objectStore, self.outputQueue)
                         self.taskList.put(upload)
                     elif isinstance(self.currentTask, Authenticate):
                         if self.currentTask.isAuthenticated:
-                            upload = Upload(self.objectStore)
-                            self.taskList.put(upload)
+                            #upload = Upload(self.objectStore,
+                            #    self.outputQueue)
+                            #self.taskList.put(upload)
+                            download = Download(self.objectStore,
+                                                self.outputQueue)
+                            self.taskList.put(download)
                         else:
                             sleep = Sleep(self.currentTask.retryWait)
                             #logging.info('failed to auth'
@@ -201,6 +211,9 @@ class Mediator(threading.Thread):
             finally:
                 self.lock.release()
 
+    def isRunning(self):
+        return self.running
+
     def clearPendingTasks(self):
         self.taskList = Queue.Queue()
 
@@ -211,6 +224,7 @@ class Mediator(threading.Thread):
         #return None
 
     def stop(self):
+        logging.debug('mediator stoppping...')
         self.inputQueue.put(messages.Stop)
         self.inputQueueThread.join()
         if self.lock.acquire(True):

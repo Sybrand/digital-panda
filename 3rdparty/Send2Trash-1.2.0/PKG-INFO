@@ -1,0 +1,71 @@
+Metadata-Version: 1.0
+Name: Send2Trash
+Version: 1.2.0
+Summary: Send file to trash natively under Mac OS X, Windows and Linux.
+Home-page: http://hg.hardcoded.net/send2trash/
+Author: Hardcoded Software
+Author-email: hsoft@hardcoded.net
+License: BSD License
+Description: ==================================================
+        Send2Trash -- Send files to trash on all platforms
+        ==================================================
+        
+        This is a Python 2 package. The Python 3 package is at http://pypi.python.org/pypi/Send2Trash3k .
+        
+        Send2Trash is a small package that sends files to the Trash (or Recycle Bin) *natively* and on
+        *all platforms*. On OS X, it uses native ``FSMoveObjectToTrashSync`` Cocoa calls, on Windows, it uses native (and ugly) ``SHFileOperation`` win32 calls. On other platforms, it follows the trash specifications from freedesktop.org.
+        
+        ``ctypes`` is used to access native libraries, so no compilation is necessary.
+        
+        Installation
+        ------------
+        
+        Download the source from http://hg.hardcoded.net/send2trash and install it with::
+        
+        >>> python setup.py install
+        
+        Usage
+        -----
+        
+        >>> from send2trash import send2trash
+        >>> send2trash('some_file')
+        
+        When there's a problem ``OSError`` is raised.
+        
+        Changes
+        =======
+        
+        Version 1.2.0 -- 2011/03/16
+        ---------------------------
+        
+        * Improved ``plat_other`` to follow freedesktop.org trash specification.
+        
+        Version 1.1.0 -- 2011/02/14
+        ---------------------------
+        
+        * Converted compiled modules to ctypes so that cross-platform compilation isn't necessary anymore.
+        
+        Version 1.0.2 -- 2010/07/10
+        ---------------------------
+        
+        * Fixed bugs with external volumes in plat_other.
+        
+        Version 1.0.1 -- 2010/04/19
+        ---------------------------
+        
+        * Fixed memory leak in OS X module.
+        
+        Version 1.0.0 -- 2010/04/07
+        ---------------------------
+        
+        * Initial Release
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Topic :: Desktop Environment :: File Managers

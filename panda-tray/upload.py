@@ -4,11 +4,14 @@ import config
 import statestore
 import logging
 import os
+import messages
+from send2trash import send2trash
 
 
 class Upload(object):
-    def __init__(self, objectStore):
+    def __init__(self, objectStore, outputQueue):
         self.objectStore = objectStore
+        self.outputQueue = outputQueue
         self.localStore = LocalProvider()
         c = config.Config()
         self.localSyncPath = c.get_home_folder()
@@ -18,6 +21,7 @@ class Upload(object):
         pass
 
     def perform(self):
+        self.outputQueue.put(messages.Status('Looking for files to upload'))
         #logging.debug('Upload::perform')
         if not os.path.exists(self.localSyncPath):
             os.makedirs(self.localSyncPath)
@@ -51,9 +55,7 @@ class Upload(object):
             if os.path.isdir(childLocalPath):
                 self.remove_local_dir(childLocalPath, childRemotePath)
             else:
-                self.state.removeObjectSyncRecord(childRemotePath)
-                logging.info('delete %r' % childLocalPath)
-                os.remove(childLocalPath)
+                self.deleteLocalFile(childLocalPath, childRemotePath)
                 #logging.info('local=%s;remote=%s' % (childLocalPath,
                 #                                     childRemotePath))
         #logging.info('local=%s;remote=%s' % (localPath, remotePath))
@@ -165,15 +167,23 @@ class Upload(object):
                 # we uploaded this file - but it's NOT online!!
                 # this can only mean that it's been deleted online
                 # so we need to delete it locally!
-                logging.warn('delete local file %s' % localPath)
-                os.remove(localPath)
-                self.state.removeObjectSyncRecord(remotePath)
+                self.deleteLocalFile(localPath, remotePath)
             else:
                 # the file hasn't been uploaded before, so we upload it now
                 self.uploadFile(localPath, remotePath)
 
+    def deleteLocalFile(self, localPath, remotePath):
+        logging.warn('delete local file %s' % localPath)
+        head, tail = os.path.split(localPath)
+        self.outputQueue.put(messages.Status('Deleting %s' % tail))
+        send2trash(localPath)
+        self.state.removeObjectSyncRecord(remotePath)
+        self.outputQueue.put(messages.Status('OK'))
+
     def uploadFile(self, localPath, remotePath):
         logging.warn('upload local file %s' % localPath)
+        head, tail = os.path.split(localPath)
+        self.outputQueue.put(messages.Status('Uploading %s' % tail))
         # before we upload it - we calculate the hash
         localFileInfo = self.localStore.get_file_info(localPath)
         self.objectStore.upload_object(localPath,
@@ -183,6 +193,7 @@ class Upload(object):
         self.state.markObjectAsSynced(remotePath,
                                       localFileInfo.hash,
                                       localMD)
+        self.outputQueue.put(messages.Status('OK'))
 
     def fileHasBeenUploaded(self, localPath, remotePath):
         syncInfo = self.state.getObjectSyncInfo(remotePath)

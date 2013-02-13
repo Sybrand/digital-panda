@@ -27,6 +27,8 @@ There's not much to see right now... especially if you don't have a swift server
 * Synchronization capabilities - e.g. "sync folder"
 * Configuration GUI
 * Minimal GUI that does syncing in background
+* Consider refactoring to using Twisted http://twistedmatrix.com/trac/
+* Refactor upload/download decision making (generate a list of actions, apply actions)
 
 ## Dependancies
 
@@ -44,34 +46,10 @@ install esky (https://github.com/cloudmatrix/esky)
 
 using innosetup for installer (windows)
 
-## Known issues
-Panda-Tray:
-- In settings dialog, Apply doesn't disable after clicking cancel
-- Tabbing in settings dialog doesn't work right (not jumping to buttons after text)
-- In settings dialog, first textbox should be selected by default
-- Event handling is just bloody crazy right now! Need to refactor UI code
-- Downloads don't resume - doesn't show upload/download status
-- Quitting the panda - background downloads keep going
-- Not working with Unity on Ubuntu
-- Password is being stored in clear text!
-- Installer fails if already installed and running
-- If you quit the panda - while it's upgrading - it keeps running in the background until
-	the upgrade is complete. If you try to start up the panda while it's upgrading, it
-	won't start. You have to wait until the update is complete, and then start the panda.
-	That's a silly yourney - the users shouldn't have to worry about that!
-- If you delete the local directory, but have placed new files in that directory remotely,
-	then the remote files get removed. Appropriate action would be to retain files that
-	have not been downloaded yet, by downloading them - and retaining directory structure as
-	far as is valid
-- The setup program isn't signed - so Windows 8 complains
-- The autoupdate feature, on Windows 8 requires promping to complete
-- On first run, on windows 8, security issue causes prompting
+install send2trash (in 3rdparty\Send2Trash-1.2.0 run python setup.py install)
 
+install zope easy_install zope.interface-4.0.3-py2.7-win32.egg
 
-## Missing features
-Panda-Tray:
-- Cool feature would be to open digital panda folder, if you click on the digital panda icon, when digital panda is already running in the tray.
-- Favourites (link to digital panda should be added)
-- I think the panda should ask before updating - but that can wait until we have something more stable
-- Status updates (downloading, uploading etc.)
-- Look if there's a better way to detect online changes than iterating through everything
+install twisted - Twisted-12.3.0.win32-py2.7.msi
+
+install pyOpenSSL - easy_install pyOpenSSL-0.11-py2.7-win32.egg

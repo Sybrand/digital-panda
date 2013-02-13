@@ -9,7 +9,7 @@ import threading
 import os
 import tempfile
 import mmap
-#import sys
+from internet import Downloader
 
 
 ENCODING = 'utf8'
@@ -224,6 +224,10 @@ class SwiftProvider(abstract.AbstractProvider):
                 fileInfo.contentType = data[1]
         return fileInfo
 
+    def stop(self):
+        logging.info('SwiftProvider::stop')
+        self._swift.stop()
+
     credentials = property(_get_credentials, _set_credentials)
 
 
@@ -245,6 +249,9 @@ class SwiftAPI(object):
         self._username = username
         self._password = password
         self._user_agent = user_agent
+        self._lock = threading.Lock()
+        self._downloader = None
+        self._isRunning = True
 
     def _open_connection(self, url):
         """ return HTTPConnection/HTTPSConnection depending
@@ -481,10 +488,59 @@ class SwiftAPI(object):
         return result.getheaders()
 
     def get_object(self, container, name, targetPath):
+        return self.get_object_url_lib(container, name, targetPath)
+
+    def get_object_twisting(self, container, name, targetPath):
+
+        metaData = self.get_object_meta_data(container, name, True)
+        for data in metaData:
+            if data[0] == 'content-length':
+                expectedBytes = int(data[1])
+                break
         # we download to a temporary path
         tmpPath = os.path.join(tempfile.gettempdir(), '~tmp')
         if os.path.exists(tmpPath):
             os.remove(tmpPath)
+
+        url = self._storage_url
+        if url.port:
+            host = "%s:%d" % (url.hostname, url.port)
+        else:
+            host = url.hostname
+        path = '%s://%s%s' % (url.scheme,
+                              host,
+                              self._prepare_object_path(container, name))
+
+        headers = {'X-Auth-Token': [self._auth_token],
+                   'User-Agent': [self._user_agent]}
+        self._lock.acquire()
+        try:
+            self._downloader = Downloader()
+        finally:
+            self._lock.release()
+        self._downloader.download(path, tmpPath, headers)
+        bytesWritten = self._downloader.getBytesWritten()
+        self._lock.acquire()
+        try:
+            self._downloader = None
+        finally:
+            self._lock.release()
+        if bytesWritten != expectedBytes:
+            raise Exception('for %r, was expecting %r bytes, but only got %r' %
+                            (path, expectedBytes, bytesWritten))
+        os.rename(tmpPath, targetPath)
+
+    def get_object_url_lib(self, container, name, targetPath):
+        # we download to a temporary path
+        tmpPath = os.path.join(tempfile.gettempdir(), '~tmp')
+        if os.path.exists(tmpPath):
+            os.remove(tmpPath)
+
+        metaData = self.get_object_meta_data(container, name, True)
+        for data in metaData:
+            if data[0] == 'content-length':
+                expectedBytes = int(data[1])
+                break
 
         path = self._prepare_object_path(container, name)
         connection = self._open_connection(self._storage_url)
@@ -495,11 +551,17 @@ class SwiftAPI(object):
             chunkSize = 1048576
             data = result.read(chunkSize)
             targetFile.write(data)
-            while (len(data) == chunkSize):
+            bytesRead = len(data)
+            while (len(data) == chunkSize) and self._isRunning:
                 data = result.read(chunkSize)
                 targetFile.write(data)
+                bytesRead += len(data)
             targetFile.flush()
             targetFile.close()
+            if expectedBytes != bytesRead:
+                raise Exception('was expecting %r bytes for %r'
+                                ', but only read %r' %
+                                (expectedBytes, path, bytesRead))
             # file download is complete - so we
             # replace it
             os.rename(tmpPath, targetPath)
@@ -553,6 +615,16 @@ class SwiftAPI(object):
 
     def _set_auth_url(self, value):
         self._auth_url = urlparse(value)
+
+    def stop(self):
+        logging.info('SwiftAPI::stop()')
+        self._lock.acquire()
+        self._isRunning = False
+        try:
+            if self._downloader:
+                self._downloader.interrupt()
+        finally:
+            self._lock.release()
 
     username = property(_get_username, _set_username)
     password = property(_get_password, _set_password)
