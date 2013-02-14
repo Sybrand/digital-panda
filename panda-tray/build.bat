@@ -1,6 +1,6 @@
 @echo off
 set pandapfx=C:\Temp\panda.pfx
-set version=0.13
+set version=0.14
 set zip="C:\Program Files (x86)\7-Zip\7z.exe"
 IF "%1"=="installer" GOTO inno
 IF "%1"=="sign" GOTO sign
