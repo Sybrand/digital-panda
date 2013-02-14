@@ -20,14 +20,15 @@ Panda-Tray:
 - The setup program isn't signed - so Windows 8 complains
 - The autoupdate feature, on Windows 8 requires promping to complete
 - On first run, on windows 8, security issue causes prompting
+- Upload speed not showing
+- Must check md5 hash on upload and download!
 
 ## Missing features
 Panda-Tray:
 - Favourites (link to digital panda should be added)
 - I think the panda should ask before updating - but that can wait until we have something more stable
-- Status: speed uploading/downloading, files up to date etc.
+- Status: speed uploading, files up to date etc.
 - Look if there's a better way to detect online changes than iterating through everything
-- "All files up to date"
 
 
 ## Panda-Tray:

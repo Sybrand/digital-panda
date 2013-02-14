@@ -55,16 +55,16 @@ class SwiftProvider(abstract.AbstractProvider):
         # use / convention to indicate root
         # in swift context - we will take this to mean that
         # no container has yet been selected
-        self.lock = threading.Lock()
+        self._lock = threading.Lock()
         self._credentials = credentials
 
     def delete_object(self, path):
-        if self.lock.acquire(True):
+        if self._lock.acquire(True):
             try:
                 container, name = self._split_path(path)
                 self._swift.delete_object(container, name)
             finally:
-                self.lock.release()
+                self._lock.release()
 
     def list_dir(self, path):
         #logging.debug('list_dir(path = %s)' % path)
@@ -132,15 +132,15 @@ class SwiftProvider(abstract.AbstractProvider):
         return swiftObject['content_type'] == FOLDER_TYPE
 
     def create_folder(self, targetPath):
-        if self.lock.acquire(True):
+        if self._lock.acquire(True):
             try:
                 container, name = self._split_path(targetPath)
                 self._swift.put_empty_object(container, name, FOLDER_TYPE)
             finally:
-                self.lock.release()
+                self._lock.release()
 
     def download_object(self, sourcePath, targetPath):
-        if self.lock.acquire(True):
+        if self._lock.acquire(True):
             try:
                 # create a temporary path (we only move the file to the
                 # targetPath, once it's been completely downloaded)
@@ -150,10 +150,10 @@ class SwiftProvider(abstract.AbstractProvider):
                 logging.info('container=%s;name=%s' % (container, name))
                 self._swift.get_object(container, name, targetPath)
             finally:
-                self.lock.release()
+                self._lock.release()
 
     def upload_object(self, sourcePath, targetPath, md5Hash=None):
-        if self.lock.acquire(True):
+        if self._lock.acquire(True):
             try:
                 logging.info('going to upload %s to %s' %
                              (sourcePath, targetPath))
@@ -167,20 +167,20 @@ class SwiftProvider(abstract.AbstractProvider):
                     self._headers_to_fileInfo(headers, targetPath, name)
                 return fileInfo
             finally:
-                self.lock.release()
+                self._lock.release()
 
     def authenticate(self):
-        if self.lock.acquire(True):
+        if self._lock.acquire(True):
             try:
                 self._swift.authenticate()
                 return True
             finally:
-                self.lock.release()
+                self._lock.release()
         return False
 
     def get_file_info(self, path):
         #logging.info('get file info for: %s' % path)
-        if self.lock.acquire(True):
+        if self._lock.acquire(True):
             try:
                 container, name = self._split_path(path)
                 metaData = self._swift.get_object_meta_data(container, name)
@@ -189,7 +189,7 @@ class SwiftProvider(abstract.AbstractProvider):
                     fileInfo = self._headers_to_fileInfo(metaData, path, name)
                 return fileInfo
             finally:
-                self.lock.release()
+                self._lock.release()
 
     def _set_credentials(self, credentials):
         self._credentials = credentials
@@ -468,7 +468,6 @@ class SwiftAPI(object):
         fileNo = sourceFile.fileno()
         fileSize = os.path.getsize(localPath)
         path = self._prepare_object_path(container, name)
-        self.lock.acquire()
         # potentially NOT thread safe here!
         # if self._mappedFile is accessed while we
         # are setting up this object - things could go badly
@@ -490,13 +489,13 @@ class SwiftAPI(object):
             headers['Content-Length'] = 0
             connection.request('PUT', path, '', headers)
         result = connection.getresponse()
-        self.lock.acquire()
+        self._lock.acquire()
         try:
             if self._mappedFile:
                 self._mappedFile.close()
                 self._mappedFile = None
         finally:
-            self.lock.release()
+            self._lock.release()
         sourceFile.close()
         if (result.status != 201):
             raise Exception('failed to upload %r ; status = %r' %
@@ -548,6 +547,16 @@ class SwiftAPI(object):
         os.rename(tmpPath, targetPath)
         """
 
+    def _update_progress(self,
+                         path,
+                         bytesPerSecond,
+                         totalBytesRead,
+                         expectedBytes):
+        self._output_queue.put(abstract.ProgressMessage(path,
+                                                        bytesPerSecond,
+                                                        totalBytesRead,
+                                                        expectedBytes))
+
     def get_object_url_lib(self, container, name, targetPath):
         # we download to a temporary path
         tmpPath = os.path.join(tempfile.gettempdir(), '~tmp')
@@ -572,34 +581,32 @@ class SwiftAPI(object):
             targetFile.write(data)
             totalBytesRead = len(data)
             delta = time.time() - t
-            bytesPerSecond = totalBytesRead / delta
-            logging.info('Bps: %r' % bytesPerSecond)
+            if delta > 0:
+                bytesPerSecond = totalBytesRead / delta
+                logging.info('Bps: %r' % bytesPerSecond)
             #megaBytesPerSecond = math.floor(bytesPerSecond / 1024 / 1024)
             while (len(data) == chunkSize) and self._isRunning:
                 t = time.time()
                 data = result.read(chunkSize)
-                delta = time.time() - t
                 bytesRead = len(data)
-                bytesPerSecond = bytesRead / delta
-                #prevMBPS = megaBytesPerSecond
-                #megaBytesPerSecond = math.floor(bytesPerSecond / 1024 / 1024)
-                self._output_queue.put(abstract.ProgressMessage(path,
-                                                                bytesPerSecond,
-                                                                totalBytesRead,
-                                                                expectedBytes))
-                """if prevMBPS != megaBytesPerSecond:
-                    logging.info('%rMB/%rMB - downloading @ %r MBps' %
-                                 (totalBytesRead / 1024 / 1024,
-                                 expectedBytes / 1024 / 1024,
-                                 megaBytesPerSecond))"""
+                delta = time.time() - t
+                if delta > 0:
+                    bytesPerSecond = bytesRead / delta
+                    self._update_progress(path,
+                                          bytesPerSecond,
+                                          totalBytesRead,
+                                          expectedBytes)
                 targetFile.write(data)
                 totalBytesRead += bytesRead
             targetFile.flush()
             targetFile.close()
+            """ some version of swift don't report expectedBytes correctly!
+            as such - we can't use this as a test - we have to rather check
+            the md5 hash
             if expectedBytes != totalBytesRead:
                 raise Exception('was expecting %r bytes for %r'
                                 ', but only read %r' %
-                                (expectedBytes, path, totalBytesRead))
+                                (expectedBytes, path, totalBytesRead))"""
             # file download is complete - so we
             # replace it
             os.rename(tmpPath, targetPath)

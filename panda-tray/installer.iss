@@ -27,7 +27,7 @@ LicenseFile=..\LICENSE.rtf
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
-SignTool=Standard
+;SignTool=Standard
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -42,6 +42,8 @@ Source: "dist\Digital Panda Tray Application-{#MyAppVersion}.win32\*"; DestDir: 
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+;http://www.vbforums.com/showthread.php?437025-RESOLVED-InnoSetup-ISTool-Creating-a-shortcut-in-favorites-folder
+;-> this goes to i.e favourites! who cares! Name: "{userfavorites}\Digital Panda"; Filename: "{%UserProfiles}\Digital Panda"
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
