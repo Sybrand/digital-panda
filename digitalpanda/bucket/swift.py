@@ -10,6 +10,7 @@ import os
 import tempfile
 import mmap
 import time
+import hashlib
 #import math
 #from internet import Downloader
 
@@ -565,9 +566,11 @@ class SwiftAPI(object):
 
         metaData = self.get_object_meta_data(container, name, True)
         for data in metaData:
+            #logging.info('key = %r' % data[0])
             if data[0] == 'content-length':
                 expectedBytes = int(data[1])
-                break
+            elif data[0] == 'etag':
+                expectedHash = data[1]
 
         path = self._prepare_object_path(container, name)
         connection = self._open_connection(self._storage_url)
@@ -577,15 +580,21 @@ class SwiftAPI(object):
             t = time.time()
             targetFile = open(tmpPath, 'wb')
             chunkSize = 1048576
+            md5 = hashlib.md5()
             data = result.read(chunkSize)
-            targetFile.write(data)
-            totalBytesRead = len(data)
-            delta = time.time() - t
-            if delta > 0:
-                bytesPerSecond = totalBytesRead / delta
-                logging.info('Bps: %r' % bytesPerSecond)
+            if len(data) > 0:
+                targetFile.write(data)
+                md5.update(data)
+                totalBytesRead = len(data)
+                delta = time.time() - t
+                if delta > 0:
+                    bytesPerSecond = totalBytesRead / delta
+                    self._update_progress(path,
+                                          bytesPerSecond,
+                                          totalBytesRead,
+                                          expectedBytes)
             #megaBytesPerSecond = math.floor(bytesPerSecond / 1024 / 1024)
-            while (len(data) == chunkSize) and self._isRunning:
+            while (len(data) > 0) and self._isRunning:
                 t = time.time()
                 data = result.read(chunkSize)
                 bytesRead = len(data)
@@ -596,10 +605,14 @@ class SwiftAPI(object):
                                           bytesPerSecond,
                                           totalBytesRead,
                                           expectedBytes)
-                targetFile.write(data)
+                if bytesRead > 0:
+                    targetFile.write(data)
+                    md5.update(data)
                 totalBytesRead += bytesRead
             targetFile.flush()
             targetFile.close()
+            localHash = md5.hexdigest()
+
             """ some version of swift don't report expectedBytes correctly!
             as such - we can't use this as a test - we have to rather check
             the md5 hash
@@ -609,7 +622,12 @@ class SwiftAPI(object):
                                 (expectedBytes, path, totalBytesRead))"""
             # file download is complete - so we
             # replace it
-            os.rename(tmpPath, targetPath)
+            if localHash == expectedHash:
+                logging.debug('we read what we expected!')
+                os.rename(tmpPath, targetPath)
+            else:
+                raise Exception('expected hash tag %r, recieved hash tag %r' %
+                                (expectedHash, localHash))
         else:
             raise Exception('failed to download %s/%s to %s ; status = %r' %
                             (container, name,

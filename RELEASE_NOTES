@@ -21,7 +21,8 @@ Panda-Tray:
 - The autoupdate feature, on Windows 8 requires promping to complete
 - On first run, on windows 8, security issue causes prompting
 - Upload speed not showing
-- Must check md5 hash on upload and download!
+- Must check md5 hash on upload!
+- Download is not downloading complete file!
 
 ## Missing features
 Panda-Tray:
@@ -29,9 +30,15 @@ Panda-Tray:
 - I think the panda should ask before updating - but that can wait until we have something more stable
 - Status: speed uploading, files up to date etc.
 - Look if there's a better way to detect online changes than iterating through everything
+- Double click the panda, should open panda folder
+- Account settings should be an additinoal tab away
 
 
 ## Panda-Tray:
+
+0.14
+* Bug fixes:
+- Downloads were coming down incomplete - added check to ensure that file hashes match
 
 0.13
 * Bug fixes:
