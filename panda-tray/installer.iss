@@ -27,7 +27,7 @@ LicenseFile=..\LICENSE.rtf
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
-;SignTool=Standard
+SignTool=Standard
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
