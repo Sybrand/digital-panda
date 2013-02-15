@@ -20,7 +20,7 @@
                 <i><b>IMPORTANT:</b> Digital Panda is currently in Alpha (i.e. early and active development) - please make a backup of ALL your data before installing the Panda!</i>
             </p>
 			<p>
-				<a href='http://www.digitalpanda.co.za/downloads/Setup.Digital Panda Tray Application-0.13.win32.exe'>Windows 7 / 8</a>
+				<a href='http://www.digitalpanda.co.za/downloads/Setup.Digital Panda Tray Application-0.14.win32.exe'>Windows 7 / 8</a>
 			</p>
 			<p>
 				Ubuntu 12.10 - Soon (or <a href="https://github.com/Sybrand/digital-panda">do it yourself</a>)
