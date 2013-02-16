@@ -1,0 +1,10 @@
+body {
+	background-color:#FFDDAA;
+	background-image:none;
+}
+div.logoContainer {
+    width:800px;
+    border-color:#FFFFFF;
+    border-width:1px;
+    border-style:solid;
+}

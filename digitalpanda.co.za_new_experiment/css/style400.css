@@ -5,16 +5,20 @@ body {
 div {
 	font-size: 20pt;
 }
+div.logoWords {
+    width:160px;
+}
 div.logoWordsDigital {
 	margin-top:10px;
 }
 div.logoWordsPanda {
 	margin-left:2px;
     margin-top:0px;
-    width: 200px;
 }
 div.logoBlurb {
-	width:200px;
 	margin-top:2px;
 	margin-left:2px;
+}
+div.logoContainer {
+    width:400px;
 }

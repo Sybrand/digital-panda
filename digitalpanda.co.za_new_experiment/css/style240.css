@@ -5,3 +5,6 @@ body {
 div {
 	font-size: 30pt;
 }
+div.logoContainer {
+    width:240px;
+}

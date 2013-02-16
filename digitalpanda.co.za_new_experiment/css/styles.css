@@ -83,16 +83,26 @@ color:#4f881d;
 text-decoration:none;
 }
 div.header {
-position:absolute;
-top:0px;
-width:100%;
-height:140px;
-background-image:url(../images/headerSlice.png);
-background-repeat:repeat-x;
-z-index:100;
+    position:relative;
+    top:0px;
+    width:100%;
+    height:140px;
+    background-image:url(../images/headerSlice.png);
+    background-repeat:repeat-x;
+    z-index:100;
+    border-color:#FF0000;
+    border-width:2px;
+    border-style:solid;
+    text-align:center;
 }
 div.logoContainer {
     position:relative;
+    float: left;
+    width:900px;
+    border-color:#00FF00;
+    border-width:2px;
+    border-style:solid;
+    text-align:center;
     /*
     position:relative;
     margin:10px auto 0;
@@ -116,6 +126,14 @@ div.logoPanda {
     width:84px;
     height:110px;
 }
+div.logoWords {
+    float: left;
+    position:relative;
+    width:300px;
+    border-color:#991200;
+    border-width:1px;
+    border-style:solid;
+}
 div.logoWordsDigital {
     float: left;
     position:relative;
@@ -124,6 +142,9 @@ div.logoWordsDigital {
     width:149px;
     height:41px;
     margin-top:50px;
+    border-color:#991200;
+    border-width:1px;
+    border-style:solid;
 }
 div.logoWordsPanda {
     float: left;
@@ -132,14 +153,22 @@ div.logoWordsPanda {
     background-image:url(../images/digitalPandaLogo_words_panda.png);
     background-repeat:no-repeat;
     width:132px;
-    height:38px;
+    height:41px;
     margin-top:50px;
+    border-color:#991200;
+    border-width:1px;
+    border-style:solid;
 }
 div.logoBlurb {
-    float: left;
+    border-color:#220000;
+    border-width:1px;
+    border-style:solid;
+    float:left;
+    position:relative;
     font-size:13px;
     color:#ffffff;
     margin-top:0px;
+    margin-left:4px;
 }
 div.pageContainer {
 position:relative;
