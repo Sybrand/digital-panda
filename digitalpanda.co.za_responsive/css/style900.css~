@@ -1,0 +1,8 @@
+div.infoContainer {
+    width:100%;
+}
+img.pandaInABox {
+    visibility:hidden;
+    width:0px;
+    height:0px;
+}

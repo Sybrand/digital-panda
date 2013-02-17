@@ -1,0 +1,10 @@
+div.logoPanda {
+    background-image:url(../images/digitalPandaLogo_panda.png);
+    background-repeat:no-repeat;
+    width:84px;
+    height:110px;
+}
+div.logoContainer {
+    background-image:url(../images/headerSlice.png);
+    background-repeat:repeat;
+}

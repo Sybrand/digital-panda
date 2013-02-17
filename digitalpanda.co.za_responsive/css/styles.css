@@ -1,0 +1,212 @@
+body {
+    background-color:#000000;
+}
+div.logoContainer {
+    background-image:url(../images/headerSlice.png);
+    background-repeat:repeat;
+}
+div.logo {
+    margin-top:10px;
+    margin-bottom:10px;
+    height:110px;
+    background-image:url(../images/digitalPandaLogo.png);
+    background-repeat:no-repeat;
+    color:#FFFFFF;
+    font-size: 13px;
+    font-family: arial;
+    text-align: left;
+}
+img.logo {
+    margin-top:0px;
+    margin-bottom:0px;
+    float:left;
+}
+div.blurb {
+    margin-top: 80px;
+    margin-left: 87px;
+}
+div.whatIsDigitalPanda {
+    margin-top:0px;
+    margin-bottom:0px;
+    color:#4f881d;
+    font-size:25px;
+}
+img.whatIsDigitalPanda {
+    margin-top:0px;
+    margin-bottom:0px;
+}
+/*
+img.pandaInABox {
+    border-color:red;
+    width:175px;
+    height:175px;
+}*/
+p {
+    text-align:left;
+}
+div.downloadBig {
+    float:left;
+    width:243px;
+    height:52px;
+    background-image:url(../images/downloadDigitalPanda.png);
+    background-repeat:no-repeat;
+    background-position:top center;
+    cursor:pointer;
+}
+div.downloadBig:hover {
+    background-position:bottom center;
+}
+div.version {
+    float:left;
+    margin-left:46px;
+    margin-top:28px;
+    color:#6eb63d;
+    font-size:14px;
+}
+div.mainPandaBlurb {
+    background-color:#e4e4e4;
+    border-radius:5px;
+    padding: 5px;
+}
+div.mainContainer {
+    background-color:#FFFFFF;
+}
+div.mainColumns {
+    margin-top:0px;
+    padding-top:15px;
+    padding-bottom:15px;
+    padding-left:3%;
+    padding-right:3%;
+}
+div.dropShadow {
+    background-image:url(../images/logoDropShadow.png);
+    height:9px;
+}
+.border {
+    border-color:red;
+    border-width:2px;
+    border-style:solid;
+}
+div.infoContainer {
+    width:900px;
+    margin:0 auto;
+}
+div.bottomInfo {
+    background-color:#555555;
+}
+div.buttonBorder {
+    border-color:#406b0e;
+    border-style:solid;
+    border-width:1px;
+    border-radius:5px;
+    background-image:url('../images/downloadButtonSlice.png')
+}
+table.buttonTable {
+    margin:4px;
+    padding:0px;
+}
+tr.buttonTr {
+    margin:0px;
+    padding:0px;
+}
+td.buttonTdImg {
+    margin:0px;
+    padding:0px;
+}
+td.buttonTdText {
+     padding:0px;
+     margin:0px;
+     vertical-align:top
+}
+img.buttonImg {
+     vertical-align:middle;
+     margin-right:10px;
+}
+div.buttonTitle {
+     text-align:left;
+     color:#FFFFFF;
+     text-transform:uppercase;
+     font-family:arial;
+     font-size:13px;
+     padding-top:3px;
+     padding-right:5px;
+     margin:0px
+}
+div.buttonVersion {
+    color:#6eb63d;
+    font-size:14px;
+    text-align:left;
+    font-family:arial;
+    font-size:14px;
+    padding:0px;
+}
+div.otherVersions {
+    font-size: 28px;
+    color: #4f881d;
+    font-weight: normal;
+    padding-top: 5px;
+    margin: 0px;
+    text-align:left;
+}
+div.rhsButtonBorder {
+    border-color:#cccccc;
+    border-style:solid;
+    border-width:1px;
+    border-radius:5px;
+    /*background-image:url('../images/rhsButtonSlice.png');*/
+    background-color: #e0e0e0;
+    vertical-align:middle;
+    text-align: left;
+    color:#69a43d;
+    font-size:14px;
+    min-height: 30px;
+    padding-left: 5px;
+    margin-bottom: 15px;
+}
+img.rhsButtonImg {
+    width:26;
+    height:26;
+}
+div.rhsButtonText {
+    padding-left: 30px;
+    padding: 5px;
+    padding-left: 30px;
+}
+div.twitter {
+    background-image:url('../images/twitterIcon.png');
+    background-position: left center; 
+    background-repeat: no-repeat;
+}
+div.email {
+    background-image:url('../images/emailIcon.png');
+    background-position: left center; 
+    background-repeat: no-repeat;   
+}
+div.getInvolved {
+    background-image:url('../images/getInvolvedIcon.png');
+    background-position: left center; 
+    background-repeat: no-repeat;   
+}
+td.rhsButtonTdText {
+     padding-right: 10px;
+     padding-left: 2px;
+     margin:0px;
+     vertical-align:middle;
+     text-align: left;
+     color:#69a43d;
+     font-size:15px;
+}
+/*
+div.RHSbtn {
+    margin:0px auto;
+    margin-bottom: 15px;
+    width: 210px;
+    height: 31px;
+    padding: 1px;
+    background-image: url(../images/rhsbutton.png);
+    background-repeat: no-repeat;
+    background-position: top center;
+    overflow: hidden;
+    cursor: pointer;
+}
+*/

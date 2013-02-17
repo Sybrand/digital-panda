@@ -16,7 +16,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
 	<title>Digital Panda - Cloud Storage Synchronization</title>
-        <meta name="description" content="Description: Digital Panda is a cloud synchronization tool that syncs with OpenStack Swift. License: Open Source, Platform: Windows"/>
+		<meta name="description" content="Description: Digital Panda is a cloud synchronization tool that syncs with OpenStack Swift. License: Open Source, Platform: Windows"/>
 	<meta name="keywords" content="cloud storage, openstack, swift, sync, synchronization, synchronisation">
 
 	<meta name="author" content="Sybrand Strauss">
@@ -45,23 +45,12 @@
 	<link rel="stylesheet" href="css/10cols.css" media="all">
 	<link rel="stylesheet" href="css/11cols.css" media="all">
 	<link rel="stylesheet" href="css/12cols.css" media="all">
-        <link rel="stylesheet" href="css/styles.css" media="all">
-        <link rel="stylesheet" type="text/css" media="screen and (max-width: 500px)" href="css/style500.css"/>
+	<link rel="stylesheet" href="css/styles.css" media="all">
+	<link rel="stylesheet" type="text/css" media="screen and (max-width: 500px)" href="css/style500.css"/>
+	<link rel="stylesheet" type="text/css" media="screen and (max-width: 900px)" href="css/style900.css"/>
 
 	<!-- All JavaScript at the bottom, except for Modernizr which enables HTML5 elements and feature detects -->
 	<script src="js/modernizr-2.5.3-min.js"></script>
-
-	<style type="text/css">
-
-	/*  THIS IS JUST TO GET THE GRID TO SHOW UP.  YOU DONT NEED THIS IN YOUR CODE */
-
-	#maincontent .col {
-		background: #ccc;
-		background: rgba(204, 204, 204, 0.85);
-
-	}
-
-	</style>
 
 </head>
 
@@ -69,47 +58,78 @@
 
 <div class="logoContainer">
 	<div class="section group infoContainer">
-                <div class="col span_8_of_8 logo"><img class="logo" src="images/digitalPandaLogo.png"/></div>
+				<div class="col span_8_of_8 logo">
+					<div class="blurb">STORE STUFF IN THE CLOUD</div>
+					<!--img class="logo" src="images/digitalPandaLogo.png"/-->
+				</div>
 	</div>
 </div>
 <div class="mainContainer infoContainer">
+	<div class="section group dropShadow">
+	</div>
 	<div class="section group mainColumns">
-		<div class="col span_5_of_8">
-	  		<div class="group mainPandaBlurb">
+		<div class="col span_6_of_8">
+			<div class="group mainPandaBlurb">
 				<div class="col span_1_of_3">
 					<img src="images/pandaInABox.png" class="pandaInABox"/>
 				</div>
 				<div class="col span_2_of_3">
-			  		<div class="section group">
-						<div class="col span_1_of_1">
-							<p><img src="images/whatisdigitalpanda.png"/></p>
-							<p>
-						The easy way to synchronize all your documents, music and movies to your storage in the cloud.</p>
-                                                        <p>Digital Panda is an Openstack compatible synchronization client.</p>
+					<div class="section group">
+						<div class="col span_1_of_1 whatIsDigitalPanda">
+							What is Digital Panda?
 						</div>
 					</div>
 					<div class="section group">
-					  <div class="col span_1_of_1">
-					    <div class="downloadBigContainer">
-                 			      <div class="downloadBig">
-		                        	<div class="version">Windows 7 &amp; 8</div>
-                  			      </div>
-		                       	    <div class="dwnldReflection">&nbsp;</div>					
-             				</div>
-				        </div>
+						<div class="col span_1_of_1">
+							<p>The easy way to synchronize all your documents, music and movies to your storage in the cloud.</p>
+							<p>Digital Panda is an Openstack compatible synchronization client.</p>
+							<p>I<b>MPORTANT:</b> Digital Panda is currently in Alpha (i.e. early and active development) - please make a backup of ALL your data before installing the Panda!</p>
+						</div>
+					</div>
+					<div class="section group">
+					  	<div class="col span_1_of_1">
+					  		<a href="downloads/Setup.Digital%20Panda%20Tray%20Application-0.14.win32.exe">
+					  			<div class="buttonBorder">
+					  				<table class="buttonTable">
+					  					<tr class="buttonTr">
+					  						<td class="buttonTdImg">
+					  							<img class="buttonImg" src="images/downArrow.png"/>
+					  						</td>
+					  						<td class="buttonTdText">
+					  							<div class="section group buttonTitle">
+						  							Download Digital Panda
+						  						</div>
+									  			<div class="section group buttonVersion">
+									  				Windows 7 &amp; 8
+									  			</div>
+					  						</td>
+					  					</tr>
+					  				</table>
+					  			</div>
+					  		</a>
+					  		<!--
+							<div class="downloadBigContainer">
+								<div class="downloadBig">
+									<div class="version">Windows 7 &amp; 8</div>
+								</div>
+								<div class="dwnldReflection">&nbsp;</div>					
+							</div>
+						-->
+						</div>
 					</div>
 				</div>				
 			</div>
+			<!--
 			<div class="section group">
-				<div class="section group">
+				<div class="section group otherVersions">
 					Other versions
 				</div>
 				<div class="section group">
 					<div class="col span_1_of_5">
-						Windows
+						Windows 8
 					</div>
 					<div class="col span_1_of_5">
-						Mac
+						Mac OS X
 					</div>
 					<div class="col span_1_of_5">
 						Linux
@@ -120,37 +140,55 @@
 					<div class="col span_1_of_5">
 						iOS
 					</div>
-
-
-
 				</div>
 			</div>
+		-->
 		</div>
- 		<div class="col span_3_of_8">
+		<div class="col span_2_of_8">
 			<div class="section group">
-				Follow the digital panda
+				<a href="https://twitter.com/TheDigitalPanda" target="_blank" alt="Follow the digital panda">
+					<div class="rhsButtonBorder">
+						<div class="rhsButtonText twitter">
+							Follow the digital panda
+						</div>
+		  			</div>
+	  			</a>
 			</div>
 			<div class="section group">
-				Email
+				<a href="mailto:thepanda@digitalpanda.co.za" alt="Email the Digital Panda">
+					<div class="rhsButtonBorder">
+						<div class="rhsButtonText email">
+							Email the Digital Panda
+						</div>
+					</div>
+				</a>
 			</div>
+			<!--
 			<div class="section group">
 				Contribute
 			</div>
 			<div class="section group">
 				Help
 			</div>
+			-->
 			<div class="section group">
-				Get involved
+				<a href="https://github.com/Sybrand/digital-panda" target="_blank" alt="Get Involved">
+					<div class="rhsButtonBorder">
+						<div class="rhsButtonText getInvolved">
+							Get involved
+						</div>
+					</div>
+				</a>
 			</div>
 		</div>
 	</div>
 </div>
-
+<!--
 <div class="infoContainer bottomInfo">
 	<div class="section group">
 		stuff at the bottom
 	</div>
-</div>
+</div>-->
 	<!-- JavaScript at the bottom for fast page loading -->
 
 	<!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if necessary -->

@@ -1,0 +1,65 @@
+body {
+    background-color:#000000;
+}
+div.logoContainer {
+    background-image:url(../images/headerSlice.png);
+    background-repeat:repeat;
+}
+div.logo {
+    margin-top:10px;
+    margin-bottom:10px;
+}
+img.logo {
+    margin-top:0px;
+    margin-bottom:0px;
+    float:left;
+}
+/*
+img.pandaInABox {
+    border-color:red;
+    width:175px;
+    height:175px;
+}*/
+p {
+    text-align:left;
+}
+div.downloadBig {
+    float:left;
+    width:243px;
+    height:52px;
+    background-image:url(../images/downloadDigitalPanda.png);
+    background-repeat:no-repeat;
+    background-position:top center;
+    cursor:pointer;
+}
+div.downloadBig:hover {
+    background-position:bottom center;
+}
+div.version {
+    float:left;
+    margin-left:46px;
+    margin-top:28px;
+    color:#6eb63d;
+    font-size:14px;
+}
+div.mainPandaBlurb {
+    background-color:#DDDDDD;
+}
+div.mainContainer {
+    background-color:#FFFFFF;
+}
+div.mainColumns {
+    margin-top:0px;
+}
+div.border {
+    border-color:red;
+    border-width:2px;
+    border-style:solid;
+}
+div.infoContainer {
+    width:900px;
+    margin:0 auto;
+}
+div.bottomInfo {
+    background-color:#999999;
+}
