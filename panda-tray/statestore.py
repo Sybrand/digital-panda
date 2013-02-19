@@ -27,15 +27,33 @@ class SyncInfo(object):
 
 class StateStore(object):
 
-    def __init__(self):
+    def __init__(self, account):
         c = config.Config()
         self.databasePath = c.get_database_path()
+        self.createDatabase()
+        # IMPORTANT!!! ONLY DO THIS IN VERSION 0.14!!! this is to make sure
+        # everyone gets upgraded ok
+        import version
+        import os
+        if version.version == '0.15':
+            conn = self.getConnection()
+            try:
+                conn.execute('select account from object limit 1')
+            except:
+                # drop the existing database
+                conn.close()
+                logging.warn('going to drop object')
+                os.remove(self.databasePath)
+                self.createDatabase()
+        self.account = account
+
+    def createDatabase(self):
         #logging.debug('database path = %r' % self.databasePath)
         conn = self.getConnection()
         #conn.execute('create table if not exists container '
         #             '(path)')
         conn.execute('create table if not exists object'
-                     '(path, hash, datemodified)')
+                     '(account, path, hash, datemodified)')
 
     def getConnection(self):
         return sqlite3.connect(self.databasePath)
@@ -52,14 +70,14 @@ class StateStore(object):
         c.execute('''select hash from object where path = ?''', t)
         data = c.fetchone()
         if (data is None):
-            t = (path, objectHash, dateModified)
+            t = (self.account, path, objectHash, dateModified)
             c.execute('''insert into object
-                      (path, hash, dateModified)
-                      values (?,?,?)''', t)
+                      (account, path, hash, dateModified)
+                      values (?,?,?,?)''', t)
         else:
-            t = (objectHash, dateModified, path)
+            t = (objectHash, dateModified, path, self.account)
             c.execute('''update object set hash = ?, datemodified = ?
-                      where path = ?''', t)
+                      where path = ? and account = ?''', t)
         conn.commit()
         c.close()
 
@@ -67,9 +85,9 @@ class StateStore(object):
         path = path.strip('/')
         conn = self.getConnection()
         c = conn.cursor()
-        t = (path,)
+        t = (path, self.account)
         c.execute('''select hash, datemodified from object
-                  where path = ?''', t)
+                  where path = ? and account = ?''', t)
         data = c.fetchone()
         c.close()
         syncInfo = None
@@ -81,8 +99,8 @@ class StateStore(object):
         path = path.strip('/')
         conn = self.getConnection()
         c = conn.cursor()
-        t = (path, )
+        t = (path, self.account)
         logging.info('removing sync info for for %s' % path)
-        c.execute('delete from object where path = ?', t)
+        c.execute('delete from object where path = ? and account = ?', t)
         conn.commit()
         c.close()

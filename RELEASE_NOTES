@@ -37,6 +37,12 @@ Panda-Tray:
 
 ## Panda-Tray:
 
+0.15
+* New functionality
+- Now handling multiple accounts - files are stored under /DigitalPanda/Username
+- Instead of deleting remote files, they get moved to trash
+- If there were any changes remotely, or locally, panda immediately looks for work without resting
+
 0.14
 * Bug fixes:
 - Downloads were coming down incomplete - added check to ensure that file hashes match

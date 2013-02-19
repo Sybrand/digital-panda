@@ -3,3 +3,10 @@ img.pandaInABox {
     width:0px;
     height:0px;
 }
+div.logo {
+	background-image:url(../images/digitalPandaLogoSmall.png);
+}
+div.blurb {
+	margin-top: 80px;
+    margin-left: 94px;
+}

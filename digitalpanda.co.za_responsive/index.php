@@ -60,7 +60,6 @@
 	<div class="section group infoContainer">
 				<div class="col span_8_of_8 logo">
 					<div class="blurb">STORE STUFF IN THE CLOUD</div>
-					<!--img class="logo" src="images/digitalPandaLogo.png"/-->
 				</div>
 	</div>
 </div>
@@ -146,10 +145,10 @@
 		</div>
 		<div class="col span_2_of_8">
 			<div class="section group">
-				<a href="https://twitter.com/TheDigitalPanda" target="_blank" alt="Follow the digital panda">
+				<a href="https://twitter.com/TheDigitalPanda" target="_blank" alt="Follow The Panda">
 					<div class="rhsButtonBorder">
 						<div class="rhsButtonText twitter">
-							Follow the digital panda
+							Follow the Panda
 						</div>
 		  			</div>
 	  			</a>

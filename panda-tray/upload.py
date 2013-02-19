@@ -6,16 +6,18 @@ import logging
 import os
 import messages
 from send2trash import send2trash
+from worker import BaseWorker
 
 
-class Upload(object):
+class Upload(BaseWorker):
     def __init__(self, objectStore, outputQueue):
+        BaseWorker.__init__(self)
         self.objectStore = objectStore
         self.outputQueue = outputQueue
         self.localStore = LocalProvider()
         c = config.Config()
         self.localSyncPath = c.get_home_folder()
-        self.state = statestore.StateStore()
+        self.state = statestore.StateStore(c.username)
 
     def stop(self):
         pass
@@ -34,6 +36,7 @@ class Upload(object):
                 self.upload_directory(f)
             elif os.path.isfile(fullPath):
                 self.processFile(fullPath, f)
+        self.outputQueue.put(messages.Status('Remote files up to date'))
 
     def remove_local_dir(self, localPath, remotePath):
         #logging.info('TODO: implement directory out of sync scenario')
@@ -68,6 +71,7 @@ class Upload(object):
         files = os.listdir(fullPath)
         remoteDirInfo = self.objectStore.get_file_info(remotePath)
         if not remoteDirInfo:
+            self._set_hadWorkToDo(True)
             # the folder exists locally, but not remotely.
             # 1) if we've already synced it - it means it was deleted
             # remotely
@@ -129,38 +133,47 @@ class Upload(object):
 
                 logging.info('remote hash: %r' % remoteFileInfo.hash)
                 logging.info('local hash: %r' % localFileInfo.hash)
-                logging.info('sync hash: %r' % syncInfo.hash)
 
-                if remoteFileInfo.hash == syncInfo.hash:
-                    # the remote file, and our sync record are the same
-                    # that means the local version hash changed
-                    self.objectStore.upload_object(localPath,
-                                                   remotePath,
-                                                   localFileInfo.hash)
-                    self.state.markObjectAsSynced(remotePath,
-                                                  localFileInfo.hash,
-                                                  dm)
-                elif localFileInfo.hash == syncInfo.hash:
-                    # the local file hasn't changed - so it must be the
-                    # remote file! the download process should pick this up
-                    pass
+                if syncInfo:
+                    logging.info('sync hash: %r' % syncInfo.hash)
+                    if remoteFileInfo.hash == syncInfo.hash:
+                        # the remote file, and our sync record are the same
+                        # that means the local version hash changed
+                        self._set_hadWorkToDo(True)
+                        self.objectStore.upload_object(localPath,
+                                                       remotePath,
+                                                       localFileInfo.hash)
+                        self.state.markObjectAsSynced(remotePath,
+                                                      localFileInfo.hash,
+                                                      dm)
+                    elif localFileInfo.hash == syncInfo.hash:
+                        # the local file hasn't changed - so it must be the
+                        # remote file! the download process should pick this up
+                        pass
+                    else:
+                        logging.warn('not implemented!')
+                    # the files are NOT the same - so either the local
+                    # one is new, or the remote on is new
+                    # this is a nasty nasty problem with no perfect solution!
+                    # lots of thinking to be done here - but in the end
+                    # it will be some kind of compromise
+                    # we can however reduce the number of problems:
+                    # 1) look at the hash we last uploaded
+                    # 1.1) if the local hash and historic hash are the same
+                    #      then it means that the remote file is newer,
+                    #      download
+                    # 1.2) if the historic hash is the same as the remote hash
+                    #      then we know the local file has changed
+                    # 1.3) if the historic hash differs from both the remote
+                    #      hash
+                    #      and the local hash, then we have no way of knowing
+                    #      which
+                    #      is newer - our only option is to rename the local
+                    #      one
                 else:
-                    logging.warn('not implemented!')
-                # the files are NOT the same - so either the local
-                # one is new, or the remote on is new
-                # this is a nasty nasty problem with no perfect solution!
-                # lots of thinking to be done here - but in the end
-                # it will be some kind of compromise
-                # we can however reduce the number of problems:
-                # 1) look at the hash we last uploaded
-                # 1.1) if the local hash and historic hash are the same
-                #      then it means that the remote file is newer, download
-                # 1.2) if the historic hash is the same as the remote hash
-                #      then we know the local file has changed
-                # 1.3) if the historic hash differs from both the remote hash
-                #      and the local hash, then we have no way of knowing which
-                #      is newer - our only option is to rename the local one
+                    logging.error('not sync info for %r !' % remotePath)
         else:
+            self._set_hadWorkToDo(True)
             # woah - the file isn't online!
             # do we upload the local file? or do we delete it???
             if self.fileHasBeenUploaded(localPath, remotePath):
@@ -178,7 +191,6 @@ class Upload(object):
         self.outputQueue.put(messages.Status('Deleting %s' % tail))
         send2trash(localPath)
         self.state.removeObjectSyncRecord(remotePath)
-        self.outputQueue.put(messages.Status('OK'))
 
     def uploadFile(self, localPath, remotePath):
         logging.warn('upload local file %s' % localPath)
@@ -193,7 +205,6 @@ class Upload(object):
         self.state.markObjectAsSynced(remotePath,
                                       localFileInfo.hash,
                                       localMD)
-        self.outputQueue.put(messages.Status('OK'))
 
     def fileHasBeenUploaded(self, localPath, remotePath):
         syncInfo = self.state.getObjectSyncInfo(remotePath)

@@ -59,10 +59,14 @@ class SwiftProvider(abstract.AbstractProvider):
         self._lock = threading.Lock()
         self._credentials = credentials
 
-    def delete_object(self, path):
+    def delete_object(self, path, moveToTrash=False):
         if self._lock.acquire(True):
             try:
                 container, name = self._split_path(path)
+                if moveToTrash:
+                    logging.info('before deleting %r - we move it to trash' %
+                                 path)
+                    self._swift.copy_object(container, name, 'Trash', name)
                 self._swift.delete_object(container, name)
             finally:
                 self._lock.release()
@@ -424,6 +428,45 @@ class SwiftAPI(object):
             raise Exception('failed to get container meta data; status = %r' %
                             (result.status))
 
+    def copy_object(self, containerFrom, nameFrom, containerTo, nameTo):
+        connection = self._open_connection(self._storage_url)
+        # we want to copy to a container - but we need to know if that
+        # container exists!
+        path = "%s/%s" % (self._storage_url.path, urllib.quote(containerTo))
+        connection.request('HEAD', path, None, self._create_headers())
+        result = connection.getresponse()
+        if result.status == 404:
+            # we need to create the container!
+            logging.info('creating container - %r' % containerTo)
+            self.put_container(containerTo)
+        elif result.status == 204 or result.status == 200:
+            pass
+        else:
+            raise Exception('failed to get container meta data; status = %r' %
+                            (result.status))
+        # hold on - does the source object even exist?
+        objectMeta = self.get_object_meta_data(containerFrom, nameFrom)
+        if objectMeta:
+            # ok - we have a container, and we're ready to go
+            connection = self._open_connection(self._storage_url)
+            fromPath = self._prepare_object_path(containerFrom, nameFrom)
+            toPath = "/%s/%s" % (urllib.quote(containerTo),
+                                 self._escape_string(nameTo))
+            headers = self._create_headers()
+            headers['Content-Length'] = 0
+            headers['Destination'] = toPath
+            connection.request('COPY', fromPath, None, headers)
+            result = connection.getresponse()
+            if result.status == 201:
+                pass
+            else:
+                raise Exception('failed to copy from %r to %r with code %r'
+                                %
+                                (fromPath, toPath, result.status))
+            logging.info('copy result: %r' % (result.status))
+        else:
+            logging.info('we can\'t move something, if it\'s not there')
+
     def delete_object(self, container, name,
                       retry_on_unauthorized=True):
         """ delete a swift object - given the container
@@ -623,7 +666,6 @@ class SwiftAPI(object):
             # file download is complete - so we
             # replace it
             if localHash == expectedHash:
-                logging.debug('we read what we expected!')
                 os.rename(tmpPath, targetPath)
             else:
                 raise Exception('expected hash tag %r, recieved hash tag %r' %

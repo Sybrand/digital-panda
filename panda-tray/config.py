@@ -1,9 +1,11 @@
 import os
 import os.path
 import ConfigParser
+#import logging
 
 
 AUTH_SECTION = 'auth'
+ADVANCED_SECTION = 'advanced'
 USERNAME = 'username'
 PASSWORD = 'password'
 URL = 'url'
@@ -102,7 +104,11 @@ class Config(object):
         return 'Custom'
 
     def get_home_folder(self):
-        return os.path.join(os.environ['USERPROFILE'], 'Digital Panda')
+        tmp = os.path.join(os.environ['USERPROFILE'],
+                           'Digital Panda',
+                           self.username)
+        #logging.info('home folder = %r' % tmp)
+        return tmp
 
     def get_database_path(self):
         return os.path.join(self.configFolder, 'sync.db')
@@ -118,3 +124,13 @@ class Config(object):
 
     def get_temporary_folder(self):
         return self.configFolder
+
+    def get_trash_folder(self):
+        return "Trash"
+
+    def get_update_interval(self):
+        interval = self._get_key(ADVANCED_SECTION, 'update_interval')
+        if not interval:
+            # interval in seconds
+            interval = 20
+        return int(interval)

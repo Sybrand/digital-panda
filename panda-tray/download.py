@@ -7,19 +7,22 @@ import threading
 import traceback
 import messages
 from send2trash import send2trash
+from worker import BaseWorker
 
 
-class Download(object):
+class Download(BaseWorker):
     def __init__(self, objectStore, outputQueue):
+        BaseWorker.__init__(self)
         self.objectStore = objectStore
         self.outputQueue = outputQueue
         self.localStore = LocalProvider()
         c = config.Config()
         self.localSyncPath = c.get_home_folder()
         self.tempDownloadFolder = c.get_temporary_folder()
-        self.state = statestore.StateStore()
+        self.state = statestore.StateStore(c.username)
         self.lock = threading.Lock()
         self.running = True
+        self.trashFolder = c.get_trash_folder()
 
     def stop(self):
         logging.info('Download::stop')
@@ -36,20 +39,26 @@ class Download(object):
                 break
             #logging.debug('f.path = %r' % f.path)
             if f.isFolder:
-                skipChildren = self.download_folder(f)
-                # if we deleted a bunch of stuff - it might
-                # mean our files list is out of wack
-                # so lets rather just break out - and restart
-                # next time round
-                if skipChildren:
-                    logging.info('break')
-                    break
+                if f.name == self.trashFolder:
+                    # we don't download the trash folder
+                    continue
+                else:
+                    skipChildren = self.download_folder(f)
+                    # if we deleted a bunch of stuff - it might
+                    # mean our files list is out of wack
+                    # so lets rather just break out - and restart
+                    # next time round
+                    if skipChildren:
+                        logging.info('break')
+                        break
             else:
                 self.download_file(f)
+        self.outputQueue.put(messages.Status('Local files up to date'))
 
     def download_file(self, f):
         localPath = self.get_local_path(f.path)
         if not os.path.exists(localPath):
+            self._set_hadWorkToDo(True)
             logging.debug('does not exist: %s' % localPath)
             if self.already_synced_file(f.path):
                 # if we've already downloaded this file,
@@ -69,7 +78,6 @@ class Download(object):
                 os.rename(tmpFile, localPath)
                 localMD = self.localStore.get_last_modified_date(localPath)
                 self.state.markObjectAsSynced(f.path, f.hash, localMD)
-                self.outputQueue.put(messages.Status('OK'))
         else:
             # the file already exists - do we overwrite it?
             syncInfo = self.state.getObjectSyncInfo(f.path)
@@ -122,6 +130,7 @@ class Download(object):
             pass
 
     def replace_file(self, f, localPath):
+        self._set_hadWorkToDo(True)
         head, tail = os.path.split(localPath)
         self.outputQueue.put(messages.Status('Downloading %s' % tail))
         tmpFile = self.get_tmp_filename()
@@ -135,7 +144,6 @@ class Download(object):
         self.state.markObjectAsSynced(f.path,
                                       f.hash,
                                       localMD)
-        self.outputQueue.put(messages.Status('OK'))
 
     def get_tmp_filename(self):
         return os.path.join(self.tempDownloadFolder, 'tmpfile')
@@ -150,6 +158,7 @@ class Download(object):
         downloadFolderContents = True
         skipChildren = False
         if not os.path.exists(localPath):
+            self._set_hadWorkToDo(True)
             # the path exists online, but NOT locally
             # we do one of two things, we either
             # a) delete it remotely
@@ -233,6 +242,7 @@ class Download(object):
 
     def delete_remote_folder(self, path):
         # a folder has children - and we need to remove those!
+        self._set_hadWorkToDo(True)
         children = self.objectStore.list_dir(path)
         for child in children:
             logging.info('%s [child] %s' % (path, child.path))
@@ -246,9 +256,9 @@ class Download(object):
         self.delete_remote_file(path)
 
     def delete_remote_file(self, path):
+        self._set_hadWorkToDo(True)
         logging.info('delete remote file: %s' % path)
         head, tail = os.path.split(path)
         self.outputQueue.put(messages.Status('Deleting %s' % tail))
-        self.objectStore.delete_object(path)
+        self.objectStore.delete_object(path, moveToTrash=True)
         self.state.removeObjectSyncRecord(path)
-        self.outputQueue.put(messages.Status('OK'))

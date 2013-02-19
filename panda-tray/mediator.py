@@ -16,9 +16,10 @@ import traceback
 from update import Update
 from upload import Upload
 from download import Download
+from worker import BaseWorker
 
 
-class Sleep(object):
+class Sleep(BaseWorker):
     def __init__(self, sleepTime):
         self._sleepTime = sleepTime
         self.queue = Queue.Queue()
@@ -37,7 +38,7 @@ class Sleep(object):
         self.queue.put(1)
 
 
-class Authenticate(object):
+class Authenticate(BaseWorker):
     def __init__(self, objectStore, outputQueue):
         self.outputQueue = outputQueue
         self.objectStore = objectStore
@@ -105,6 +106,8 @@ class Mediator(threading.Thread):
         self.lock = threading.Lock()
         self.inputQueueThread = threading.Thread(target=self.inputQueueWatcher)
         self.inputQueueThread.start()
+        c = config.Config()
+        self.updateInterval = c.get_update_interval()
 
     def inputQueueWatcher(self):
         while (self.running):
@@ -179,12 +182,20 @@ class Mediator(threading.Thread):
                         # but first we relax for 5 seconds
                         # it's important to relax - to give swfit a few
                         # seconds to catch up
-                        self.taskList.put(Sleep(20))
+                        if not self.currentTask.hadWorkToDo:
+                            # if you didn't have any work to do - take a break!
+                            self.taskList.put(Sleep(self.updateInterval))
+                        else:
+                            logging.info('there was work to do - no resting!')
                         download = Download(self.objectStore, self.outputQueue)
                         self.taskList.put(download)
                     elif isinstance(self.currentTask, Download):
                         #logging.debug('we completed a upload')
-                        self.taskList.put(Sleep(20))
+                        if not self.currentTask.hadWorkToDo:
+                            # if you didn't have any work to do - take a break!
+                            self.taskList.put(Sleep(self.updateInterval))
+                        else:
+                            logging.info('there was work to do - no resting!')
                         upload = Upload(self.objectStore, self.outputQueue)
                         self.taskList.put(upload)
                     elif isinstance(self.currentTask, Authenticate):
