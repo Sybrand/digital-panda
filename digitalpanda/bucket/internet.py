@@ -73,7 +73,7 @@ class Downloader(object):
     def download(self, sourcePath, targetPath, headers):
         agent = Agent(reactor)
         sourcePath = sourcePath.encode('utf-8')
-        logging.debug('going to download %r' % sourcePath)
+        #logging.debug('going to download %r' % sourcePath)
         req = agent.request('GET',
                             sourcePath,
                             Headers(headers),

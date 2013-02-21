@@ -2,15 +2,40 @@ import esky
 import logging
 import sys
 import messages
+import os
+import config
+from esky.util import appdir_from_executable
+from worker import BaseWorker
 
 
-class Update(object):
+### BEGIN - taken from https://github.com/cloudmatrix/esky/wiki/FAQ
+def restart_this_app():
+    appexe = appexe_from_executable(sys.executable)
+    logging.info(appexe)
+    os.execv(appexe, [appexe] + sys.argv[1:])
+
+
+def appexe_from_executable(exepath):
+    appdir = appdir_from_executable(exepath)
+    exename = os.path.basename(exepath)
+    #  On OSX we might be in a bundle
+    if sys.platform == "darwin":
+        if os.path.isdir(os.path.join(appdir, "Contents", "MacOS")):
+            return os.path.join(appdir, "Contents", "MacOS", exename)
+    return os.path.join(appdir, exename)
+### END - taken from https://github.com/cloudmatrix/esky/wiki/FAQ
+
+
+class Update(BaseWorker):
     def __init__(self, outputQueue):
+        BaseWorker.__init__(self)
         self._outputQueue = outputQueue
 
     def perform(self):
         if getattr(sys, "frozen", False):
-            updateUrl = 'http://www.digitalpanda.co.za/updates/'
+            c = config.Config()
+            updateUrl = ('http://www.digitalpanda.co.za/updates_%s/' %
+                        (c.get_upgrade_branch()))
             logging.info('checking for update...')
             try:
                 logging.info('sys.executable = %r' % sys.executable)
@@ -43,6 +68,7 @@ class Update(object):
                             logging.info('dropping root...')
                             app.drop_root()
                             logging.info('done update')
+                            self._set_hadWorkToDo(True)
                         else:
                             logging.info('failed to get root')
                     else:

@@ -48,9 +48,9 @@ class StateStore(object):
 
     def markObjectAsSynced(self, path, objectHash, dateModified):
         path = path.strip('/')
-        logging.info('mark %s with hash %s modified '
-                     '@ %s as synced' %
-                     (path, objectHash, dateModified))
+        #logging.info('mark %s with hash %s modified '
+        #             '@ %s as synced' %
+        #             (path, objectHash, dateModified))
         conn = self.getConnection()
         c = conn.cursor()
 

@@ -13,7 +13,7 @@ import messages
 import config
 import bucket.swift
 import traceback
-from update import Update
+import update
 from upload import Upload
 from download import Download
 from worker import BaseWorker
@@ -114,9 +114,12 @@ class Mediator(threading.Thread):
             message = self.inputQueue.get()
             if isinstance(message, messages.Stop):
                 logging.debug('stop message recieved')
+                logging.debug('attempting lock')
                 if self.lock.acquire(True):
+                    logging.debug('got the lock')
                     try:
                         if self.currentTask:
+                            logging.debug('telling current task to stop')
                             self.currentTask.stop()
                     finally:
                         self.lock.release()
@@ -149,9 +152,10 @@ class Mediator(threading.Thread):
 
     def run(self):
         # the first thing we try to do, is connect
-        self.taskList.put(Update(self.outputQueue))
+        self.taskList.put(update.Update(self.outputQueue))
         self.taskList.put(Authenticate(self.objectStore,
                                        self.outputQueue))
+        self._starting = True
         while self.running:
             if self.lock.acquire(True):
                 try:
@@ -184,20 +188,26 @@ class Mediator(threading.Thread):
                         # seconds to catch up
                         if not self.currentTask.hadWorkToDo:
                             # if you didn't have any work to do - take a break!
-                            self.taskList.put(Sleep(self.updateInterval))
+                            if not self._starting:
+                                self.taskList.put(Sleep(self.updateInterval))
                         else:
-                            logging.info('there was work to do - no resting!')
+                            #logging.info('there was work to do - no resting!')
+                            pass
                         download = Download(self.objectStore, self.outputQueue)
                         self.taskList.put(download)
+                        self._starting = False
                     elif isinstance(self.currentTask, Download):
                         #logging.debug('we completed a upload')
                         if not self.currentTask.hadWorkToDo:
                             # if you didn't have any work to do - take a break!
-                            self.taskList.put(Sleep(self.updateInterval))
+                            if not self._starting:
+                                self.taskList.put(Sleep(self.updateInterval))
                         else:
-                            logging.info('there was work to do - no resting!')
+                            #logging.info('there was work to do - no resting!')
+                            pass
                         upload = Upload(self.objectStore, self.outputQueue)
                         self.taskList.put(upload)
+                        self._starting = False
                     elif isinstance(self.currentTask, Authenticate):
                         if self.currentTask.isAuthenticated:
                             #upload = Upload(self.objectStore,
@@ -215,12 +225,17 @@ class Mediator(threading.Thread):
                             self.taskList.put(self.currentTask)
                     elif isinstance(self.currentTask, Sleep):
                         pass
-                    elif isinstance(self.currentTask, Update):
-                        pass
+                    elif isinstance(self.currentTask, update.Update):
+                        if self.currentTask.hadWorkToDo:
+                            self.scheduleRestart()
                     else:
                         logging.warn('unhandeled task completion!')
             finally:
                 self.lock.release()
+
+    def scheduleRestart(self):
+        # ideally - we should check that the config setting aren't open!
+        update.restart_this_app()
 
     def isRunning(self):
         return self.running
@@ -236,6 +251,12 @@ class Mediator(threading.Thread):
 
     def stop(self):
         logging.debug('mediator stoppping...')
+        try:
+            if self.lock.acquire(True):
+                self.running = False
+                self.clearPendingTasks()
+        finally:
+                self.lock.release()
         self.inputQueue.put(messages.Stop)
         self.inputQueueThread.join()
         if self.lock.acquire(True):
@@ -243,6 +264,7 @@ class Mediator(threading.Thread):
                 self.clearPendingTasks()
                 self.running = False
                 if self.currentTask:
+                    logging.debug('stopping the current task...')
                     self.currentTask.stop()
                     self.currentTask = None
             finally:

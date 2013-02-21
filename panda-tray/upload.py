@@ -18,8 +18,11 @@ class Upload(BaseWorker):
         c = config.Config()
         self.localSyncPath = c.get_home_folder()
         self.state = statestore.StateStore(c.username)
+        self._isRunning = True
 
     def stop(self):
+        self.objectStore.stop()
+        self._isRunning = False
         pass
 
     def perform(self):
@@ -29,6 +32,8 @@ class Upload(BaseWorker):
             os.makedirs(self.localSyncPath)
         files = os.listdir(self.localSyncPath)
         for f in files:
+            if not self._isRunning:
+                break
             #logging.debug('upload: %s' % f)
             fullPath = os.path.join(self.localSyncPath, f)
             if os.path.isdir(fullPath):
@@ -47,6 +52,8 @@ class Upload(BaseWorker):
         # we need to remove the local directory, and all it's contents
         files = os.listdir(localPath)
         for f in files:
+            if not self._isRunning:
+                break
             if isinstance(f, str):
                 # TODO: this might be an issue on linux/mac
                 # but in windows land, things are stored as latin-1
@@ -80,16 +87,18 @@ class Upload(BaseWorker):
             syncInfo = self.state.getObjectSyncInfo(remotePath)
             if syncInfo:
                 # the folder has already been synced - so we delete it locally
-                logging.info('removing directory: %s' % fullPath)
+                #logging.info('removing directory: %s' % fullPath)
                 self.remove_local_dir(fullPath, remotePath)
             else:
-                logging.info('creating remote folder %s' % remotePath)
+                #logging.info('creating remote folder %s' % remotePath)
                 self.objectStore.create_folder(remotePath)
                 localMD = self.localStore.get_last_modified_date(fullPath)
                 self.state.markObjectAsSynced(remotePath,
                                               None,
                                               localMD)
         for f in files:
+            if not self._isRunning:
+                break
             # we want everything in unicode!
             if isinstance(f, str):
                 # strings we encode to iso-8859-1 (on windows)
@@ -131,11 +140,11 @@ class Upload(BaseWorker):
                 localFileInfo = self.localStore.get_file_info(localPath)
                 syncInfo = self.state.getObjectSyncInfo(remotePath)
 
-                logging.info('remote hash: %r' % remoteFileInfo.hash)
-                logging.info('local hash: %r' % localFileInfo.hash)
+                #logging.info('remote hash: %r' % remoteFileInfo.hash)
+                #logging.info('local hash: %r' % localFileInfo.hash)
 
                 if syncInfo:
-                    logging.info('sync hash: %r' % syncInfo.hash)
+                    #logging.info('sync hash: %r' % syncInfo.hash)
                     if remoteFileInfo.hash == syncInfo.hash:
                         # the remote file, and our sync record are the same
                         # that means the local version hash changed
@@ -186,14 +195,14 @@ class Upload(BaseWorker):
                 self.uploadFile(localPath, remotePath)
 
     def deleteLocalFile(self, localPath, remotePath):
-        logging.warn('delete local file %s' % localPath)
+        #logging.warn('delete local file %s' % localPath)
         head, tail = os.path.split(localPath)
         self.outputQueue.put(messages.Status('Deleting %s' % tail))
         send2trash(localPath)
         self.state.removeObjectSyncRecord(remotePath)
 
     def uploadFile(self, localPath, remotePath):
-        logging.warn('upload local file %s' % localPath)
+        #logging.warn('upload local file %s' % localPath)
         head, tail = os.path.split(localPath)
         self.outputQueue.put(messages.Status('Uploading %s' % tail))
         # before we upload it - we calculate the hash

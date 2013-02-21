@@ -16,6 +16,7 @@ import response_event
 import version
 import messages
 import logging
+import config
 from bucket.abstract import ProgressMessage
 
 
@@ -189,7 +190,17 @@ class TaskBar(wx.TaskBarIcon):
         if self.advancedMenu:
             self.advancedMenu.Show(False)
         home = os.path.expanduser('~')
-        panda = os.path.join(home, 'Digital Panda')
+        c = config.Config()
+        panda = None
+        if c.username:
+            # try for full path if there is a username
+            panda = os.path.join(home, 'Digital Panda', c.username)
+            if not os.path.exists(panda):
+                # if the path doesn't exist - reset
+                panda = None
+        if not panda:
+            # get base folder (without acccount)
+            panda = os.path.join(home, 'Digital Panda')
         if not os.path.exists(panda):
             try:
                 os.makedirs(panda)

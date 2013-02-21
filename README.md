@@ -54,6 +54,12 @@ install twisted - Twisted-12.3.0.win32-py2.7.msi
 
 install pyOpenSSL - easy_install pyOpenSSL-0.11-py2.7-win32.egg
 
-### Fonts
+## Fonts
 
-Original artwork used Bauhaus Medium and light, ttd-radisnoir and fonts-confortaa are free on ubuntu though.
+Original artwork used Bauhaus Medium and light; There are free alternatives that are close, but not the same - ttd-radisnoir and fonts-confortaa are free on ubuntu.
+
+## Design Decisions
+
+### The "Trash" Container
+We could have a Trash folder in every containter, I've opted for one Trash container.
+Seems like a better idea, than having tons of Trash folders all over the place.

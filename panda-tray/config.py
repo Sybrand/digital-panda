@@ -11,6 +11,9 @@ USERNAME = 'username'
 PASSWORD = 'password'
 URL = 'url'
 STORAGE_PROVIDER = 'storage_provider'
+BRANCH_STABLE = 'stable'
+BRANCH_DEV = 'dev'
+BRANCH_TEST = 'test'
 
 
 class Config(object):
@@ -138,3 +141,10 @@ class Config(object):
             # interval in seconds
             interval = 20
         return int(interval)
+
+    def get_upgrade_branch(self):
+        upgrade_branch = self._get_key(ADVANCED_SECTION, 'upgrade_branch')
+        if not upgrade_branch:
+            # interval in seconds
+            upgrade_branch = BRANCH_STABLE
+        return upgrade_branch

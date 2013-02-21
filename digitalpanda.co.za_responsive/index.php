@@ -87,7 +87,7 @@
 					</div>
 					<div class="section group">
 					  	<div class="col span_1_of_1">
-					  		<a href="downloads/Setup.Digital%20Panda%20Tray%20Application-0.14.win32.exe">
+					  		<a href="downloads/Setup.Digital%20Panda%20Tray%20Application-0.15.win32.exe">
 					  			<div class="buttonBorder">
 					  				<table class="buttonTable">
 					  					<tr class="buttonTr">

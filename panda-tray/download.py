@@ -59,7 +59,7 @@ class Download(BaseWorker):
         localPath = self.get_local_path(f.path)
         if not os.path.exists(localPath):
             self._set_hadWorkToDo(True)
-            logging.debug('does not exist: %s' % localPath)
+            #logging.debug('does not exist: %s' % localPath)
             if self.already_synced_file(f.path):
                 # if we've already downloaded this file,
                 # it means we have to delete it remotely!
@@ -174,13 +174,13 @@ class Download(BaseWorker):
                 skipChildren = True
                 logging.info('done deleting remote folder')
             else:
-                logging.info('creating: %r' % localPath)
+                #logging.info('creating: %r' % localPath)
                 os.makedirs(localPath)
                 localMD = self.localStore.get_last_modified_date(localPath)
                 self.state.markObjectAsSynced(folder.path,
                                               None,
                                               localMD)
-                logging.info('done creating %r' % localPath)
+                #logging.info('done creating %r' % localPath)
         if downloadFolderContents:
             try:
                 #logging.debug('downloading folder
@@ -220,9 +220,9 @@ class Download(BaseWorker):
             alreadySynced = True
         else:
             # if we don't have sync info for this path
-            # - it means we haven't
-            # downloaded it yet
-            logging.info('no sync info for %s' % path)
+            # - it means we haven't downloaded it yet
+            #logging.info('no sync info for %s' % path)
+            pass
         return alreadySynced
 
     def already_synced_file(self, path):
@@ -241,11 +241,12 @@ class Download(BaseWorker):
             return False
 
     def delete_remote_folder(self, path):
+        logging.info('delete_remote_folder(path = %r)' % path)
         # a folder has children - and we need to remove those!
         self._set_hadWorkToDo(True)
         children = self.objectStore.list_dir(path)
-        for child in children:
-            logging.info('%s [child] %s' % (path, child.path))
+        #for child in children:
+        #    logging.info('%s [child] %s' % (path, child.path))
         for child in children:
             if child.isFolder:
                 # remove this child folder
@@ -253,6 +254,7 @@ class Download(BaseWorker):
             else:
                 # remove this child file
                 self.delete_remote_file(child.path)
+        logging.info('going to attempt to delete: %r' % path)
         self.delete_remote_file(path)
 
     def delete_remote_file(self, path):

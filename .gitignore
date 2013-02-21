@@ -1,4 +1,8 @@
 *.pyc
 build
 *.wixobj
+*.wixpdb
 *.msi
+Output
+digitalpanda/Digital_Panda_Shared_Libraries.egg-info/
+digitalpanda/Digital_Panda_Tray_Application.egg-info/

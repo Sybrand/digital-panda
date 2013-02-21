@@ -2,7 +2,7 @@ from abstract import AbstractProvider, BucketFile
 import os
 import hashlib
 import datetime
-import logging
+#import logging
 
 
 class LocalProvider(AbstractProvider):
@@ -49,7 +49,7 @@ class LocalProvider(AbstractProvider):
 
     def get_file_info(self, path):
         # this is a computationally expensive call!
-        logging.info('calculating md5 hash for %s' % path)
+        #logging.info('calculating md5 hash for %s' % path)
         fileInfo = BucketFile(path, None, None)
         md5 = hashlib.md5()
         with open(path, 'rb') as f:
