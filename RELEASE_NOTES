@@ -22,7 +22,6 @@ Panda-Tray:
 - On first run, on windows 8, security issue causes prompting
 - Upload speed not showing
 - Must check md5 hash on upload!
-- Download is not downloading complete file!
 
 ## Missing features
 Panda-Tray:
@@ -33,7 +32,8 @@ Panda-Tray:
 - Double click the panda, should open panda folder
 - Account settings should be an additinoal tab away
 - Restart application after update
-
+- Instead of overwriting remote file, copy to trash
+- Empty trash
 
 ## Panda-Tray:
 
@@ -42,6 +42,11 @@ Panda-Tray:
 - Now handling multiple accounts - files are stored under /DigitalPanda/Username
 - Instead of deleting remote files, they get moved to trash
 - If there were any changes remotely, or locally, panda immediately looks for work without resting
+- Database version now matches software version - this to ensure that upgrading/downgrading won't
+	break things. (The down side is a re-indexing when you upgrade - meaning things are a bit slow
+	when you upgrade)
+- Only doing cleanup after upgrade, in order to limit super user calls
+- BUSY: puttin alpha on everything
 
 0.14
 * Bug fixes:

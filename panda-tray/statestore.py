@@ -31,23 +31,11 @@ class StateStore(object):
         c = config.Config()
         self.databasePath = c.get_database_path()
         self.createDatabase()
-        # IMPORTANT!!! ONLY DO THIS IN VERSION 0.14!!! this is to make sure
-        # everyone gets upgraded ok
-        import version
-        import os
-        if version.version == '0.15':
-            conn = self.getConnection()
-            try:
-                conn.execute('select account from object limit 1')
-            except:
-                # drop the existing database
-                conn.close()
-                logging.warn('going to drop object')
-                os.remove(self.databasePath)
-                self.createDatabase()
         self.account = account
 
     def createDatabase(self):
+        """ Create the database if it doesn't exist
+        """
         #logging.debug('database path = %r' % self.databasePath)
         conn = self.getConnection()
         #conn.execute('create table if not exists container '

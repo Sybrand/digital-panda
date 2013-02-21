@@ -1,6 +1,7 @@
 import os
 import os.path
 import ConfigParser
+import version
 #import logging
 
 
@@ -111,7 +112,10 @@ class Config(object):
         return tmp
 
     def get_database_path(self):
-        return os.path.join(self.configFolder, 'sync.db')
+        # in order to avoid crazy version problems - we restrict
+        # database to software version
+        filename = 'sync_%s.db' % (version.version)
+        return os.path.join(self.configFolder, filename)
 
     def get_log_file_folder(self):
         return self.configFolder

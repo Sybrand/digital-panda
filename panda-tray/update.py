@@ -50,10 +50,13 @@ class Update(object):
                 except Exception, e:
                     logging.error('error updating app: %r' % e)
                 finally:
+                    """ no - we ONLY do a cleanup after an update
+                    otherwise we have to get sudo all the damn time
                     try:
                         app.cleanup()
                     finally:
                         logging.error('error cleaning up app')
+                    """
             except Exception, e:
                 logging.error('error updating app: %r' % e)
             logging.info('update check complete')

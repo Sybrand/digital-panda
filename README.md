@@ -53,3 +53,7 @@ install zope easy_install zope.interface-4.0.3-py2.7-win32.egg
 install twisted - Twisted-12.3.0.win32-py2.7.msi
 
 install pyOpenSSL - easy_install pyOpenSSL-0.11-py2.7-win32.egg
+
+### Fonts
+
+Original artwork used Bauhaus Medium and light, ttd-radisnoir and fonts-confortaa are free on ubuntu though.
