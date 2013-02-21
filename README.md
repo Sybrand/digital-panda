@@ -11,9 +11,25 @@ This Software is licensed under the MIT License (MIT), please refer to LICENSE f
 ## How to run
 
 Currently runs on Windows 7
-With a little work/luck it might run on Ubuntu 12.04
 
-There's not much to see right now... especially if you don't have a swift server to connect to!
+## How to develop
+### Ubuntu
+#### Dependancies
+sudo apt-get install python-setuptools
+
+go to ./3rdparty/esky
+sudo python setup.py install
+
+go to ./3rdparty/Send2Trash-1.2.0
+sudo python setup.py install
+
+go to ./digitalpanda
+sudo python setup.py develop
+
+
+go to ./panda-tray
+python dev.py
+
 
 ## Milestones
 

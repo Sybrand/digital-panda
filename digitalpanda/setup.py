@@ -5,6 +5,7 @@ Created on January 18, 2013
 
 from distutils.core import setup
 # we need to import setuptools to allow develop mode
+# on ubuntu apt-get install python-setuptools
 import setuptools
 
 

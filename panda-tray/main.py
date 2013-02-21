@@ -18,6 +18,7 @@ import messages
 import version
 import platform
 import urllib2
+import gtxtaskbar
 
 
 if os.name == 'nt':
@@ -101,7 +102,7 @@ def main():
         finally:
             mediatorThread.stop()
     else:
-        logging.error('Wups - we''re trying to get Ubuntu 12.10 to work!')
+        gtxtaskbar.run()
 
     del myapp
 

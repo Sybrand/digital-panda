@@ -6,3 +6,4 @@ build
 Output
 digitalpanda/Digital_Panda_Shared_Libraries.egg-info/
 digitalpanda/Digital_Panda_Tray_Application.egg-info/
+3rdparty/Send2Trash-1.2.0/dist/*.egg
