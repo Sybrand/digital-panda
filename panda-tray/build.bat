@@ -34,8 +34,8 @@ rmdir /s /q "dist\Digital Panda Tray Application-%version%.win32"
 echo unzipping %zipfile%
 %zip% x -odist -y %zipfile%
 echo "signing executables"
-"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f %pandapfx% /p %2 "dist\panda-tray-w.exe"
-"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f %pandapfx% /p %2 "dist\Digital Panda Tray Application-%version%.win32\panda-tray-w.exe"
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f %pandapfx% /p %2 "dist\*.exe"
+"C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f %pandapfx% /p %2 "dist\Digital Panda Tray Application-%version%.win32\*.exe"
 "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f %pandapfx% /p %2 "dist\*.dll"
 "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe" sign /f %pandapfx% /p %2 "dist\Digital Panda Tray Application-%version%.win32\*.dll"
 echo "re-creating zip file"
