@@ -637,6 +637,9 @@ class SwiftAPI(object):
                                                         expectedBytes))
 
     def get_object_url_lib(self, container, name, targetPath):
+        """
+        get an object using the urllib import
+        """
         # we download to a temporary path
         tmpPath = os.path.join(tempfile.gettempdir(), '~tmp')
         if os.path.exists(tmpPath):
@@ -649,6 +652,9 @@ class SwiftAPI(object):
                 expectedBytes = int(data[1])
             elif data[0] == 'etag':
                 expectedHash = data[1]
+
+        """logging.info('the expected hash for %s/%s is %r' %
+                     (container, name, expectedHash))"""
 
         path = self._prepare_object_path(container, name)
         connection = self._open_connection(self._storage_url)

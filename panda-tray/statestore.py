@@ -54,16 +54,23 @@ class StateStore(object):
         conn = self.getConnection()
         c = conn.cursor()
 
-        t = (path,)
-        c.execute('''select hash from object where path = ?''', t)
+        t = (path, self.account)
+        c.execute('''select hash from object where path = ?
+                  and account = ?''', t)
         data = c.fetchone()
         if (data is None):
             t = (self.account, path, objectHash, dateModified)
+            logging.debug(('insert into object'
+                           '(account, path, hash, dateModified)'
+                           'values (%r,%r,%r,%r)')
+                          % t)
             c.execute('''insert into object
                       (account, path, hash, dateModified)
                       values (?,?,?,?)''', t)
         else:
             t = (objectHash, dateModified, path, self.account)
+            logging.debug(('update object set hash = %r, datemodified = %r'
+                           ' where path = %r and account = %r') % t)
             c.execute('''update object set hash = ?, datemodified = ?
                       where path = ? and account = ?''', t)
         conn.commit()
@@ -74,6 +81,9 @@ class StateStore(object):
         conn = self.getConnection()
         c = conn.cursor()
         t = (path, self.account)
+        """logging.debug(('select hash, datemodified from object'
+                       'where path = %r and account = %r') %
+                      t)"""
         c.execute('''select hash, datemodified from object
                   where path = ? and account = ?''', t)
         data = c.fetchone()
@@ -81,6 +91,8 @@ class StateStore(object):
         syncInfo = None
         if data:
             syncInfo = SyncInfo(data[0], data[1])
+        if not syncInfo:
+            logging.debug('no syncinfo')
         return syncInfo
 
     def removeObjectSyncRecord(self, path):
@@ -88,7 +100,9 @@ class StateStore(object):
         conn = self.getConnection()
         c = conn.cursor()
         t = (path, self.account)
-        logging.info('removing sync info for for %s' % path)
+        logging.info(('removing sync info for for path = %r'
+                      'and account = %r')
+                     % t)
         c.execute('delete from object where path = ? and account = ?', t)
         conn.commit()
         c.close()

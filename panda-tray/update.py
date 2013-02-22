@@ -31,12 +31,18 @@ class Update(BaseWorker):
         BaseWorker.__init__(self)
         self._outputQueue = outputQueue
 
+    def _get_working_message(self):
+        return messages.Status('Checking for updates')
+
     def perform(self):
         if getattr(sys, "frozen", False):
             c = config.Config()
             updateUrl = ('http://www.digitalpanda.co.za/updates_%s/' %
                         (c.get_upgrade_branch()))
-            logging.info('checking for update...')
+            # IMPORTANT: please never remove the logging entry below
+            # it's very usefull for debugging, to know where the panda is
+            # looking for updates!
+            logging.info('checking for update @ %r...' % updateUrl)
             try:
                 logging.info('sys.executable = %r' % sys.executable)
                 app = esky.Esky(sys.executable, updateUrl)
@@ -44,7 +50,7 @@ class Update(BaseWorker):
                 try:
                     #app.auto_update()
                     # look for a new verion
-                    message = messages.Status('Checking for updates')
+                    message = messages.Status(self._get_working_message())
                     self._outputQueue.put(message)
                     v = app.find_update()
                     if v:

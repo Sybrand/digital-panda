@@ -35,6 +35,10 @@ Panda-Tray:
 
 ## Panda-Tray:
 
+0.16
+* Bug fixes:
+- Was not handling pure pseudo directories corectly (resulting in infinite download/delete/download... loop)
+
 0.15
 * New functionality
 - Now handling multiple accounts - files are stored under /DigitalPanda/Username

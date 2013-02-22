@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Digital Panda - Cloud Storage Synchronisation Client"
-#define MyAppVersion "0.15"
+#define MyAppVersion "0.16"
 #define MyAppPublisher "Digital Panda"
 #define MyAppURL "http://www.digitalpanda.co.za"
 #define MyAppExeName "panda-tray-w.exe"

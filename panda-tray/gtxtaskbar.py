@@ -1,20 +1,22 @@
 import logging
-import gtk
-import appindicator
 import sys
 import os
 
+
 def run():
+    # we only need to import these
+    import appindicator
+    import gtk
     logging.error('Wups - we''re trying to get Ubuntu 12.10 to work!')
     icon_theme_path = os.path.join(sys.path[0], 'gfx')
     #'/home/sybrand/repos/digital-panda/panda-tray/gfx'
     logging.info('set icon theme path = %s' % icon_theme_path)
-    ind = appindicator.Indicator ("Digital Panda",
-        "digitalpandahead_icon",
-        appindicator.CATEGORY_APPLICATION_STATUS,
-        icon_theme_path=icon_theme_path)
-    ind.set_status (appindicator.STATUS_ACTIVE)
-    ind.set_attention_icon ("digitalpandahead")
+    ind = appindicator.Indicator("Digital Panda",
+                                 "digitalpandahead_icon",
+                                 appindicator.CATEGORY_APPLICATION_STATUS,
+                                 icon_theme_path=icon_theme_path)
+    ind.set_status(appindicator.STATUS_ACTIVE)
+    ind.set_attention_icon("digitalpandahead")
 
     # create a menu
     menu = gtk.Menu()

@@ -29,10 +29,13 @@ class Download(BaseWorker):
         self.objectStore.stop()
         self.running = False
 
+    def _get_working_message(self):
+        return messages.Status('Looking for files to download')
+
     def perform(self):
         # get the current directory
         #logging.debug('Download::perform')
-        self.outputQueue.put(messages.Status('Looking for files to download'))
+        self.outputQueue.put(self._get_working_message())
         files = self.objectStore.list_dir(None)
         for f in files:
             if not self.running:
@@ -78,6 +81,7 @@ class Download(BaseWorker):
                 os.rename(tmpFile, localPath)
                 localMD = self.localStore.get_last_modified_date(localPath)
                 self.state.markObjectAsSynced(f.path, f.hash, localMD)
+                self.outputQueue.put(self._get_working_message())
         else:
             # the file already exists - do we overwrite it?
             syncInfo = self.state.getObjectSyncInfo(f.path)
@@ -126,7 +130,20 @@ class Download(BaseWorker):
                         # been no changes
                         pass
             else:
-                logging.info('TODO: what to do when there is no sync info!')
+                # TODO: we need to do something here!
+                # the file exists locally, and remotely - but we don't have any
+                # record of having downloaded it
+                localFileInfo = self.localStore.get_file_info(localPath)
+                if localFileInfo.hash == f.hash:
+                    localMD = self.localStore.get_last_modified_date(localPath)
+                    self.state.markObjectAsSynced(f.path,
+                                                  localFileInfo.hash,
+                                                  localMD)
+                else:
+                    # we don't have any history of this file - and the hash
+                    # from local differs from remote! WHAT DO WE DO!
+                    logging.error('TODO: HASH differs! Which is which????: %r'
+                                  % f.path)
             pass
 
     def replace_file(self, f, localPath):
@@ -144,6 +161,7 @@ class Download(BaseWorker):
         self.state.markObjectAsSynced(f.path,
                                       f.hash,
                                       localMD)
+        self.outputQueue.put(self._get_working_message())
 
     def get_tmp_filename(self):
         return os.path.join(self.tempDownloadFolder, 'tmpfile')
@@ -264,3 +282,4 @@ class Download(BaseWorker):
         self.outputQueue.put(messages.Status('Deleting %s' % tail))
         self.objectStore.delete_object(path, moveToTrash=True)
         self.state.removeObjectSyncRecord(path)
+        self.outputQueue.put(self._get_working_message())

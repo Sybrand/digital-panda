@@ -25,8 +25,11 @@ class Upload(BaseWorker):
         self._isRunning = False
         pass
 
+    def _get_working_message(self):
+        return messages.Status('Looking for files to upload')
+
     def perform(self):
-        self.outputQueue.put(messages.Status('Looking for files to upload'))
+        self.outputQueue.put(self._get_working_message())
         #logging.debug('Upload::perform')
         if not os.path.exists(self.localSyncPath):
             os.makedirs(self.localSyncPath)
@@ -78,6 +81,17 @@ class Upload(BaseWorker):
         files = os.listdir(fullPath)
         remoteDirInfo = self.objectStore.get_file_info(remotePath)
         if not remoteDirInfo:
+            # now hold on - sometimes we have pseudo directories!
+            tmp = self.objectStore.list_dir(remotePath)
+            if len(tmp) > 0:
+                # aaah - this is clearly a pseudo directory - because
+                # we can see there are files in it!
+                remoteDirInfo = True
+                logging.info(('TODO: %r is a pseudoDirectory - create a real '
+                             'directory object!')
+                             % remotePath)
+                #TODO: implement logic for creating a remote directory
+        if not remoteDirInfo:
             self._set_hadWorkToDo(True)
             # the folder exists locally, but not remotely.
             # 1) if we've already synced it - it means it was deleted
@@ -87,7 +101,8 @@ class Upload(BaseWorker):
             syncInfo = self.state.getObjectSyncInfo(remotePath)
             if syncInfo:
                 # the folder has already been synced - so we delete it locally
-                #logging.info('removing directory: %s' % fullPath)
+                logging.info('%r does not exists remotely, so we remove %r' %
+                             (remotePath, fullPath))
                 self.remove_local_dir(fullPath, remotePath)
             else:
                 #logging.info('creating remote folder %s' % remotePath)
@@ -200,6 +215,7 @@ class Upload(BaseWorker):
         self.outputQueue.put(messages.Status('Deleting %s' % tail))
         send2trash(localPath)
         self.state.removeObjectSyncRecord(remotePath)
+        self.outputQueue.put(self._get_working_message())
 
     def uploadFile(self, localPath, remotePath):
         #logging.warn('upload local file %s' % localPath)
@@ -214,6 +230,7 @@ class Upload(BaseWorker):
         self.state.markObjectAsSynced(remotePath,
                                       localFileInfo.hash,
                                       localMD)
+        self.outputQueue.put(self._get_working_message())
 
     def fileHasBeenUploaded(self, localPath, remotePath):
         syncInfo = self.state.getObjectSyncInfo(remotePath)
