@@ -1,7 +1,6 @@
 #include "AutoUpdate.h"
 #include <stdlib.h> // getenv
 #include <sstream>
-#include <atlbase.h>
 // from: http://stackoverflow.com/questions/2629421/how-to-use-boost-in-visual-studio-2010
 // 1) you need to download boost
 // 2) you need to change to not using pre-compiled headers, and set boost as additional directory
@@ -25,7 +24,7 @@ AutoUpdate::~AutoUpdate(void)
 }
 
 std::string AutoUpdate::GetAvailableVersion() {
-	ip::tcp::iostream stream("www.boost.org", "http");
+	boost::asio::ip::tcp::iostream stream("www.boost.org", "http");
 	if (!stream)
 	{
 	  // Can't connect.
