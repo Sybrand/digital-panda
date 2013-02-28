@@ -1,8 +1,8 @@
-#include <windows.h>
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
 #include "AutoUpdate.h"
+#include <windows.h>
 
 // using http://msdn.microsoft.com/en-us/library/vstudio/bb384843.aspx as reference
 
@@ -154,7 +154,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		PostQuitMessage(0);
 		break;
 	case WM_START_APPLICATION: {
-		AutoUpdate *au = new AutoUpdate();
+		panda::AutoUpdate *au = new panda::AutoUpdate();
 		au->CheckForUpdateAndRun();
 		delete au;
 		break;
