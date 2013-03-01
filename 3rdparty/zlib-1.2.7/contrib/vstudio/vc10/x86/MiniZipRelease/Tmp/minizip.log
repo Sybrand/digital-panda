@@ -1,0 +1,21 @@
+﻿Build started 2013/03/01 02:10:45 PM.
+     1>Project "C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\minizip.vcxproj" on node 3 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "x86\MiniZipRelease\Tmp\minizip.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\.. /I..\..\minizip /IC:\Temp\boost_1_52_0 /Zi /nologo /W3 /WX- /O2 /Ob1 /Oy /D WIN32 /D _CRT_NONSTDC_NO_DEPRECATE /D _CRT_SECURE_NO_DEPRECATE /D ZLIB_WINAPI /D NDEBUG /D _CONSOLE /D _MBCS /GF /Gm- /EHsc /MT /GS- /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x86\MiniZipRelease\Tmp\\" /Fd"x86\MiniZipRelease\Tmp\vc100.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\minizip\minizip.c
+         minizip.c
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"x86\MiniZipRelease\minizip.exe" /INCREMENTAL:NO /NOLOGO x86\ZlibDllRelease\zlibwapi.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"x86\MiniZipRelease\Tmp\minizip.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\x86\MiniZipRelease\minizip.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"x86\MiniZipRelease\minizip.lib" /MACHINE:X86 x86\MiniZipRelease\Tmp\minizip.obj
+         "C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\x86\ZlibDllRelease\zlibwapi.lib"
+         minizip.vcxproj -> C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\x86\MiniZipRelease\minizip.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"x86\MiniZipRelease\minizip.exe;#1" /manifest x86\MiniZipRelease\Tmp\minizip.exe.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "x86\MiniZipRelease\Tmp\minizip.unsuccessfulbuild".
+         Touching "x86\MiniZipRelease\Tmp\minizip.lastbuildstate".
+     1>Done Building Project "C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\minizip.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.91

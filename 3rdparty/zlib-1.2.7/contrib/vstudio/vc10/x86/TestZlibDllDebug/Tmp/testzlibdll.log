@@ -1,0 +1,19 @@
+﻿Build started 2013/03/01 02:10:02 PM.
+     1>Project "C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\testzlibdll.vcxproj" on node 4 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "x86\TestZlibDllDebug\Tmp\testzlibdll.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\..\.. /I..\..\minizip /IC:\Temp\boost_1_52_0 /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _CRT_NONSTDC_NO_DEPRECATE /D _CRT_SECURE_NO_DEPRECATE /D ZLIB_WINAPI /D _DEBUG /D _CONSOLE /D _MBCS /Gm /EHsc /MTd /GS- /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x86\TestZlibDllDebug\Tmp\\" /Fd"x86\TestZlibDllDebug\Tmp\vc100.pdb" /Gd /TC /analyze- /errorReport:prompt ..\..\testzlib\testzlib.c
+         testzlib.c
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"x86\TestZlibDllDebug\testzlibdll.exe" /INCREMENTAL /NOLOGO x86\ZlibDllDebug\zlibwapi.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST:NO /DEBUG /PDB:"x86\TestZlibDllDebug\testzlib.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"x86\TestZlibDllDebug\testzlibdll.lib" /MACHINE:X86 x86\TestZlibDllDebug\Tmp\testzlib.obj
+         "C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\x86\ZlibDllDebug\zlibwapi.lib"
+         testzlibdll.vcxproj -> C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\x86\TestZlibDllDebug\testzlibdll.exe
+       FinalizeBuildStatus:
+         Deleting file "x86\TestZlibDllDebug\Tmp\testzlibdll.unsuccessfulbuild".
+         Touching "x86\TestZlibDllDebug\Tmp\testzlibdll.lastbuildstate".
+     1>Done Building Project "C:\Users\sstrau\Downloads\zlib-1.2.7.tar\zlib-1.2.7\zlib-1.2.7\contrib\vstudio\vc10\testzlibdll.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.17
