@@ -1,14 +1,15 @@
 #include "AutoUpdate.h"
 #include "ApplicationVersion.h"
+#include "Html.h"
 #include <stdlib.h> // getenv
 #include <sstream>
 #include <fstream>
+#include "../../3rdparty/hashlibpp_0_3_4/hashlib2plus/trunk/src/hl_md5wrapper.h"
 // from: http://stackoverflow.com/questions/2629421/how-to-use-boost-in-visual-studio-2010
 // 1) you need to download boost
 // 2) you need to change to not using pre-compiled headers, and set boost as additional directory
 // 3) from visual studio command line, run bootstrap.bat
 // 4) Run b2: (Win32) b2 --toolset=msvc-10.0 --build-type=complete stage ; (x64) b2 --toolset=msvc-10.0 --build-type=complete architecture=x86 address-model=64 stage
-
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/filesystem.hpp>
 
@@ -72,7 +73,7 @@ namespace panda {
 
 	bool AutoUpdate::UpdateAvailable() {
 		return false;
-	}
+	}	
 
 	bool AutoUpdate::DownloadUpdate() {
 		// get the latest version location
@@ -86,7 +87,7 @@ namespace panda {
 		if (!stream) {
 			throw std::string("can't connect");
 		}
-		stream << "GET " << version.location << " HTTP/1.0" << endl;
+		stream << "GET " << Html::urlEncode(version.location) << " HTTP/1.0" << endl;
 		stream << "Host: " << version.host << endl;
 		stream << "Accept: */*" << endl;
 		stream << "User-Agent: " << userAgent << endl;
@@ -99,8 +100,9 @@ namespace panda {
 		}
 		// decide where we're downloading this file to
 		string applicationPath = GetApplicationPath();
+		boost::filesystem::path tmpPath(version.location);
 		std::stringstream ss;
-		ss << applicationPath << "\\updates\\tmp.tmp";
+		ss << applicationPath << "\\updates\\" << tmpPath.filename();
 		std::string filePath = ss.str();
 		boost::filesystem::path path(filePath);
 		if (!boost::filesystem::exists(path.parent_path())) {
@@ -119,6 +121,8 @@ namespace panda {
 		updateFile.flush();
 		updateFile.close();
 		// compare the hash
+		md5wrapper md5;
+		string hash = md5.getHashFromFile(filePath);
 
 		// if hash the same, return true
 		return false;

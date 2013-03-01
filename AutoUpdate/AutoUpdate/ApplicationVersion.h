@@ -19,7 +19,5 @@ public:
 		this->location = location;
 	}
 	*/
-	ApplicationVersion(void);
-	~ApplicationVersion(void);
 };
 

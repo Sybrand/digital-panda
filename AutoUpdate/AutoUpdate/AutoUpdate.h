@@ -46,6 +46,7 @@ namespace panda {
 			}
 			return httpResponse;
 		}
+
 	public:
 		AutoUpdate(void) {
 			// TODO: load from config
