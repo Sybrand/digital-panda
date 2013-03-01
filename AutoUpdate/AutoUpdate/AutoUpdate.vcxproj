@@ -55,8 +55,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\3rdparty\zziplib-0.13.59\msvc8\Release;C:\boost_1_53_0\stage\lib;..\..\3rdparty\zlib125dll\static32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zziplib.lib;zlibstat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\boost_1_53_0\stage\lib;..\..\3rdparty\zlib125dll\static32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zlibstat.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -74,8 +74,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\..\3rdparty\zziplib-0.13.59\msvc8\Release;C:\boost_1_53_0\stage\lib;..\..\3rdparty\zlib125dll\static32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zziplib.lib;zlibstat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\boost_1_53_0\stage\lib;..\..\3rdparty\zlib125dll\static32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zlibstat.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

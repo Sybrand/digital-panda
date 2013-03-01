@@ -260,7 +260,9 @@ class hashwrapper
 			/*
 			 * open the specified file
 			 */
-			if((file = fopen(filename.c_str(), "rb")) == NULL)
+			// 2013/03/01: Sybrand - changed to use fopen_s to get rid of warning
+			//if((file = fopen(filename.c_str(), "rb")) == NULL)
+			if(fopen_s(&file, filename.c_str(), "rb")!=0)
 			{
 				throw hlException(HL_FILE_READ_ERROR,
 						  "Cannot read file \"" + 

@@ -12,7 +12,6 @@
 // 4) Run b2: (Win32) b2 --toolset=msvc-10.0 --build-type=complete stage ; (x64) b2 --toolset=msvc-10.0 --build-type=complete architecture=x86 address-model=64 stage
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/filesystem.hpp>
-#include <zzip/zzip.h>
 
 namespace panda {
 
@@ -73,20 +72,7 @@ namespace panda {
 
 	bool AutoUpdate::InstallUpdate(ApplicationVersion &version) {
 		string updatePath = GetUpdatePath(version);
-		ZZIP_DIR* dir = zzip_dir_open(updatePath.c_str(), 0);
-		if (dir) {
-			ZZIP_DIRENT dirent;
-			while (zzip_dir_read(dir, &dirent)) {
-				ZZIP_FILE* fp = zzip_file_open(dir, dirent.d_name, 0);
-				if (fp) {
-
-				}
-				else {
-					break;
-				}
-			}
-		}
-		zzip_dir_close(dir);
+		
 		// zip is a nightmare - we can use boost to gunzip
 		// http://www.boost.org/doc/libs/1_41_0/libs/iostreams/doc/classes/gzip.html#examples
 

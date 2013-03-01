@@ -1,2 +1,4 @@
 Debug
 ipch
+*.sdf
+*.suo
