@@ -49,12 +49,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\boost_1_53_0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\boost_1_53_0;..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src;..\..\3rdparty\zziplib-0.13.59\</AdditionalIncludeDirectories>
+      <AdditionalOptions>-D_WIN32_WINNT=0x0501 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\boost_1_53_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\3rdparty\zziplib-0.13.59\msvc8\Release;C:\boost_1_53_0\stage\lib;..\..\3rdparty\zlib125dll\static32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zziplib.lib;zlibstat.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -65,21 +67,31 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\boost_1_53_0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\boost_1_53_0;..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src;C:\Users\sstrau\digital-panda\3rdparty\zziplib-0.13.59\zzip</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\3rdparty\zziplib-0.13.59\msvc8\Release;C:\boost_1_53_0\stage\lib;..\..\3rdparty\zlib125dll\static32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zziplib.lib;zlibstat.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5.cpp" />
+    <ClCompile Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5wrapper.cpp" />
     <ClCompile Include="AutoUpdate.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Url.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5.h" />
+    <ClInclude Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5wrapper.h" />
+    <ClInclude Include="ApplicationVersion.h" />
     <ClInclude Include="AutoUpdate.h" />
+    <ClInclude Include="HttpResponse.h" />
+    <ClInclude Include="Url.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

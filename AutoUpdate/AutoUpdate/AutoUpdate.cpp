@@ -1,10 +1,10 @@
 #include "AutoUpdate.h"
 #include "ApplicationVersion.h"
-#include "Html.h"
+#include "Url.h"
 #include <stdlib.h> // getenv
 #include <sstream>
 #include <fstream>
-#include "../../3rdparty/hashlibpp_0_3_4/hashlib2plus/trunk/src/hl_md5wrapper.h"
+#include <hl_md5wrapper.h>
 // from: http://stackoverflow.com/questions/2629421/how-to-use-boost-in-visual-studio-2010
 // 1) you need to download boost
 // 2) you need to change to not using pre-compiled headers, and set boost as additional directory
@@ -12,6 +12,7 @@
 // 4) Run b2: (Win32) b2 --toolset=msvc-10.0 --build-type=complete stage ; (x64) b2 --toolset=msvc-10.0 --build-type=complete architecture=x86 address-model=64 stage
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/filesystem.hpp>
+#include <zzip/zzip.h>
 
 namespace panda {
 
@@ -22,8 +23,9 @@ namespace panda {
 	void AutoUpdate::CheckForUpdateAndRun(void) {
 		if (IsInstalled()) {
 			if (UpdateAvailable()) {
-				if (DownloadUpdate()) {
-					if (!InstallUpdate()) {
+				ApplicationVersion version = GetAvailableVersion();
+				if (DownloadUpdate(version)) {
+					if (!InstallUpdate(version)) {
 						// TODO: handle this
 					}
 				} else { // download failed
@@ -36,8 +38,10 @@ namespace panda {
 				// TODO: handle this
 			}
 		} else { // not installed
-			if (DownloadUpdate()) {
-				if (InstallUpdate()) {
+			// get the latest version location
+			ApplicationVersion version = GetAvailableVersion();
+			if (DownloadUpdate(version)) {
+				if (InstallUpdate(version)) {
 					if (!RunApplication()) {
 						// TODO: handle this
 					}
@@ -67,19 +71,55 @@ namespace panda {
 		return false;
 	}
 
-	bool AutoUpdate::InstallUpdate() {
+	bool AutoUpdate::InstallUpdate(ApplicationVersion &version) {
+		string updatePath = GetUpdatePath(version);
+		ZZIP_DIR* dir = zzip_dir_open(updatePath.c_str(), 0);
+		if (dir) {
+			ZZIP_DIRENT dirent;
+			while (zzip_dir_read(dir, &dirent)) {
+				ZZIP_FILE* fp = zzip_file_open(dir, dirent.d_name, 0);
+				if (fp) {
+
+				}
+				else {
+					break;
+				}
+			}
+		}
+		zzip_dir_close(dir);
+		// zip is a nightmare - we can use boost to gunzip
+		// http://www.boost.org/doc/libs/1_41_0/libs/iostreams/doc/classes/gzip.html#examples
+
+		// we can untar using --- ???
+
 		return false;
 	}
 
 	bool AutoUpdate::UpdateAvailable() {
 		return false;
-	}	
+	}
 
-	bool AutoUpdate::DownloadUpdate() {
-		// get the latest version location
-		ApplicationVersion version = GetAvailableVersion();
+	std::string AutoUpdate::GetUpdatePath(ApplicationVersion &version) {
+		string applicationPath = GetApplicationPath();
+		boost::filesystem::path tmpPath(version.location);
+		std::stringstream ss;
+		ss << applicationPath << "\\updates\\" << tmpPath.filename().string();
+		return ss.str();
+	}
+
+	bool AutoUpdate::DownloadUpdate(ApplicationVersion &version) {
 		// look if we don't maybe already have the file
-	
+		// decide where we're downloading this file to
+		std::string filePath = GetUpdatePath(version);
+		if (boost::filesystem::exists(filePath)) {
+			// wooah - it already exists? sweet!
+			// check the md5 to confirm
+			md5wrapper md5;
+			string hash = md5.getHashFromFile(filePath);
+			if (hash == version.hash) {
+				return true;
+			}
+		}
 		// download it
 		ip::tcp::iostream stream;
 		stream.expires_from_now(boost::posix_time::seconds(60));
@@ -87,7 +127,7 @@ namespace panda {
 		if (!stream) {
 			throw std::string("can't connect");
 		}
-		stream << "GET " << Html::urlEncode(version.location) << " HTTP/1.0" << endl;
+		stream << "GET " << Url::urlEncode(version.location) << " HTTP/1.0" << endl;
 		stream << "Host: " << version.host << endl;
 		stream << "Accept: */*" << endl;
 		stream << "User-Agent: " << userAgent << endl;
@@ -98,12 +138,7 @@ namespace panda {
 		if (response.status_code != 200) {
 			throw response.status_message;
 		}
-		// decide where we're downloading this file to
-		string applicationPath = GetApplicationPath();
-		boost::filesystem::path tmpPath(version.location);
-		std::stringstream ss;
-		ss << applicationPath << "\\updates\\" << tmpPath.filename();
-		std::string filePath = ss.str();
+		
 		boost::filesystem::path path(filePath);
 		if (!boost::filesystem::exists(path.parent_path())) {
 			// create directory if it doesn't exist
@@ -124,8 +159,7 @@ namespace panda {
 		md5wrapper md5;
 		string hash = md5.getHashFromFile(filePath);
 
-		// if hash the same, return true
-		return false;
+		return hash == version.hash;
 	}
 
 	ApplicationVersion AutoUpdate::GetAvailableVersion() {
@@ -154,7 +188,21 @@ namespace panda {
 		std::getline(stream, applicationVersion.protocol);
 		std::getline(stream, applicationVersion.host);
 		std::getline(stream, applicationVersion.location);
+		std::getline(stream, applicationVersion.hash);
 		return applicationVersion;
+	}
+
+	HttpResponse AutoUpdate::GetResponse(boost::asio::ip::tcp::iostream &stream) {
+		HttpResponse httpResponse;
+		stream >> httpResponse.http_version;
+		stream >> httpResponse.status_code;
+		std::getline(stream, httpResponse.status_message);
+		
+		std::string header;
+		while (std::getline(stream, header) && header != "\r") {
+			std::cout << header << "\n";
+		}
+		return httpResponse;
 	}
 
 }

@@ -11,6 +11,7 @@ public:
 	std::string protocol;
 	std::string host;
 	std::string location;
+	std::string hash;
 	/*
 	void setVersion(std::string version) {
 		this->version = version;

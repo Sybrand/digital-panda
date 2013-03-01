@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-class Html
+class Url
 {
 private:
 	static bool isHexDigit(char c);
@@ -9,7 +9,7 @@ private:
 public:
 	static std::string urlEncode(std::string &);
 	static std::string urlDecode(std::string &);
-	Html(void);
-	~Html(void);
+	Url(void);
+	~Url(void);
 };
 

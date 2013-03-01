@@ -27,25 +27,16 @@ namespace panda {
 			return false;
 		}
 
-		bool DownloadUpdate();
+		bool DownloadUpdate(ApplicationVersion &);
 		bool UpdateAvailable();
 
-		bool InstallUpdate();
+		bool InstallUpdate(ApplicationVersion &);
 
 		bool RunApplication();
 
-		HttpResponse GetResponse(boost::asio::ip::tcp::iostream &stream) {
-			HttpResponse httpResponse;
-			stream >> httpResponse.http_version;
-			stream >> httpResponse.status_code;
-			std::getline(stream, httpResponse.status_message);
-		
-			std::string header;
-			while (std::getline(stream, header) && header != "\r") {
-				std::cout << header << "\n";
-			}
-			return httpResponse;
-		}
+		HttpResponse GetResponse(boost::asio::ip::tcp::iostream &);
+
+		std::string GetUpdatePath(ApplicationVersion &);
 
 	public:
 		AutoUpdate(void) {
