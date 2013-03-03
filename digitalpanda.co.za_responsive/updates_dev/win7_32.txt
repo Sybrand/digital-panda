@@ -1,0 +1,6 @@
+0.16
+http
+www.digitalpanda.co.za
+/updates_dev/Digital Panda Tray Application-0.16.win32.zip
+975fd37db299daba827c67e2fc59dbcf
+7796765

@@ -48,16 +48,20 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\boost_1_53_0;..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src;..\..\3rdparty\zziplib-0.13.59\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\boost_1_53_0;..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src;..\..\3rdparty\zlib-1.2.7\contrib\minizip;..\..\3rdparty\zlib127-dll\include</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_WIN32_WINNT=0x0501 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\boost_1_53_0\stage\lib;..\..\3rdparty\zlib125dll\static32</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zlibstat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\boost_1_53_0\stage\lib;..\..\3rdparty\zlib127-dll\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>zdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
+    <PostBuildEvent>
+      <Command>copy C:\Users\Sybrand\repos\digital-panda\3rdparty\zlib127-dll\zlib1.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -81,8 +85,15 @@
   <ItemGroup>
     <ClCompile Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5.cpp" />
     <ClCompile Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5wrapper.cpp" />
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\ioapi.c" />
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\iowin32.c" />
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\miniunz.c" />
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\mztools.c" />
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\unzip.c" />
     <ClCompile Include="AutoUpdate.cpp" />
+    <ClCompile Include="Http.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Compression.cpp" />
     <ClCompile Include="Url.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -90,7 +101,9 @@
     <ClInclude Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5wrapper.h" />
     <ClInclude Include="ApplicationVersion.h" />
     <ClInclude Include="AutoUpdate.h" />
+    <ClInclude Include="Http.h" />
     <ClInclude Include="HttpResponse.h" />
+    <ClInclude Include="Compression.h" />
     <ClInclude Include="Url.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

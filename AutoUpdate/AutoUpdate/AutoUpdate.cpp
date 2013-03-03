@@ -1,6 +1,8 @@
 #include "AutoUpdate.h"
 #include "ApplicationVersion.h"
 #include "Url.h"
+#include "Compression.h"
+#include "Http.h"
 #include <stdlib.h> // getenv
 #include <sstream>
 #include <fstream>
@@ -10,8 +12,9 @@
 // 2) you need to change to not using pre-compiled headers, and set boost as additional directory
 // 3) from visual studio command line, run bootstrap.bat
 // 4) Run b2: (Win32) b2 --toolset=msvc-10.0 --build-type=complete stage ; (x64) b2 --toolset=msvc-10.0 --build-type=complete architecture=x86 address-model=64 stage
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/ip/tcp.hpp>
 
 namespace panda {
 
@@ -72,13 +75,13 @@ namespace panda {
 
 	bool AutoUpdate::InstallUpdate(ApplicationVersion &version) {
 		string updatePath = GetUpdatePath(version);
+
+		string applicationPath = GetApplicationPath();
 		
-		// zip is a nightmare - we can use boost to gunzip
-		// http://www.boost.org/doc/libs/1_41_0/libs/iostreams/doc/classes/gzip.html#examples
+		Compression compress;
+		compress.Unzip(updatePath, applicationPath);
 
-		// we can untar using --- ???
-
-		return false;
+		return true;
 	}
 
 	bool AutoUpdate::UpdateAvailable() {
@@ -93,65 +96,36 @@ namespace panda {
 		return ss.str();
 	}
 
-	bool AutoUpdate::DownloadUpdate(ApplicationVersion &version) {
-		// look if we don't maybe already have the file
-		// decide where we're downloading this file to
-		std::string filePath = GetUpdatePath(version);
+	bool AutoUpdate::IsFileOk(std::string &filePath, std::string &expectedHash) {
 		if (boost::filesystem::exists(filePath)) {
 			// wooah - it already exists? sweet!
 			// check the md5 to confirm
 			md5wrapper md5;
 			string hash = md5.getHashFromFile(filePath);
-			if (hash == version.hash) {
+			if (hash == expectedHash) {
 				return true;
 			}
 		}
-		// download it
-		ip::tcp::iostream stream;
-		stream.expires_from_now(boost::posix_time::seconds(60));
-		stream.connect(version.host, version.protocol);
-		if (!stream) {
-			throw std::string("can't connect");
-		}
-		stream << "GET " << Url::urlEncode(version.location) << " HTTP/1.0" << endl;
-		stream << "Host: " << version.host << endl;
-		stream << "Accept: */*" << endl;
-		stream << "User-Agent: " << userAgent << endl;
-		stream << "Connection: close" << endl << endl;
-		stream.flush();
-		// get request response
-		HttpResponse response = GetResponse(stream);
-		if (response.status_code != 200) {
-			throw response.status_message;
-		}
-		
-		boost::filesystem::path path(filePath);
-		if (!boost::filesystem::exists(path.parent_path())) {
-			// create directory if it doesn't exist
-			if (!boost::filesystem::create_directory(path.parent_path())) {
-				throw std::string("failed to create directory");
-			}
-		}
-		// write the file
-		std::ofstream updateFile;
-		updateFile.open(filePath, ios::out | ios::binary);
-		if (!updateFile.is_open()) {
-			throw std::string("failed to open!");
-		}
-		updateFile << stream.rdbuf();
-		updateFile.flush();
-		updateFile.close();
-		// compare the hash
-		md5wrapper md5;
-		string hash = md5.getHashFromFile(filePath);
+		return false;
+	}
 
-		return hash == version.hash;
+	bool AutoUpdate::DownloadUpdate(ApplicationVersion &version) {
+		
+		// look if we don't maybe already have the file
+		// decide where we're downloading this file to
+		
+		std::string filePath = GetUpdatePath(version);
+		if (IsFileOk(filePath, version.hash)) {
+			return true;
+		}
+		Http http;
+		return http.Download(version.host, version.protocol, version.location, filePath, version.fileSize, version.hash);
 	}
 
 	ApplicationVersion AutoUpdate::GetAvailableVersion() {
 		ApplicationVersion applicationVersion;
 			
-		ip::tcp::iostream stream;
+		boost::asio::ip::tcp::iostream stream;
 		stream.expires_from_now(boost::posix_time::seconds(60));
 		stream.connect(applicationVersionHost, "http");
 		if (!stream)
@@ -162,10 +136,10 @@ namespace panda {
 		stream << "Host: " << applicationVersionHost << endl;
 		stream << "Accept: */*" << endl;
 		stream << "User-Agent: " << userAgent << endl;
-		stream << "Connection: close" << endl << endl;;
+		stream << "Connection: close" << endl << endl;
 		stream.flush();
 
-		HttpResponse response = GetResponse(stream);
+		HttpResponse response = Http::GetResponse(stream);
 
 		if (response.status_code != 200) {
 			throw response.status_message;
@@ -175,20 +149,10 @@ namespace panda {
 		std::getline(stream, applicationVersion.host);
 		std::getline(stream, applicationVersion.location);
 		std::getline(stream, applicationVersion.hash);
+		std::string fileSize;
+		std::getline(stream, fileSize);
+		istringstream(fileSize) >> applicationVersion.fileSize;
 		return applicationVersion;
-	}
-
-	HttpResponse AutoUpdate::GetResponse(boost::asio::ip::tcp::iostream &stream) {
-		HttpResponse httpResponse;
-		stream >> httpResponse.http_version;
-		stream >> httpResponse.status_code;
-		std::getline(stream, httpResponse.status_message);
-		
-		std::string header;
-		while (std::getline(stream, header) && header != "\r") {
-			std::cout << header << "\n";
-		}
-		return httpResponse;
 	}
 
 }

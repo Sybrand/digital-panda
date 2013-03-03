@@ -2,11 +2,9 @@
 #include "ApplicationVersion.h"
 #include "HttpResponse.h"
 #include <string>
-#include <boost/asio/ip/tcp.hpp>
 
 namespace panda {
 	using namespace std;
-	using namespace boost::asio;
 
 	class AutoUpdate
 	{
@@ -34,7 +32,7 @@ namespace panda {
 
 		bool RunApplication();
 
-		HttpResponse GetResponse(boost::asio::ip::tcp::iostream &);
+		bool IsFileOk(std::string &, std::string &);
 
 		std::string GetUpdatePath(ApplicationVersion &);
 

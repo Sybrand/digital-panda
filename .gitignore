@@ -7,3 +7,10 @@ Output
 digitalpanda/Digital_Panda_Shared_Libraries.egg-info/
 digitalpanda/Digital_Panda_Tray_Application.egg-info/
 3rdparty/Send2Trash-1.2.0/dist/*.egg
+AutoUpdate/AutoUpdate.sdf
+AutoUpdate/AutoUpdate.suo
+AutoUpdate/AutoUpdate.opensdf
+AutoUpdate/Debug/
+AutoUpdate/ipch/
+AutoUpdate/AutoUpdate/AutoUpdate.vcxproj.user
+digitalpanda.co.za_responsive/updates_dev/Digital Panda Tray Application*.zip

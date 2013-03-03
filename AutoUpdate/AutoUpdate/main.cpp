@@ -154,9 +154,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		PostQuitMessage(0);
 		break;
 	case WM_START_APPLICATION: {
-		panda::AutoUpdate *au = new panda::AutoUpdate();
-		au->CheckForUpdateAndRun();
-		delete au;
+		panda::AutoUpdate au;
+		au.CheckForUpdateAndRun();
+		//delete au;
+		//Compression thing;
+		//thing.Unzip(std::string("C:\\Users\\Sybrand\\repos\\digital-panda\\digitalpanda.co.za_responsive\\updates_dev\\Digital Panda Tray Application-0.16.win32.zip"), 
+		//			std::string("c:\\temp"));
 		break;
 	}
 	default:

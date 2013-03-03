@@ -12,6 +12,7 @@ public:
 	std::string host;
 	std::string location;
 	std::string hash;
+	unsigned long int fileSize;
 	/*
 	void setVersion(std::string version) {
 		this->version = version;
