@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="md5">
+      <UniqueIdentifier>{4b1e31ae-31f4-42f6-874c-85cead734b29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zip">
+      <UniqueIdentifier>{397078c8-7252-4bf1-90b3-219f81b673d1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AutoUpdate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5.cpp">
+      <Filter>md5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5wrapper.cpp">
+      <Filter>md5</Filter>
+    </ClCompile>
+    <ClCompile Include="Url.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Http.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Compression.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\unzip.c">
+      <Filter>zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\mztools.c">
+      <Filter>zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\miniunz.c">
+      <Filter>zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\iowin32.c">
+      <Filter>zip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\ioapi.c">
+      <Filter>zip</Filter>
+    </ClCompile>
+    <ClCompile Include="Process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShortCut.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AutoUpdate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ApplicationVersion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpResponse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5.h">
+      <Filter>md5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5wrapper.h">
+      <Filter>md5</Filter>
+    </ClInclude>
+    <ClInclude Include="Url.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Http.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Compression.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShortCut.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -13,4 +13,6 @@ AutoUpdate/AutoUpdate.opensdf
 AutoUpdate/Debug/
 AutoUpdate/ipch/
 AutoUpdate/AutoUpdate/AutoUpdate.vcxproj.user
+AutoUpdatePy/dist/
+AutoUpdatePy/Digital_Panda_Auto_Update.egg-info/
 digitalpanda.co.za_responsive/updates_dev/Digital Panda Tray Application*.zip

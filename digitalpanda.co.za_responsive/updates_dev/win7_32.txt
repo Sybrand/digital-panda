@@ -1,6 +1,8 @@
-0.16
-http
-www.digitalpanda.co.za
-/updates_dev/Digital Panda Tray Application-0.16.win32.zip
-975fd37db299daba827c67e2fc59dbcf
-7796765
+{
+	"version" : 0.16,
+	"protocol" : "http",
+	"host" : "www.digitalpanda.co.za",
+	"location" : "/updates_dev/Digital Panda Tray Application-0.16.win32.zip",
+	"hash" : "fefe59bc4b8ec6e676568d533af9577f",
+	"fileSize" : 6591245
+}

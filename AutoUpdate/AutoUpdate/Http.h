@@ -7,7 +7,6 @@
 class Http
 {
 private:
-	std::string endl;
 	uintmax_t GetFileResumePosition(std::string &);
 public:
 	bool Download(std::string &host, std::string &protocol, std::string &source, std::string &target, unsigned long int fileSize, std::string &hash);

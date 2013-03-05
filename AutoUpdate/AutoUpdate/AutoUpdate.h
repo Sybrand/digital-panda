@@ -16,25 +16,26 @@ namespace panda {
 		std::string userAgent;
 
 		std::string GetApplicationPath();
+		std::string GetPandaPath();
+		std::string GetShortcutPath();
 
 		ApplicationVersion GetAvailableVersion();
 
-		bool IsInstalled() {
-			// is the application installed?
-			string applicationFolder = GetApplicationPath();
-			return false;
-		}
+		bool IsInstalled();
 
 		bool DownloadUpdate(ApplicationVersion &);
 		bool UpdateAvailable();
 
 		bool InstallUpdate(ApplicationVersion &);
 
-		bool RunApplication();
+		bool RunPanda();
 
 		bool IsFileOk(std::string &, std::string &);
 
 		std::string GetUpdatePath(ApplicationVersion &);
+		void GetCurrentVersion(std::string &version, std::string &location);
+		std::string AutoUpdate::GetExecutablePath();
+		std::string GetCurrentVersionPath();
 
 	public:
 		AutoUpdate(void) {

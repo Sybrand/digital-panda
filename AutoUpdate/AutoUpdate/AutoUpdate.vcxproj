@@ -60,7 +60,7 @@
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>copy C:\Users\Sybrand\repos\digital-panda\3rdparty\zlib127-dll\zlib1.dll $(OutDir)</Command>
+      <Command>copy ..\..\3rdparty\zlib127-dll\zlib1.dll $(OutDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -91,9 +91,11 @@
     <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\mztools.c" />
     <ClCompile Include="..\..\3rdparty\zlib-1.2.7\contrib\minizip\unzip.c" />
     <ClCompile Include="AutoUpdate.cpp" />
+    <ClCompile Include="Process.cpp" />
     <ClCompile Include="Http.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Compression.cpp" />
+    <ClCompile Include="ShortCut.cpp" />
     <ClCompile Include="Url.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -101,9 +103,11 @@
     <ClInclude Include="..\..\3rdparty\hashlibpp_0_3_4\hashlib2plus\trunk\src\hl_md5wrapper.h" />
     <ClInclude Include="ApplicationVersion.h" />
     <ClInclude Include="AutoUpdate.h" />
+    <ClInclude Include="Process.h" />
     <ClInclude Include="Http.h" />
     <ClInclude Include="HttpResponse.h" />
     <ClInclude Include="Compression.h" />
+    <ClInclude Include="ShortCut.h" />
     <ClInclude Include="Url.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

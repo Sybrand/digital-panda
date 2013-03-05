@@ -8,7 +8,6 @@
 
 Http::Http(void)
 {
-	endl = "\r\n";
 }
 
 
@@ -54,12 +53,13 @@ bool Http::Download(std::string &host, std::string &protocol, std::string &sourc
 		if (!stream) {
 			throw std::string("can't connect");
 		}
-		stream << "GET " << Url::urlEncode(source) << " HTTP/1.1" << endl;
-		stream << "Host: " << host << endl;
-		stream << "Accept: */*" << endl;
-		stream << "User-Agent: " << "Digital Panda" << endl;
-		stream << "Range: bytes=" << resumePosition << "-" << fileSize << endl;
-		stream << "Connection: close" << endl << endl;
+		std::string encodedSource = Url::urlEncode(source);
+		stream << "GET " << encodedSource << " HTTP/1.1" << "\r\n";
+		stream << "Host: " << host << "\r\n";
+		stream << "Accept: */*" << "\r\n";
+		stream << "User-Agent: " << "Digital Panda" << "\r\n";
+		stream << "Range: bytes=" << resumePosition << "-" << fileSize << "\r\n";
+		stream << "Connection: close" <<  "\r\n\r\n";
 		stream.flush();
 		// get request response
 		HttpResponse response = GetResponse(stream);
@@ -70,7 +70,7 @@ bool Http::Download(std::string &host, std::string &protocol, std::string &sourc
 		boost::filesystem::path path(target);
 		if (!boost::filesystem::exists(path.parent_path())) {
 			// create directory if it doesn't exist
-			if (!boost::filesystem::create_directory(path.parent_path())) {
+			if (!boost::filesystem::create_directories(path.parent_path())) {
 				throw std::string("failed to create directory");
 			}
 		}

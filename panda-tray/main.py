@@ -9,6 +9,7 @@ import taskbar
 import os
 # right now, this requires python setup.py develop to be run on digitalpanda
 from bucket.swift import SwiftProvider, SwiftCredentials
+from tooling.instance import SingleInstance
 #.bucket.swift import SwiftBucket
 import mediator
 import config
@@ -21,34 +22,8 @@ import urllib2
 import gtxtaskbar
 
 
-if os.name == 'nt':
-    from win32event import CreateMutex
-    from win32api import CloseHandle, GetLastError
-    from winerror import ERROR_ALREADY_EXISTS
-
-
-class SingleInstance(object):
-    def __init__(self):
-        if os.name == 'nt':
-            mutexName = '{4A475CB1-CDB5-46b5-B221-4E36602FC47E}'
-            self.mutex = CreateMutex(None, False, mutexName)
-            self.lasterror = GetLastError()
-
-    def alreadyRunning(self):
-        if os.name == 'nt':
-            return (self.lasterror == ERROR_ALREADY_EXISTS)
-        else:
-            logging.warn('alreadyRunning not implemented')
-            return False
-
-    def __del__(self):
-        if os.name == 'nt':
-            if self and self.mutex:
-                CloseHandle(self.mutex)
-
-
 def main():
-    myapp = SingleInstance()
+    myapp = SingleInstance('{4A475CB1-CDB5-46b5-B221-4E36602FC47E}')
     useWxTaskBarIcon = True
     if myapp.alreadyRunning():
         logging.info('another instance of the sync tool as already running')

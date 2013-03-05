@@ -7,29 +7,11 @@
 // using http://msdn.microsoft.com/en-us/library/vstudio/bb384843.aspx as reference
 
 /*
-pseudocode:
-if app is installed:
-	if app has update available:
-		download update
-		if download ok:
-			install update
-			if install not ok:
-				show message to user
-		else: // if download not ok
-			show message to user
-	run app
-	exit()
-else: // if app not installed
-	download update
-	if download ok:
-		install update
-		if install ok:
-			run app
-		else: // if install not ok
-			show message
-	else: // if download not ok
-		show message
-	exit()
+All Programs -> Digital Panda -> Digital Panda points to:
+C:\Program Files\Digital Panda\Digital Panda.exe
+this looks to see if c:\Users\<user>\AppData\Roaming\Digital Panda\Digital Panda.lnk exists
+if it exists - it runs it
+if it does not exist, it installs it
 */
 
 #define WM_START_APPLICATION 0x0401
@@ -42,7 +24,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 static TCHAR szWindowClass[] = _T("win32app");
-static TCHAR szTitle[] = _T("Win32 Guided Tour Application");
+static TCHAR szTitle[] = _T("Digital Panda");
 
 int WINAPI WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,
@@ -156,10 +138,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	case WM_START_APPLICATION: {
 		panda::AutoUpdate au;
 		au.CheckForUpdateAndRun();
-		//delete au;
-		//Compression thing;
-		//thing.Unzip(std::string("C:\\Users\\Sybrand\\repos\\digital-panda\\digitalpanda.co.za_responsive\\updates_dev\\Digital Panda Tray Application-0.16.win32.zip"), 
-		//			std::string("c:\\temp"));
 		break;
 	}
 	default:
