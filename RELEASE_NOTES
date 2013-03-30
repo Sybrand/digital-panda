@@ -28,7 +28,7 @@ Panda-Tray:
 - Status: speed uploading, files up to date etc.
 - Look if there's a better way to detect online changes than iterating through everything
 - Double click the panda, should open panda folder
-- Account settings should be an additinoal tab away
+- Account settings should be an additional tab away
 - Restart application after update, should only happen if dialog not showing
 - Instead of overwriting remote file, copy to Trash folder in the same container
 - Empty trash
@@ -37,7 +37,8 @@ Panda-Tray:
 
 0.16
 * Bug fixes:
-- Was not handling pure pseudo directories corectly (resulting in infinite download/delete/download... loop)
+- Was not handling pure pseudo directories correctly (resulting in infinite download/delete/download... loop)
+- Completely replaced how the auto update works
 
 0.15
 * New functionality

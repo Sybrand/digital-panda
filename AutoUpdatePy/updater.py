@@ -11,9 +11,10 @@ from win32com.client import Dispatch
 
 
 class AutoUpdate:
-    def __init__(self, parent):
+    def __init__(self, parent, updateBranch):
         self.applicationVersionHost = 'www.digitalpanda.co.za'
         self.parent = parent
+        self.updateBranch = updateBranch
         pass
 
     def IsInstalled(self):
@@ -39,6 +40,11 @@ class AutoUpdate:
     def GetApplicationPath(self):
         return os.path.join(os.environ['APPDATA'], 'Digital Panda')
 
+    # we have a rather elaborate way of figuring out the current version
+    # there are two way to run this class - from within an application - in which case
+    # using the compiled version number would make sense
+    # or - from an auto-update application, in which case the compiled version number
+    # doesn't make sense - since we're asking about another application!
     def GetCurrentVersion(self):
         versionPath = self.GetCurrentVersionPath()
         version = 0
@@ -55,7 +61,9 @@ class AutoUpdate:
 
     def GetAvailableVersion(self):
         connection = httplib.HTTPConnection(self.applicationVersionHost)
-        connection.request('GET', '/updates_dev/win7_32.txt', None)
+        infoLocation = '/updates_%s/win7_32.txt' % (self.updateBranch)
+        logging.debug('looking for update info @ %s' % infoLocation)
+        connection.request('GET', infoLocation, None)
         result = connection.getresponse()
         if result.status != 200:
             raise Exception('unexpected response: %r' % result.status)
@@ -79,6 +87,7 @@ class AutoUpdate:
 
     def IsFileOk(self, filePath, expectedHash):
         if os.path.exists(filePath):
+            logging.info('%r already exists!' % (filePath))
             fileHash = self.GetHashFromFile(filePath)
             logging.debug('comparing %r with %r' % (fileHash, expectedHash))
             return fileHash == expectedHash
@@ -137,6 +146,7 @@ class AutoUpdate:
                 else:
                     time.sleep(1)
                 data = result.read(chunkSize)
+            logging.debug('done reading file!')
 
         targetFile.flush()
         targetFile.close()
@@ -210,4 +220,5 @@ class AutoUpdate:
     def UpdateAvailable(self):
         version, location = self.GetCurrentVersion()
         availableVersion = self.GetAvailableVersion()
+        logging.debug('current version: %r, available version: %r' % (version, availableVersion['version']))
         return availableVersion['version'] > version

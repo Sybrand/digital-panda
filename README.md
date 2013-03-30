@@ -8,29 +8,6 @@ Target cloud solutions to begin with are: Swift (Openstack) and Amazon S3
 
 This Software is licensed under the MIT License (MIT), please refer to LICENSE for details
 
-## How to run
-
-Currently runs on Windows 7
-
-## How to develop
-### Ubuntu
-#### Dependancies
-sudo apt-get install python-setuptools
-
-go to ./3rdparty/esky
-sudo python setup.py install
-
-go to ./3rdparty/Send2Trash-1.2.0
-sudo python setup.py install
-
-go to ./digitalpanda
-sudo python setup.py develop
-
-
-go to ./panda-tray
-python dev.py
-
-
 ## Milestones
 
 * TODO: refactor panda-commander into own project
@@ -46,29 +23,65 @@ python dev.py
 * Consider refactoring to using Twisted http://twistedmatrix.com/trac/
 * Refactor upload/download decision making (generate a list of actions, apply actions)
 
-## Dependancies
+## How to run
 
-python (ubuntu: 2.7, windows 2.7 32bit (64 bit is an issue, because of WinSparkle))
+Currently runs on Windows 7
+
+python (ubuntu: 2.7, windows 2.7 32bit (using 32 bit for now, it being the lowest common denominator))
 
 python-wx (for ubuntu: apt-get install python-wxgtk2.8, for windows: wxPython2.8-win32-unicode-2.8.12.1-py27.exe)
 
-setuptools (for ubunutu: should just work, for windows: http://pypi.python.org/pypi/setuptools)
+setuptools
+- ubuntu:
+    sudo apt-get install python-setuptools
+- windows:
+    http://pypi.python.org/pypi/setuptools download and run setuptools-0.6c11.win32-py2.7.exe
+    add C:\Python27\Scripts to path for easy_install to work
 
-install the digitalpanda module (python setup.py develop)
+install the digitalpanda module
+    go to ./digitalpanda
+    sudo python setup.py develop
 
-install py2exe
+install the autoupdate module
+    go to ./AutoUpdatePy
+    sudo python setup.py develop
 
-install esky (https://github.com/cloudmatrix/esky)
+install py2exe (windows only
+py2exe-0.6.9.win32-py2.7.exe
+
+install pywin (windows only)
+pywin32-218.win32-py2.7.exe
 
 using innosetup for installer (windows)
 
-install send2trash (in 3rdparty\Send2Trash-1.2.0 run python setup.py install)
+install send2trash
+    go to ./3rdparty/Send2Trash-1.2.0
+    sudo python setup.py install
 
-install zope easy_install zope.interface-4.0.3-py2.7-win32.egg
+install zope: in 3rdparty\win32 run: easy_install zope.interface-4.0.3-py2.7-win32.egg (for windows only)
 
-install twisted - Twisted-12.3.0.win32-py2.7.msi
+// install twisted - Twisted-12.3.0.win32-py2.7.msi (decided not to use it for now!) doesn't make things that much simpler at all!
 
-install pyOpenSSL - easy_install pyOpenSSL-0.11-py2.7-win32.egg
+install pyOpenSSL
+ - ubuntu: ?
+ - windows: easy_install pyOpenSSL-0.11-py2.7-win32.egg
+
+ you are now ready to run the app!
+ go to ./panda-tray
+ python dev.py
+
+## How to build an update
+
+### Create exe
+in ./panda-tray, run build.bat
+### Sign exe
+This can only be done if you have the correct certificate, on a computer that's allowed to create the certificate.
+
+in ./panda-tray, run build.bat sign
+
+### Create dist file
+./panda-tray, run build.bat distfile
+
 
 ## Fonts
 
@@ -77,5 +90,5 @@ Original artwork used Bauhaus Medium and light; There are free alternatives that
 ## Design Decisions
 
 ### The "Trash" Container
-We could have a Trash folder in every containter, I've opted for one Trash container.
+We could have a Trash folder in every container, I've opted for one Trash container.
 Seems like a better idea, than having tons of Trash folders all over the place.
