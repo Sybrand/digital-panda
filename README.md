@@ -77,11 +77,14 @@ in ./panda-tray, run build.bat
 ### Sign exe
 This can only be done if you have the correct certificate, on a computer that's allowed to create the certificate.
 
-in ./panda-tray, run build.bat sign
+in ./panda-tray, run build.bat sign <password>
+
+The output is the update zip file
 
 ### Create dist file
 ./panda-tray, run build.bat distfile
 
+The output is the update file to be uploaded to digitalpanda.co.za, it contains the hash, filesize and location of the file
 
 ## Fonts
 

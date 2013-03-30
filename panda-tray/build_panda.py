@@ -34,7 +34,7 @@ def make_version():
                        'host': 'www.digitalpanda.co.za',
                        'location': location,
                        'hash': get_file_hash(zipfile),
-                       'filesize': os.path.getsize(zipfile)})
+                       'fileSize': os.path.getsize(zipfile)})
     fd.write(data)
     fd.flush()
     fd.close()

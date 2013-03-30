@@ -3,6 +3,8 @@
 rem pull the version from version.py
 rem the syntax here is VERY picky! don't mess with it!
 FOR /F "tokens=3" %%i in (version.py) DO set version=%%i
+rem we get '' on both sides of the version...
+set version=%version:~1,-1%
 
 set pandapfx=C:\Temp\panda.pfx
 set zip="C:\Program Files (x86)\7-Zip\7z.exe"

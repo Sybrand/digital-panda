@@ -103,9 +103,19 @@ class AutoUpdate:
         if self.IsFileOk(filePath, version['hash']):
             # file is there - and ok - no need to download
             return True
+        logging.debug('going to download file...')
         # download the file...
+        logging.debug('version info: %r' % version)
         fileSize = version['fileSize']
-        totalBytesRead = 0
+        logging.debug('getting the resume position...')
+        totalBytesRead = self.GetFileResumePosition(filePath)
+        logging.debug('current file size = %r' % totalBytesRead)
+        if totalBytesRead >= fileSize:
+            logging.info('deleting the existing file - it''s too big!')
+            # if the total bytes read is more than the expected
+            # file size - we need to get rid of the existing file
+            os.remove(filePath)
+            totalBytesRead = 0
         makingProgress = True
 
         while totalBytesRead < fileSize and makingProgress:
@@ -123,9 +133,12 @@ class AutoUpdate:
             logging.info('request status: %r' % result.status)
             if not (result.status == 200 or result.status == 206):
                 raise Exception(result.status)
-            if (totalBytesRead > 0):
+            if totalBytesRead < fileSize:
+                # if the file is greater than 0, and smaller than the file size,
+                # we read it appended
                 targetFile = open(filePath, 'a+b')
             else:
+                # make sure totalBytes read is reset to 0!
                 targetFileDir = os.path.dirname(filePath)
                 if not os.path.exists(targetFileDir):
                     os.makedirs(targetFileDir)
