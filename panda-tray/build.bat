@@ -1,7 +1,8 @@
 @echo off
 
 rem pull the version from version.py
-FOR /F "tokens=3" %%i in (version.py) DO set version = %%i
+rem the syntax here is VERY picky! don't mess with it!
+FOR /F "tokens=3" %%i in (version.py) DO set version=%%i
 
 set pandapfx=C:\Temp\panda.pfx
 set zip="C:\Program Files (x86)\7-Zip\7z.exe"
