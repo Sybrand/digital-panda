@@ -7,15 +7,35 @@ import logging
 import time
 import zipfile
 import pythoncom
+import ConfigParser
 from win32com.client import Dispatch
 
 
 class AutoUpdate:
-    def __init__(self, parent, updateBranch):
-        self.applicationVersionHost = 'www.digitalpanda.co.za'
+    def __init__(self, parent, upgradeHost):
         self.parent = parent
-        self.updateBranch = updateBranch
-        pass
+
+        # TODO: the config stuff is very much stolen from panda-tray - need,
+        # to pull this into a common place!
+        appDataFolder = os.environ['APPDATA']
+        configFolder = os.path.join(appDataFolder, 'Digital Panda')
+        configFilePath = os.path.join(configFolder, 'settings')
+        if not upgradeHost:
+            self.upgradeHost = self._get_config_key(configFilePath, "advanced", "upgrade_url")
+            if not self.upgradeHost:
+                # we default to the normal place to get this
+                self.upgradeHost = 'www.digitalpanda.co.za'
+        else:
+            self.upgradeHost = upgradeHost
+        logging.debug('AutoUpdate.__init__: self.upgradeHost is %s' % self.upgradeHost)
+
+    def _get_config_key(self, configFilePath, section, key):
+        config = ConfigParser.RawConfigParser()
+        config.read(configFilePath)
+        try:
+            return config.get(section, key)
+        except:
+            return ''
 
     def IsInstalled(self):
         # check to see if digital panda is installed
@@ -60,10 +80,11 @@ class AutoUpdate:
         return (version, location)
 
     def GetAvailableVersion(self):
-        connection = httplib.HTTPConnection(self.applicationVersionHost)
-        infoLocation = '/updates_%s/win7_32.txt' % (self.updateBranch)
+        logging.debug('creating http connection to %s' % self.upgradeHost)
+        connection = httplib.HTTPConnection(host=self.upgradeHost, port=80, strict=False)
+        infoLocation = '/update/win7_32.txt'
         logging.debug('looking for update info @ %s' % infoLocation)
-        connection.request('GET', infoLocation, None)
+        connection.request('GET', infoLocation)
         result = connection.getresponse()
         if result.status != 200:
             raise Exception('unexpected response: %r' % result.status)
@@ -235,3 +256,4 @@ class AutoUpdate:
         availableVersion = self.GetAvailableVersion()
         logging.debug('current version: %r, available version: %r' % (version, availableVersion['version']))
         return availableVersion['version'] > version
+

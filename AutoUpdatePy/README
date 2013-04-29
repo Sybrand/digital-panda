@@ -1,0 +1,7 @@
+How to run:
+
+example:
+python auto_update.pyw localhost
+
+don't be tempted to make a host file entry, pointing www.digitalpanda.co.za to localhost - python throws an exception
+when this happens :(

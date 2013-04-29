@@ -11,6 +11,7 @@ set zip="C:\Program Files (x86)\7-Zip\7z.exe"
 IF "%1"=="installer" GOTO inno
 IF "%1"=="sign" GOTO sign
 IF "%1"=="distfile" GOTO distfile
+IF "%1"=="deploy_local" GOTO deploy_local
 goto py2exe
 
 :py2exe
@@ -48,6 +49,10 @@ del "Output\setup.exe"
 "c:\Program Files (x86)\Inno Setup 5\ISCC.exe" "/sStandard=$qC:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Bin\signtool.exe$q sign /f %pandapfx% /p %2 /d $qDigital Panda - Cloud Storage Synchronisation Client$q $f" installer.iss
 del "Output\Setup.Digital Panda Tray Application-%version%.win32.exe"
 rename "Output\setup.exe" "Setup.Digital Panda Tray Application-%version%.win32.exe"
+goto end
+
+:deploy_local
+python build_panda.py deploy_local
 goto end
 
 :end

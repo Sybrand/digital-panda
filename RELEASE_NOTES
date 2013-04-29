@@ -39,6 +39,12 @@ Panda-Tray:
 * Bug fixes:
 - Was not handling pure pseudo directories correctly (resulting in infinite download/delete/download... loop)
 - Completely replaced how the auto update works
+CURRENT: testing auto-update
+WHERE I LEFT OF: got it to update from localhost - running:
+C:\Users\Sybrand\repos\digital-panda\AutoUpdatePy>python auto_update.pyw localhost
+NEXT: running the panda, from it's shortcut, get it to do an autoupdate
+NEXT NEXT: then create and sign installer (document this step!)
+
 
 0.15
 * New functionality

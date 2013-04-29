@@ -3,7 +3,7 @@ import sys
 import os
 import version
 import json
-
+import shutil
 
 def get_file_hash(filename):
     md5 = hashlib.md5()
@@ -19,15 +19,22 @@ def get_file_hash(filename):
 def get_file_size(filename):
     return os.path.getsize(filename)
 
+def get_dist_filename():
+    return 'win7_32.txt'
+
+def get_dist_path():
+    return os.path.join('dist', get_dist_filename())
+
+def get_zip_file_name():
+    return ('Digital Panda Tray Application-%s.win32.zip' %
+                   (version.version))
 
 def make_version():
-    distPath = os.path.join('dist', 'win7_32.txt')
+    distPath = get_dist_path()
     if os.path.exists(distPath):
         os.remove(distPath)
-    zipfileName = ('Digital Panda Tray Application-%s.win32.zip' %
-                   (version.version))
-    zipfile = os.path.join('dist', zipfileName)
-    location = '/updates/%s' % zipfile
+    zipfile = os.path.join('dist', get_zip_file_name())
+    location = '/update/%s' % get_zip_file_name()
     fd = open(distPath, 'w')
     data = json.dumps({'version': float(version.version),
                        'protocol': 'http',
@@ -39,6 +46,11 @@ def make_version():
     fd.flush()
     fd.close()
 
+def deploy_local():
+    tmpPath = 'c:\\temp\\digitalpanda\\build'
+    shutil.copy(get_dist_path(), os.path.join(tmpPath, get_dist_filename()))
+    shutil.copy(os.path.join('dist', get_zip_file_name()), os.path.join(tmpPath, get_zip_file_name()))
+
 
 if __name__ == '__main__':
     if sys.argv[1] == 'hash':
@@ -47,3 +59,5 @@ if __name__ == '__main__':
         print get_file_size(sys.argv[2])
     elif sys.argv[1] == 'version':
         make_version()
+    elif sys.argv[1] == 'deploy_local':
+        deploy_local()

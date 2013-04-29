@@ -154,13 +154,14 @@ class wxUpdateFrame(wx.Frame):
 
 
 class PandaInstaller(threading.Thread):
-    def __init__(self, notify_window):
+    def __init__(self, notify_window, upgradeHost):
         threading.Thread.__init__(self)
         self._notify_window = notify_window
+        self.upgradeHost = upgradeHost
 
     def run(self):
         try:
-            autoUpdate = AutoUpdate(self)
+            autoUpdate = AutoUpdate(self, self.upgradeHost)
             if autoUpdate.Install():
                 self.SignalComplete()
             else:
@@ -181,7 +182,7 @@ class PandaInstaller(threading.Thread):
                      FailEvent())
 
 
-def InstallPanda():
+def InstallPanda(upgradeHost = None):
     # the panda isn't installed at all!
     app = wx.PySimpleApp()
     frame = wxUpdateFrame()
@@ -190,19 +191,19 @@ def InstallPanda():
     frame.SetText('Installing the Digital Panda...')
     frame.Show(True)
     # start up a thread for the update
-    installerThread = PandaInstaller(frame)
+    installerThread = PandaInstaller(frame, upgradeHost)
     installerThread.start()
     frame.SetText('Installing the Digital Panda...')
     app.MainLoop()
 
 
-def StartPanda():
+def StartPanda(upgradeHost = None):
     logging.info("starting the panda")
-    autoUpdate = AutoUpdate(None)
+    autoUpdate = AutoUpdate(None, upgradeHost)
     os.startfile(autoUpdate.GetShortcutPath())
 
 
-def main():
+def main(args):
     logging.basicConfig(level=logging.DEBUG)
     instanceName = '{5A475CB1-CDB5-46b5-B221-4E36602FC47E}'
     myapp = SingleInstance(instanceName)
@@ -210,12 +211,20 @@ def main():
         if myapp.alreadyRunning():
             logging.info('another instance of sync tool already running')
 
-        autoUpdate = AutoUpdate(None)
+        if len(args)>0:
+            upgradeHost = args[0]
+        else:
+            upgradeHost = "www.digitalpanda.co.za"
+
+        logging.debug('upgradeHost is: %s' % upgradeHost)
+        autoUpdate = AutoUpdate(None, upgradeHost)
         if (autoUpdate.IsInstalled()):
+            logging.debug('panda already installed - start...')
             #pandaPath = autoUpdate.GetShortcutPath()
             #subprocess.call([pandaPath])
             os.startfile(autoUpdate.GetShortcutPath())
         else:
-            InstallPanda()
+            logging.debug('panda not installed - starting install')
+            InstallPanda(upgradeHost)
     finally:
         del myapp

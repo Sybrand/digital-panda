@@ -19,7 +19,7 @@ class Update(BaseWorker):
 
     def perform(self):
         c = config.Config()
-        autoUpdate = AutoUpdate(self, c.get_upgrade_branch())
+        autoUpdate = AutoUpdate(self, c.get_upgrade_url())
         try:
             if autoUpdate.UpdateAvailable():
                 availableVersion = autoUpdate.GetAvailableVersion()

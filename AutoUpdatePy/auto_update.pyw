@@ -18,4 +18,4 @@ def redirect_std():
 
 if __name__ == '__main__':
     redirect_std()
-    main.main()
+    main.main(sys.argv[1:])

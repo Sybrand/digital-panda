@@ -11,9 +11,10 @@ USERNAME = 'username'
 PASSWORD = 'password'
 URL = 'url'
 STORAGE_PROVIDER = 'storage_provider'
-BRANCH_STABLE = 'stable'
+UPGRADE_URL = 'www.digitalpanda.co.za'
+"""BRANCH_STABLE = 'stable'
 BRANCH_DEV = 'dev'
-BRANCH_TEST = 'test'
+BRANCH_TEST = 'test'"""
 
 
 class Config(object):
@@ -142,9 +143,16 @@ class Config(object):
             interval = 20
         return int(interval)
 
+    """ removed in favour of upgrade url
     def get_upgrade_branch(self):
         upgrade_branch = self._get_key(ADVANCED_SECTION, 'upgrade_branch')
         if not upgrade_branch:
-            # interval in seconds
             upgrade_branch = BRANCH_STABLE
         return upgrade_branch
+    """
+
+    def get_upgrade_url(self):
+        upgrade_url = self._get_key(ADVANCED_SECTION, 'upgrade_url')
+        if not upgrade_url:
+            upgrade_url = UPGRADE_URL
+        return upgrade_url
